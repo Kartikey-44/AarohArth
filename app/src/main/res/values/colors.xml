@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="primaryText">#111827</color>
+    <color name="outline">#DADCE0</color>
+    <color name="onPrimary">#FFFFFF</color>
+    <color name="primary">#33835A</color>
+    <color name="hint_color">#000000</color>
+    <color name="sign_up_sign_in_bckground">#80FFFFFF</color>
+    <color name="entry_text">#000000</color>
+    <color name="splash_background">#F1F1F1</color>
+    <color name="google_btn_bg">#FFFFFF</color>
+    <color name="dialogbackground">#FFFFFF</color>
+    <color name="dialogfailtext">#D32F2F</color>
+    <color name="dialogsuccesstext">#388E3C</color>
+    <color name="dialogwarningtext">#F9A825</color>
+    <color name="divider">#000000</color>
+</resources>

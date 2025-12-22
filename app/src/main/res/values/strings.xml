@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Aaroh Arth</string>
+    <string name="hint_email">Enter Email</string>
+    <string name="hint_password">Create Password</string>
+    <string name="signin_text">Already Have An Account?<b>Sign In -></b></string>
+    <string name="signup_text">Not Have An Account?<b>Sign Up -></b></string>
+    <string name="default_web_client_id">970778426890-j6gbhr1pusv4vcsco44qkp3564jpdesa.apps.googleusercontent.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

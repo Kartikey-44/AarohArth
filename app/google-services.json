@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "970778426890",
+    "firebase_url": "https://aaroharth-default-rtdb.firebaseio.com",
+    "project_id": "aaroharth",
+    "storage_bucket": "aaroharth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970778426890:android:d46a8b472226fb1e9769f3",
+        "android_client_info": {
+          "package_name": "ind.finance.aaroharth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "970778426890-9in2l63gfp5k3n5pu0v2hf08ik2obtd9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ind.finance.aaroharth",
+            "certificate_hash": "89b4fac3be01e4fa284abfa68820b66ae62668b4"
+          }
+        },
+        {
+          "client_id": "970778426890-j6gbhr1pusv4vcsco44qkp3564jpdesa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4PY1bmg-y2tJRk_o-bgRZTjXy-1VaiOo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "970778426890-j6gbhr1pusv4vcsco44qkp3564jpdesa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

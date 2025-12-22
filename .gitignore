@@ -1,0 +1,24 @@
+# Android / Gradle
+.gradle/
+build/
+.local/
+
+# Android Studio
+.idea/
+
+# Local config
+local.properties
+.env
+
+# Keystore / signing
+*.jks
+*.keystore
+key.properties
+
+# Firebase admin / secrets
+*serviceAccount*.json
+firebase-adminsdk*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
