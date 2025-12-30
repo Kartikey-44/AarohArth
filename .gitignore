@@ -1,23 +1,37 @@
-# Android / Gradle
+# Gradle
 .gradle/
 build/
-.local/
-
-# Android Studio
-.idea/
+*/build/
 
 # Local config
 local.properties
 .env
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Native build
+.externalNativeBuild/
+.cxx/
 
 # Keystore / signing
 *.jks
 *.keystore
 key.properties
 
-# Firebase admin / secrets
+# Firebase admin / secrets (CRITICAL)
 *serviceAccount*.json
 firebase-adminsdk*.json
+
+# Logs
+*.log
 
 # OS junk
 .DS_Store
