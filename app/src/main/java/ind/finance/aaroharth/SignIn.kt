@@ -11,6 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -55,16 +58,21 @@ class SignIn : AppCompatActivity() {
 
         // ---------- GOOGLE SIGN-IN BUTTON ----------
         binding.googleSignInButton.setOnClickListener {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+            if(isInternetAvailable(this)){
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()
 
-            googleSignInClient = GoogleSignIn.getClient(this, gso)
-            startActivityForResult(
-                googleSignInClient.signInIntent,
-                RC_GOOGLE_SIGN_IN
-            )
+                googleSignInClient = GoogleSignIn.getClient(this, gso)
+                startActivityForResult(
+                    googleSignInClient.signInIntent,
+                    RC_GOOGLE_SIGN_IN
+                )
+            }
+            else{
+                nointernetavailble("No Connection Availble")
+            }
         }
         binding.btnSignIn.setOnClickListener {
             val email=binding.emailEntryField.text.toString().trim()
@@ -81,7 +89,7 @@ class SignIn : AppCompatActivity() {
                }
             }
             else{
-                nointernet("No Internet Detected")
+                nointernetavailble("No Connection Availble")
 
            }
         }
@@ -90,6 +98,14 @@ class SignIn : AppCompatActivity() {
         binding.signinSignupButton.setOnClickListener {
             startActivity(Intent(this, SignUp::class.java))
         }
+        val text= "Don't Have An Account? Sign Up"
+        val spannable= SpannableString(text)
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.signin)),
+            23,30,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        binding.signinSignupButton.text=spannable
     }
 
     private fun signIn(email: String, password: String) {
@@ -199,6 +215,7 @@ class SignIn : AppCompatActivity() {
     private fun dialogWarning(message: String) = showDialog("DangerIcon.json", message)
     private fun dialogFailed(message: String) = showDialog("Failed.json", message)
     private fun dialogSuccess(message: String) = showDialog("Success.json", message)
+    private fun nointernetavailble(message: String)=showDialog("nointernet.json",message)
 
     private fun showDialog(animation: String, message: String) {
 
