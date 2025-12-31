@@ -16,4 +16,5 @@
     <color name="dialogsuccesstext">#388E3C</color>
     <color name="dialogwarningtext">#F9A825</color>
     <color name="divider">#FFFFFF</color>
+    <color name="sign_in_background">#0A0E17</color>
 </resources>

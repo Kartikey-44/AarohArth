@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation("com.airbnb.android:lottie:6.4.0")
     // Room (KSP — NO kapt)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
@@ -53,6 +54,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.1.1")
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
