@@ -196,7 +196,7 @@ class SignUp : AppCompatActivity() {
                                 getSharedPreferences("app_prefs",MODE_PRIVATE)
                                     .edit().putBoolean("firstopen",false).apply()
                                 Handler(Looper.getMainLooper()).postDelayed({
-                                    startActivity(Intent(this, MainActivity::class.java))
+                                    startActivity(Intent(this, MainActivity ::class.java))
                                     finish()
                                 }, 2500)
                             }
