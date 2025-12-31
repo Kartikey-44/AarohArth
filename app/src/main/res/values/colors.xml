@@ -17,4 +17,5 @@
     <color name="dialogwarningtext">#F9A825</color>
     <color name="divider">#000000</color>
     <color name="sign_in_background">#F8FAFC</color>
+    <color name="signin">#0059FF</color>
 </resources>

@@ -11,6 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Patterns
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
@@ -56,16 +59,21 @@ class SignUp : AppCompatActivity() {
 
 
         binding.googleSignUpButton.setOnClickListener {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+            if(isInternetAvailable(this)){
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()
 
-            googleSignInClient = GoogleSignIn.getClient(this, gso)
-            startActivityForResult(
-                googleSignInClient.signInIntent,
-                RC_GOOGLE_SIGN_IN
-            )
+                googleSignInClient = GoogleSignIn.getClient(this, gso)
+                startActivityForResult(
+                    googleSignInClient.signInIntent,
+                    RC_GOOGLE_SIGN_IN
+                )
+            }
+            else{
+                nointernetavailble("No Connection Availble")
+            }
         }
 
         binding.signUpSignInButton.setOnClickListener {
@@ -79,9 +87,18 @@ class SignUp : AppCompatActivity() {
             if (isInternetAvailable(this)) {
                 checkCredentials(email, password)
             } else {
-                dialogWarning("No Internet Connection")
+                nointernetavailble("No Connection Availble")
             }
         }
+        val text= "Already Have An Account? Sign In"
+        val spannable= SpannableString(text)
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.signin)),
+                25,32,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        binding.signUpSignInButton.text=spannable
+
     }
 
     // ---------------- GOOGLE SIGN-IN RESULT ----------------
@@ -196,7 +213,7 @@ class SignUp : AppCompatActivity() {
                                 getSharedPreferences("app_prefs",MODE_PRIVATE)
                                     .edit().putBoolean("firstopen",false).apply()
                                 Handler(Looper.getMainLooper()).postDelayed({
-                                    startActivity(Intent(this, MainActivity::class.java))
+                                    startActivity(Intent(this, MainActivity ::class.java))
                                     finish()
                                 }, 2500)
                             }
@@ -242,6 +259,7 @@ class SignUp : AppCompatActivity() {
     private fun dialogWarning(message: String) = showDialog("DangerIcon.json", message)
     private fun dialogFailed(message: String) = showDialog("Failed.json", message)
     private fun dialogSuccess(message: String) = showDialog("Success.json", message)
+    private fun nointernetavailble(message: String)=showDialog("nointernet.json",message)
 
     private fun showDialog(animation: String, message: String) {
         val dialog = Dialog(this)
