@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         binding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         super.onCreate(savedInstanceState)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomMenu) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigationBar) { view, insets ->
             val bottomInset = insets.getInsets(
                 WindowInsetsCompat.Type.navigationBars()
             ).bottom
@@ -32,36 +32,18 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
-        changeFragment(HomeFragement())
-        menuclick(binding.home)
-
-        binding.home.setOnClickListener {
-            menuclick(binding.home)
-            changeFragment(HomeFragement())
+        //      Change screen or fragment
+        binding.bottomNavigationBar.setOnItemSelectedListener { item ->
+            when(item.itemId) {
+                R.id.home -> changeFragment(HomeFragement())
+                R.id.categories -> changeFragment(CategoriesFragment())
+                R.id.carbon_tracker -> changeFragment(CarbonFragment())
+                R.id.dashboard -> changeFragment(DashboardFragment())
+                R.id.profile -> changeFragment(ProfileFragment())
+            }
+            true
         }
-        binding.categories.setOnClickListener {
-            menuclick(binding.categories)
-            changeFragment(CategoriesFragment())
-        }
-        binding.carbonTracker.setOnClickListener {
-            menuclick(binding.carbonTracker)
-            changeFragment(CarbonFragment())
-        }
-        binding.dashboard.setOnClickListener {
-            menuclick(binding.dashboard)
-            changeFragment(DashboardFragment())
-        }
-        binding.profile.setOnClickListener {
-            menuclick(binding.profile)
-            changeFragment(ProfileFragment())
-        }
-
-
-    }
-    private fun menuclick(view: ImageView){
-        listOf(binding.home,binding.categories,binding.carbonTracker,binding.dashboard,binding.profile)
-            .forEach { it.isSelected=false }
-        view.isSelected=true
+        binding.bottomNavigationBar.selectedItemId = R.id.home
     }
 
     private fun changeFragment(fragment: Fragment){
