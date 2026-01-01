@@ -17,4 +17,16 @@
     <color name="dialogwarningtext">#F9A825</color>
     <color name="divider">#FFFFFF</color>
     <color name="sign_in_background">#0A0E17</color>
+
+    <color name="colorOnAiButton">#1A0D08</color>
+    <color name="colorAiButton">#4CAF50</color>
+    <color name="colorOnAddTransactionBtn">#3D2B1F</color>
+    <color name="colorAddTransactionBtn">#FFCA28</color>
+    <color name="colorIncomeButton">#1B5E20</color>
+    <color name="colorOnIncomeButton">#E8F5E8</color>
+    <color name="colorExpenseButton">#370000</color>
+    <color name="colorOnExpenseButton">#FFEBEE</color>
+    <color name="toolbar_color">#0C5D4C</color>
+    <color name="nav_active">#4DB6AC</color>
+    <color name="nav_inactive">#1A2D25</color>
 </resources>

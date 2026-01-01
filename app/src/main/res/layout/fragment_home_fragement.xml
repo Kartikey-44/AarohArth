@@ -1,14 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeFragement">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="hello" />
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbar_color"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_transaction_Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:contentDescription="@string/app_ai"
+            android:focusable="true"
+            android:src="@drawable/plus_icon"
+            app:backgroundTint="@color/colorOnAddTransactionBtn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:shapeAppearanceOverlay="@style/RoundCorner"
+            app:tint="@color/colorAddTransactionBtn" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/ai_Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:contentDescription="@string/app_ai"
+            android:focusable="true"
+            android:src="@drawable/aaroh_arth_icon"
+            app:backgroundTint="@color/colorOnAiButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:maxImageSize="55dp"
+            app:shapeAppearanceOverlay="@style/RoundCorner"
+            app:tint="@color/colorAiButton" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/expense_Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:contentDescription="@string/expense_Btn"
+            android:focusable="true"
+            android:src="@drawable/expense_graph_icon"
+            android:visibility="invisible"
+            app:backgroundTint="@color/colorExpenseButton"
+            app:layout_constraintBottom_toTopOf="@+id/add_transaction_Btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/colorOnExpenseButton" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/income_Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:contentDescription="@string/income_btn"
+            android:focusable="true"
+            android:src="@drawable/income_graph_icon"
+            android:visibility="invisible"
+            app:backgroundTint="@color/colorIncomeButton"
+            app:layout_constraintBottom_toTopOf="@+id/expense_Btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/colorOnIncomeButton" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

@@ -45,7 +45,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:text="Sign Up Here"
+        android:text="@string/sign_up_here"
         android:gravity="center"
         android:textSize="22sp"
         android:fontFamily="@font/inter18ptsemibold"
@@ -138,7 +138,7 @@
                 android:id="@+id/btn_sign_up"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="Sign Up"
+                android:text="@string/sign_up"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:cornerRadius="24dp"
@@ -205,12 +205,14 @@
         android:id="@+id/sign_up_sign_in_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/google_sign_up_button"
+        android:layout_margin="40dp"
+        android:clickable="true"
+        android:gravity="center"
+        android:minHeight="48dp"
+        android:text="@string/signin_text"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:gravity="center"
-        android:clickable="true"
-        android:textSize="18sp"
-        android:layout_margin="40dp"/>
+        app:layout_constraintTop_toBottomOf="@id/google_sign_up_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
