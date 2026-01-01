@@ -2,9 +2,24 @@
     <string name="app_name">Aaroh Arth</string>
     <string name="hint_email">Enter Email</string>
     <string name="hint_password">Create Password</string>
-    <string name="signin_text">Already Have An Account?<b>Sign In -></b></string>
-    <string name="signup_text">Not Have An Account?<b>Sign Up -></b></string>
+    <string name="signin_text">Already Have An Account?  Sign In</string>
+    <string name="signup_text">Not Have An Account?  Sign Up</string>
     <string name="default_web_client_id">970778426890-j6gbhr1pusv4vcsco44qkp3564jpdesa.apps.googleusercontent.com</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_transaction" />
+    <string name="app_ai" />
+    <string name="expense_Btn" />
+    <string name="income_btn" />
+    <string name="expense_icon">expense_icon</string>
+    <string name="hello_dashboard_fragment">hello dashboard fragment</string>
+    <string name="hello_carbon_fragment">hello carbon fragment</string>
+    <string name="hello_profile_fragment">hello_profile_fragment</string>
+    <string name="hello_categories_fragment">hello_categories_fragment</string>
+    <string name="sign_in_here">Sign In Here</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_with_google">Sign In with Google</string>
+    <string name="google_icon">google_icon</string>
+    <string name="sign_up_here">Sign Up Here</string>
+    <string name="sign_up">Sign Up</string>
 </resources>
