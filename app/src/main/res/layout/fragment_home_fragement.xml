@@ -10,17 +10,232 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_home"
-            android:layout_width="match_parent"
+<com.google.android.material.card.MaterialCardView
+    android:id="@+id/top_card"
+    android:layout_width="0dp"
+    android:layout_height="200dp"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:layout_marginTop="95dp"
+    app:cardCornerRadius="25dp"
+    android:backgroundTint="@color/top_card_back_profit"
+    app:strokeColor="@color/top_card_stroke_profit"
+    app:strokeWidth="4dp"
+    app:cardElevation="10dp"
+    android:layout_marginHorizontal="10dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        >
+        <TextView
+            android:id="@+id/total_balance_heading"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@color/toolbar_color"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textColor="@color/top_card_income_color"
+            android:text="Total Balance:"
+            android:gravity="center"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="20dp"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
-        </com.google.android.material.appbar.MaterialToolbar>
+        <TextView
+            android:id="@+id/total_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/rupee_expense"
+            android:drawableTint="@color/top_card_income_color"
+            android:gravity="center"
+            android:text="300000"
+            android:textColor="@color/top_card_income_color"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/total_balance_heading" />
 
+        <TextView
+            android:id="@+id/income_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/total_balance"
+            app:layout_constraintEnd_toStartOf="@id/expense_heading"
+            android:text="Income:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/top_card_income_color"
+            android:gravity="center"
+            android:layout_marginEnd="50dp"/>
+        <TextView
+            android:id="@+id/income"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/income_heading"
+            app:layout_constraintEnd_toStartOf="@id/expense"
+            android:text="3000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/top_card_income_color"
+            android:drawableTint="@color/top_card_income_color"
+            android:drawableStart="@drawable/rupee_expense"
+            android:gravity="center"
+            android:layout_marginEnd="50dp"/>
+        <TextView
+            android:id="@+id/expense_heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+           app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/total_balance"
+            app:layout_constraintStart_toEndOf="@id/income_heading"
+            android:text="Expense:"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/top_card_expense_color"
+            android:gravity="center"
+            android:layout_marginStart="50dp"/>
+        <TextView
+            android:id="@+id/expense"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/expense_heading"
+            app:layout_constraintStart_toEndOf="@id/income"
+            android:text="3000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/top_card_expense_color"
+            android:drawableStart="@drawable/rupee_expense"
+            android:gravity="center"
+            android:layout_marginStart="50dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
+        
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/account"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/top_card"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/budget"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="50dp"
+            android:elevation="10dp"
+            android:backgroundTint="@color/managemnt_card_back"
+            app:strokeWidth="3dp"
+            app:strokeColor="@color/management_stroke_color">
+            <ImageView
+                android:id="@+id/account_management"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/account"/>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:id="@+id/account_manage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/account"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/budget_manage"
+            android:layout_marginStart="50dp"
+            android:text="@string/account_manage"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="1.1"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/management_text_color"/>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/budget"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/top_card"
+            app:layout_constraintStart_toEndOf="@id/account"
+            app:layout_constraintEnd_toStartOf="@id/loan"
+            android:layout_marginTop="30dp"
+            android:layout_marginHorizontal="50dp"
+            android:elevation="10dp"
+            android:backgroundTint="@color/managemnt_card_back"
+            app:strokeWidth="3dp"
+            app:strokeColor="@color/management_stroke_color">
+            <ImageView
+                android:id="@+id/budget_management"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/budget"/>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView
+            android:id="@+id/budget_manage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/budget"
+            app:layout_constraintStart_toEndOf="@id/account_manage"
+            app:layout_constraintEnd_toStartOf="@id/loan_manage"
+            android:layout_marginHorizontal="50dp"
+            android:text="@string/budget_manage"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="1.1"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/management_text_color"/>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/loan"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/top_card"
+            app:layout_constraintStart_toEndOf="@+id/budget"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="50dp"
+            android:elevation="10dp"
+            android:backgroundTint="@color/managemnt_card_back"
+            app:strokeWidth="3dp"
+            app:strokeColor="@color/management_stroke_color">
+            <ImageView
+                android:id="@+id/loan_management"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/loan" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/loan_manage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/budget"
+            app:layout_constraintStart_toEndOf="@id/budget_manage"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="50dp"
+            android:text="@string/loan_management"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="1.1"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/management_text_color"/>
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_transaction_Btn"
             android:layout_width="wrap_content"
@@ -36,6 +251,42 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:shapeAppearanceOverlay="@style/RoundCorner"
             app:tint="@color/colorAddTransactionBtn" />
+
+        <TextView
+            android:id="@+id/recent_transaction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/account_manage"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="20dp"
+            android:text="Recent Transactions"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="20dp"
+            android:textColor="@color/recent_transaction"/>
+        <TextView
+            android:id="@+id/see_all"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/loan_manage"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="See All"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="20dp"
+            android:textColor="@color/recent_transaction"
+            android:clickable="true"
+            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/recent_transaction"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="15dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/ai_Btn"
