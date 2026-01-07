@@ -1,150 +1,168 @@
 package ind.finance.aaroharth
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.*
+import android.widget.ImageView
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Toast
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.appbar.MaterialToolbar
+import ind.finance.aaroharth.databinding.FragmentHomeFragementBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragement.newInstance] factory method to
- * create an instance of this fragment.
- */
 class HomeFragement : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    //--------------< Animation Variables >---------------------------------------------------------
-    private lateinit var rotateOpen: Animation
-    private lateinit var rotateClose: Animation
-    private lateinit var fromBottom: Animation
-    private lateinit var toBottom: Animation
-
-    private lateinit var addTransactionFab: FloatingActionButton  //Fab --> FloatingActionButton
-    private lateinit var incomeFab: FloatingActionButton
-    private lateinit var expenseFab: FloatingActionButton
+    private lateinit var binding: FragmentHomeFragementBinding
     private var isFabOpen = false
-    //----------------------------------------------------------------------------------------------
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    // ------------------ Fragment Lifecycle ------------------
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-
-        //--------------< Load All Animation  >-----------------------------------------------------
-        rotateOpen = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_open_animation)
-        rotateClose = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_close_animation)
-        fromBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_from_bottom_animation)
-        toBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_to_bottom_animation)
-        //------------------------------------------------------------------------------------------
-
-
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home_fragement, container, false)
+    ): View {
+        binding = FragmentHomeFragementBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-        //--------------<  Animation -> FindButtonID >----------------------------------------------
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // FIND YOUR FABS
-        addTransactionFab = view.findViewById(R.id.add_transaction_Btn)
-        incomeFab = view.findViewById(R.id.income_Btn)
-        expenseFab = view.findViewById(R.id.expense_Btn)
+        // Tell Fragment it has a menu (SearchView lives here)
+        setHasOptionsMenu(true)
 
-        // AddTransaction FAB CLICK - TOGGLE MENU
-        addTransactionFab.setOnClickListener {
+        // Main FAB
+        binding.addTransactionBtn.setOnClickListener {
             if (isFabOpen) closeFab() else openFab()
         }
-        // --------------<  Animation ->  SetOnCLickListener, fragment --> fragment(findNavController()) or Screen (Intent)
-        //INCOME FAB - Navigate to Income
-        incomeFab.setOnClickListener {
-            //findNavController().navigate(R.id.action_homeFragment_to_incomeFragment)
-            Toast.makeText(requireContext(), "Income", Toast.LENGTH_SHORT).show()
+
+        // Income FAB
+        binding.incomeBtn.setOnClickListener {
             closeFab()
+            startActivity(
+                Intent(requireContext(), Transaction_Action_Page::class.java)
+                    .putExtra("type", "income")
+            )
         }
 
-        //EXPENSE FAB - Navigate to Expense
-        expenseFab.setOnClickListener {
-            //findNavController().navigate(R.id.action_homeFragment_to_expenseFragment)
-            Toast.makeText(requireContext(), "Expense", Toast.LENGTH_SHORT).show()
+        // Expense FAB
+        binding.expenseBtn.setOnClickListener {
             closeFab()
+            startActivity(
+                Intent(requireContext(), Transaction_Action_Page::class.java)
+                    .putExtra("type", "expense")
+            )
         }
     }
 
-    //--------------<  Animation ->  functions  >---------------------------------------------------
+    // ------------------ Toolbar Search ------------------
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.search_bar, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+
+        // Force black color everywhere
+        val black = ContextCompat.getColor(requireContext(), android.R.color.black)
+
+        // Search hint text
+        searchView.queryHint = "Search transactions"
+
+        // Search text + hint color
+        val searchEditText =
+            searchView.findViewById<SearchView.SearchAutoComplete>(
+                androidx.appcompat.R.id.search_src_text
+            )
+        searchEditText.setTextColor(black)
+        searchEditText.setHintTextColor(black)
+
+        // Remove default underline
+        searchView.findViewById<View>(
+            androidx.appcompat.R.id.search_plate
+        )?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+
+        // Search icon (magnifier)
+        searchView.findViewById<ImageView>(
+            androidx.appcompat.R.id.search_mag_icon
+        )?.setColorFilter(black)
+
+        // Close (X) icon
+        searchView.findViewById<ImageView>(
+            androidx.appcompat.R.id.search_close_btn
+        )?.setColorFilter(black)
+
+        // Handle toolbar title hide/show
+        val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
+        val titleView = toolbar.findViewById<View>(R.id.toolbarTitle)
+
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                // Hide app name
+                titleView.visibility = View.GONE
+
+                // IMPORTANT:
+                // Replace back arrow drawable instead of tinting
+                searchView.setOnSearchClickListener {
+                    val backIcon = searchView.findViewById<ImageView>(
+                        androidx.appcompat.R.id.search_mag_icon
+                    )
+                    backIcon?.setImageResource(R.drawable.back_arrow)
+                }
+
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                // Restore app name
+                titleView.visibility = View.VISIBLE
+                return true
+            }
+        })
+
+        // Listen to search text
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Handle submit
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Handle live search
+                return true
+            }
+        })
+    }
+
+    // ------------------ Toolbar Visibility ------------------
+
+    override fun onResume() {
+        super.onResume()
+        // Show toolbar only on HomeFragment
+        requireActivity()
+            .findViewById<MaterialToolbar>(R.id.toolbar)
+            .visibility = View.VISIBLE
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Prevent menu leaking to other fragments
+        requireActivity().invalidateOptionsMenu()
+    }
+
+    // ------------------ FAB Animations ------------------
+
     private fun openFab() {
         isFabOpen = true
-
-        // SHOW + ANIMATE INCOME FAB
-        incomeFab.visibility = View.VISIBLE
-        incomeFab.isClickable = true
-        incomeFab.startAnimation(fromBottom)
-
-        // SHOW + ANIMATE EXPENSE FAB
-        expenseFab.visibility = View.VISIBLE
-        expenseFab.isClickable = true
-        expenseFab.startAnimation(fromBottom)
-
-        // ROTATE MAIN FAB
-        addTransactionFab.startAnimation(rotateOpen)
+        binding.incomeBtn.visibility = View.VISIBLE
+        binding.expenseBtn.visibility = View.VISIBLE
     }
 
     private fun closeFab() {
         isFabOpen = false
-
-        // HIDE INCOME FAB
-        incomeFab.startAnimation(toBottom)
-        incomeFab.isClickable = false
-        incomeFab.visibility = View.GONE
-
-        // HIDE EXPENSE FAB
-        expenseFab.startAnimation(toBottom)
-        expenseFab.isClickable = false
-        expenseFab.visibility = View.GONE
-
-        // ROTATE MAIN FAB BACK
-        addTransactionFab.startAnimation(rotateClose)
-    }
-    //----------------------------------------------------------------------------------------------
-
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragement.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragement().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        binding.incomeBtn.visibility = View.GONE
+        binding.expenseBtn.visibility = View.GONE
     }
 }

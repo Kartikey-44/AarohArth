@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
     <color name="white">#FF0A0A0A</color>
     <color name="black">#FFFFFFFF</color>
     <color name="primaryText">#F2F2F2</color>
@@ -29,4 +30,40 @@
     <color name="toolbar_color">#0C5D4C</color>
     <color name="nav_active">#4DB6AC</color>
     <color name="nav_inactive">#1A2D25</color>
+
+
+    <!--Transaction Page Colours-->
+    <color name="background_screen_color">#090D16</color>
+    <color name="label_colors">#F0F4F8</color>
+    <color name="stroke_color_input_income" tools:override="true">#4ADE80</color>
+    <color name="stroke_color_input_expense" tools:override="true">#F87171</color>
+    <color name="stroke_color_input_error" tools:override="true">#EF5350</color>
+    <color name="transaction_hint_color" tools:override="true">#FFFFFF</color>
+    <color name="transaction_page_input_field_background">#292E3F</color>
+    <color name="category_drawble_end">#FFFFFF</color>
+    <color name="save_button_background_income">#66BB6A</color>
+    <color name="save_button_background_expense">#EF5350</color>
+
+
+    <color name="Fragment_background">#121212</color>
+    <color name="search_icon_color">#000000</color>
+
+
+    <!--Home Fragement-->
+    <color name="icon_color">#FFFFFF</color>
+    <color name="management_stroke_color">#FFFFFF</color>
+    <color name="managemnt_card_back">#1C1F26</color>
+    <color name="management_text_color">#FFFFFF</color>
+    <color name="top_card_back_neutral">#1C1F26</color>
+    <color name="total_balance_color_neutral">#FFFFFF</color>
+    <color name="top_card_stroke_neutral">#FFFFFF</color>
+    <color name="recent_transaction">#FFFFFF</color>
+    <color name="recent_transaction_card_back">#121212</color>
+    <color name="recent_transaction_card_stroke_income">#1F3D2B</color>
+    <color name="recent_transaction_card_stroke_expense">#3A1E1E</color>
+    <color name="recent_tran_icon_income">#4ADE80</color>
+    <color name="recent_tran_icon_expense">#F87171</color>
+    <color name="recent_tran_amount_income">#4ADE80</color>
+    <color name="recent_tran_amount_expense">#F87171</color>
+
 </resources>

@@ -48,6 +48,9 @@ dependencies {
     // Room (KSP — NO kapt)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.firebase.database)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     ksp(libs.room.compiler)
 
     // Firebase BOM
