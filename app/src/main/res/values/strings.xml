@@ -67,4 +67,6 @@
     <string name="account_manage">Manage\n Accounts</string>
     <string name="budget_manage">Manage\n Budgets</string>
     <string name="loan_management">Manage\nLoans</string>
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
 </resources>
