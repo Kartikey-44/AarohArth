@@ -12,10 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:name=".Transaction_Action_Page"
+            android:exported="false"
+            android:theme="@style/Theme.AarohArth" />
         <activity
-            android:name=".HomeScreen"
+            android:name=".MainActivity"
             android:exported="false" />
         <activity
             android:name=".SignIn"

@@ -6,11 +6,11 @@ import androidx.room.PrimaryKey
 @Entity
 data class Transaction_Info(@PrimaryKey(autoGenerate = true)
 val id:Long=0,
-    val transaction_type: String,
+    val transactionType: String,
     val amount:Long,
-    val other_party:String,
-    val date: Long,
+    val otherParty:String,
+    val dateAndTime: Long,
     val remark:String,
     val category:String,
-    val transacction_medium:String,
-    val transaction_way: String)
+    val transacctionMedium:String,
+    val transactionWay: String)

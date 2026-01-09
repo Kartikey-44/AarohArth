@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primaryText">#111827</color>
@@ -30,4 +31,56 @@
     <color name="toolbar_color">#E0F2E0</color>
     <color name="nav_active">#4CAF50</color>
     <color name="nav_inactive">#B2DFDB</color>
+
+    <!--Transaction Page Colours-->
+    <color name="background_screen_color">#F7F9FB</color>
+    <color name="label_colors">#000000</color>
+    <color name="stroke_color_input_income" tools:override="true">#1E8E5A</color>
+    <color name="stroke_color_input_expense" tools:override="true">#C62828</color>
+    <color name="stroke_color_input_error" tools:override="true">#D32F2F</color>
+    <color name="transaction_hint_color" tools:overide="true">#000000</color>
+    <color name="transaction_page_input_field_background">#F7F9FB</color>
+    <color name="rupee_symbol_income">#0FB880</color>
+    <color name="rupee_symbol_expense">#EE4444</color>
+    <color name="category_drawble_end">#000000</color>
+    <color name="save_button_background_income">#2E7D32</color>
+    <color name="subheading_color_expense">#EE4444</color>
+    <color name="subheading_color_income">  #0FB880</color>
+    <color name="save_button_background_expense">#C62828</color>
+
+
+    <color name="Fragment_background">#FFFDF8</color>
+    <color name="search_icon_color">#000000</color>
+
+    <!--Home Fragment-->
+    <color name="icon_color">#000000</color>
+    <color name="management_stroke_color">#000000</color>
+    <color name="managemnt_card_back">#EEF1F4</color>
+    <color name="management_text_color">#000000</color>
+    <color name="top_card_back_profit">#D4EED4</color>
+    <color name="top_card_back_loss">#E8D5D5</color>
+    <color name="top_card_stroke_profit">#0FB880</color>
+    <color name="top_card_stroke_loss">#EE4444</color>
+    <color name="top_card_income_color">#0FB880</color>
+    <color name="top_card_expense_color">#EE4444</color>
+    <color name="top_card_neutral">#000000</color>
+    <color name="top_card_back_neutral">#EEF1F4</color>
+    <color name="total_balance_color_neutral">#000000</color>
+    <color name="top_card_stroke_neutral">#000000</color>
+    <color name="recent_transaction">#000000</color>
+    <color name="recent_transaction_card_back">#FAFAFA</color>
+    <color name="recent_transaction_card_stroke_income">#CFE9D9</color>
+    <color name="recent_transaction_card_stroke_expense">#3A1E1E</color>
+    <color name="recent_tran_icon_income">#1B8F3A</color>
+    <color name="recent_tran_icon_EXPENSE"> #C62828</color>
+    <color name="recent_tran_amount_income">#1B8F3A</color>
+    <color name="recent_tran_amount_expense">#C62828</color>
+
+
+
+
+
+
+
+
 </resources>
