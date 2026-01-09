@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "ind.finance.aaroharth"
-    compileSdk = 34
+    compileSdk = 35 //changed 34 --> 35
 
     defaultConfig {
         applicationId = "ind.finance.aaroharth"
@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.recyclerview)
     ksp(libs.room.compiler)
 
     // Firebase BOM

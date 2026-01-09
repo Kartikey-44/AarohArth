@@ -24,6 +24,7 @@ room = "2.6.1"
 firebaseDatabase = "22.0.1"
 navigationFragmentKtx = "2.9.6"
 navigationUiKtx = "2.9.6"
+recyclerview = "1.4.0"
 
 [libraries]
 # AndroidX
@@ -45,6 +46,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
