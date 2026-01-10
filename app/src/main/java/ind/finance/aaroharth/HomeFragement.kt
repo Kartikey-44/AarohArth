@@ -11,8 +11,11 @@ import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import ind.finance.aaroharth.databinding.FragmentHomeFragementBinding
+import kotlinx.coroutines.launch
 
 class HomeFragement : Fragment() {
 
@@ -25,6 +28,8 @@ class HomeFragement : Fragment() {
     private lateinit var toBottom: Animation
 
     private var isFabOpen = false
+    private lateinit var adapter: TransactionListAdapter
+
 
     // ------------------ Fragment Lifecycle ------------------
 
@@ -86,6 +91,11 @@ class HomeFragement : Fragment() {
                 Intent(requireContext(), AccountManagement::class.java)
             )
         }
+
+        binding.tranList.layoutManager = LinearLayoutManager(requireContext())
+        adapter= TransactionListAdapter(emptyList())
+        binding.tranList.adapter =adapter
+
     }
 
     // ------------------ Toolbar Search ------------------
@@ -153,6 +163,13 @@ class HomeFragement : Fragment() {
         requireActivity()
             .findViewById<MaterialToolbar>(R.id.toolbar)
             .visibility = View.VISIBLE
+
+        val dao= App_Database.getInstance(requireContext()).transactionDao()
+        lifecycleScope.launch {
+            val transactions=dao.getalltransaction()
+           adapter.updatelist(transactions)
+
+        }
     }
 
     override fun onDestroyView() {
@@ -197,4 +214,8 @@ class HomeFragement : Fragment() {
 
         binding.addTransactionBtn.startAnimation(rotateClose)
     }
+
+    //LIST
+
+
 }

@@ -76,6 +76,9 @@
     <color name="recent_tran_icon_expense"> #C62828</color>
     <color name="recent_tran_amount_income">#1B8F3A</color>
     <color name="recent_tran_amount_expense">#C62828</color>
+    <color name="income_dot_color">#B8E3C9 </color>
+    <color name="expense_dot_color">#F2A3AA</color>
+
 
     <!--Account Management Screen-->
     <color name="screen_background">#FAFAFA</color>
@@ -88,9 +91,22 @@
 
     <!--Your Accounts Card-->
     <color name="your_account_card_bg">#FFFFFF</color>
-    <color name="your_account_card_stroke">#E6E6E6</color>
-    <color name="your_account_card_text">#000000</color>
-    <color name="icon_color_drop_down">#000000</color>
+    <color name="your_account_card_stroke">#D6D6D6</color>
+
+    <!-- Text hierarchy -->
+    <color name="your_account_text_primary">#111111</color>
+    <color name="your_account_text_secondary">#6F6F6F</color>
+    <color name="your_account_text_label">#9A9A9A</color>
+
+    <!-- Balance -->
+    <color name="your_account_amount">#111111</color>
+    <color name="your_account_balance_label">#6B6B6B</color>
+
+    <!-- Icon -->
+    <color name="icon_container_bg">#FAFAFA</color>
+    <color name="icon_container_stroke">#D0D0D0</color>
+    <color name="icon_color_primary">#111111</color>
+
 
 
 

@@ -80,7 +80,7 @@ class AccountActions : AppCompatActivity() {
     }
 
     private fun setupAccountTypes() {
-        val accountTypes = listOf("UPI", "CASH", "DEBIT CARD","CREDIT CARD", "BANK")
+        val accountTypes = listOf("UPI", "Cash", "Debit Card","Credit Card", "Bank Account")
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_1,
