@@ -1,8 +1,10 @@
 package ind.finance.aaroharth
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -29,15 +31,12 @@ class HomeFragement : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Tell Fragment it has a menu (SearchView lives here)
         setHasOptionsMenu(true)
 
-        // Main FAB
         binding.addTransactionBtn.setOnClickListener {
             if (isFabOpen) closeFab() else openFab()
         }
 
-        // Income FAB
         binding.incomeBtn.setOnClickListener {
             closeFab()
             startActivity(
@@ -46,12 +45,17 @@ class HomeFragement : Fragment() {
             )
         }
 
-        // Expense FAB
         binding.expenseBtn.setOnClickListener {
             closeFab()
             startActivity(
                 Intent(requireContext(), Transaction_Action_Page::class.java)
                     .putExtra("type", "expense")
+            )
+        }
+
+        binding.accountManagement.setOnClickListener {
+            startActivity(
+                Intent(requireContext(), AccountManagement::class.java)
             )
         }
     }
@@ -61,29 +65,28 @@ class HomeFragement : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search_bar, menu)
 
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        val searchView = menu.findItem(R.id.action_search).actionView as? SearchView
+            ?: return
 
-        // Force black color everywhere
         val black = ContextCompat.getColor(requireContext(), android.R.color.black)
 
-        // Search hint text
         searchView.queryHint = "Search transactions"
 
-        // Search text + hint color
+        // Search text
         val searchEditText =
-            searchView.findViewById<SearchView.SearchAutoComplete>(
+            searchView.findViewById<EditText>(
                 androidx.appcompat.R.id.search_src_text
             )
+
         searchEditText.setTextColor(black)
         searchEditText.setHintTextColor(black)
 
-        // Remove default underline
+        // Remove underline
         searchView.findViewById<View>(
             androidx.appcompat.R.id.search_plate
-        )?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        )?.setBackgroundColor(Color.TRANSPARENT)
 
-        // Search icon (magnifier)
+        // Search icon
         searchView.findViewById<ImageView>(
             androidx.appcompat.R.id.search_mag_icon
         )?.setColorFilter(black)
@@ -93,46 +96,27 @@ class HomeFragement : Fragment() {
             androidx.appcompat.R.id.search_close_btn
         )?.setColorFilter(black)
 
-        // Handle toolbar title hide/show
+        // Toolbar title handling
         val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
         val titleView = toolbar.findViewById<View>(R.id.toolbarTitle)
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        menu.findItem(R.id.action_search)
+            .setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
 
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                // Hide app name
-                titleView.visibility = View.GONE
-
-                // IMPORTANT:
-                // Replace back arrow drawable instead of tinting
-                searchView.setOnSearchClickListener {
-                    val backIcon = searchView.findViewById<ImageView>(
-                        androidx.appcompat.R.id.search_mag_icon
-                    )
-                    backIcon?.setImageResource(R.drawable.back_arrow)
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                    titleView.visibility = View.GONE
+                    return true
                 }
 
-                return true
-            }
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                    titleView.visibility = View.VISIBLE
+                    return true
+                }
+            })
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                // Restore app name
-                titleView.visibility = View.VISIBLE
-                return true
-            }
-        })
-
-        // Listen to search text
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                // Handle submit
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Handle live search
-                return true
-            }
+            override fun onQueryTextSubmit(query: String?): Boolean = true
+            override fun onQueryTextChange(newText: String?): Boolean = true
         })
     }
 
@@ -140,7 +124,6 @@ class HomeFragement : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Show toolbar only on HomeFragment
         requireActivity()
             .findViewById<MaterialToolbar>(R.id.toolbar)
             .visibility = View.VISIBLE
@@ -148,7 +131,6 @@ class HomeFragement : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Prevent menu leaking to other fragments
         requireActivity().invalidateOptionsMenu()
     }
 

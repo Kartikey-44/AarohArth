@@ -35,11 +35,11 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/saved"
             android:textColor="@color/top_card_income_color"
-            android:text="Total Balance:"
+            android:text="Total:"
             android:gravity="center"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginEnd="50dp"
             android:layout_marginTop="20dp"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -48,19 +48,51 @@
             android:id="@+id/total_balance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="8dp"
-            android:drawableStart="@drawable/rupee_expense"
-            android:drawableTint="@color/top_card_income_color"
-            android:gravity="center"
-            android:text="300000"
-            android:textColor="@color/top_card_income_color"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/total_balance_heading" />
+            app:layout_constraintTop_toBottomOf="@id/total_balance_heading"
+            app:layout_constraintEnd_toStartOf="@id/saved_balance"
+            android:text="3000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/top_card_income_color"
+            android:drawableTint="@color/top_card_income_color"
+            android:drawableStart="@drawable/rupee_expense"
+            android:gravity="center"
+            android:layout_marginEnd="50dp" />
+
+
+        <TextView
+            android:id="@+id/saved"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textColor="@color/top_card_income_color"
+            app:layout_constraintStart_toEndOf="@id/total_balance_heading"
+            android:text="Saved:"
+            android:gravity="center"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="20dp"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/saved_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/saved"
+            app:layout_constraintStart_toEndOf="@id/total_balance"
+            android:text="3000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/top_card_expense_color"
+            android:drawableStart="@drawable/rupee_expense"
+            android:gravity="center"
+            android:layout_marginStart="50dp"/>
 
         <TextView
             android:id="@+id/income_heading"
@@ -147,7 +179,8 @@
                 android:layout_gravity="center"
                 android:scaleType="center"
                 android:background="@android:color/transparent"
-                android:src="@drawable/account"/>
+                android:src="@drawable/account"
+                android:clickable="true"/>
         </com.google.android.material.card.MaterialCardView>
         <TextView
             android:id="@+id/account_manage"
@@ -159,7 +192,7 @@
             android:layout_marginStart="50dp"
             android:text="@string/account_manage"
             android:includeFontPadding="false"
-            android:lineSpacingMultiplier="1.1"
+            android:lineSpacingMultiplier="0.6"
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="@color/management_text_color"/>
@@ -183,7 +216,8 @@
                 android:layout_gravity="center"
                 android:scaleType="center"
                 android:background="@android:color/transparent"
-                android:src="@drawable/budget"/>
+                android:src="@drawable/budget"
+                android:clickable="true"/>
         </com.google.android.material.card.MaterialCardView>
         <TextView
             android:id="@+id/budget_manage"
@@ -219,7 +253,8 @@
                 android:layout_gravity="center"
                 android:scaleType="center"
                 android:background="@android:color/transparent"
-                android:src="@drawable/loan" />
+                android:src="@drawable/loan"
+                android:clickable="true"/>
         </com.google.android.material.card.MaterialCardView>
 
         <TextView

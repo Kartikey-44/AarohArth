@@ -188,17 +188,17 @@
         app:boxStrokeWidth="1.5dp"
         app:boxStrokeWidthFocused="3dp"
         app:boxStrokeErrorColor="@color/stroke_color_input_error"
-        android:hint="Transaction Medium">
-        <AutoCompleteTextView
-            android:id="@+id/transaction_medium_field"
+        android:hint="Medium"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="@color/icon_color">
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/transactionMediumField"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:padding="10dp"
+            android:inputType="none"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:drawableEnd="@drawable/drop_down"
-            android:drawableTint="@color/category_drawble_end"
-            android:drawablePadding="10dp"/>
+            android:padding="10dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
@@ -220,17 +220,17 @@
         app:boxStrokeWidth="1.5dp"
         app:boxStrokeWidthFocused="3dp"
         app:boxStrokeErrorColor="@color/stroke_color_input_error"
-        android:hint="Transaction Way">
-        <AutoCompleteTextView
-            android:id="@+id/transaction_way_field"
+        android:hint="Way"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="@color/icon_color">
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/transactionWayField"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:padding="10dp"
+            android:inputType="none"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:drawableEnd="@drawable/drop_down"
-            android:drawableTint="@color/category_drawble_end"
-            android:drawablePadding="10dp"/>
+            android:padding="10dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
