@@ -1,8 +1,10 @@
 package ind.finance.aaroharth
-
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -13,6 +15,11 @@ import ind.finance.aaroharth.databinding.FragmentHomeFragementBinding
 class HomeFragement : Fragment() {
 
     private lateinit var binding: FragmentHomeFragementBinding
+
+    private lateinit var rotateOpen: Animation
+    private lateinit var rotateClose: Animation
+    private lateinit var fromBottom: Animation
+    private lateinit var toBottom: Animation
     private var isFabOpen = false
 
     // ------------------ Fragment Lifecycle ------------------
@@ -23,6 +30,10 @@ class HomeFragement : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeFragementBinding.inflate(inflater, container, false)
+        rotateOpen = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_open_animation)
+        rotateClose = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_close_animation)
+        fromBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_from_bottom_animation)
+        toBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_to_bottom_animation)
         return binding.root
     }
 
@@ -71,17 +82,14 @@ class HomeFragement : Fragment() {
         searchView.queryHint = "Search transactions"
 
         // Search text + hint color
-        val searchEditText =
-            searchView.findViewById<SearchView.SearchAutoComplete>(
-                androidx.appcompat.R.id.search_src_text
-            )
+        val searchEditText = searchView.findViewById<SearchView.SearchAutoComplete>(androidx.appcompat.R.id.search_src_text)
         searchEditText.setTextColor(black)
         searchEditText.setHintTextColor(black)
 
         // Remove default underline
         searchView.findViewById<View>(
             androidx.appcompat.R.id.search_plate
-        )?.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        )?.setBackgroundColor(Color.TRANSPARENT)
 
         // Search icon (magnifier)
         searchView.findViewById<ImageView>(
@@ -156,13 +164,35 @@ class HomeFragement : Fragment() {
 
     private fun openFab() {
         isFabOpen = true
+
+        // SHOW + ANIMATE INCOME FAB
         binding.incomeBtn.visibility = View.VISIBLE
+        binding.incomeBtn.isClickable = true
+        binding.incomeBtn.startAnimation(fromBottom)
+
+        // SHOW + ANIMATE EXPENSE FAB
         binding.expenseBtn.visibility = View.VISIBLE
+        binding.expenseBtn.isClickable = true
+        binding.expenseBtn.startAnimation(fromBottom)
+
+        // ROTATE MAIN FAB
+        binding.addTransactionBtn.startAnimation(rotateOpen)
     }
 
     private fun closeFab() {
         isFabOpen = false
+
+        // HIDE INCOME FAB
+        binding.incomeBtn.startAnimation(toBottom)
+        binding.incomeBtn.isClickable = false
         binding.incomeBtn.visibility = View.GONE
+
+        // HIDE EXPENSE FAB
+        binding.expenseBtn.startAnimation(toBottom)
+        binding.expenseBtn.isClickable = false
         binding.expenseBtn.visibility = View.GONE
+
+        // ROTATE MAIN FAB BACK
+        binding.addTransactionBtn.startAnimation(rotateClose)
     }
 }
