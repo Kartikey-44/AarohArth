@@ -68,13 +68,32 @@
     <color name="total_balance_color_neutral">#000000</color>
     <color name="top_card_stroke_neutral">#000000</color>
     <color name="recent_transaction">#000000</color>
+    <!--Recent Transaction Card-->
     <color name="recent_transaction_card_back">#FAFAFA</color>
     <color name="recent_transaction_card_stroke_income">#CFE9D9</color>
     <color name="recent_transaction_card_stroke_expense">#3A1E1E</color>
     <color name="recent_tran_icon_income">#1B8F3A</color>
-    <color name="recent_tran_icon_EXPENSE"> #C62828</color>
+    <color name="recent_tran_icon_expense"> #C62828</color>
     <color name="recent_tran_amount_income">#1B8F3A</color>
     <color name="recent_tran_amount_expense">#C62828</color>
+
+    <!--Account Management Screen-->
+    <color name="screen_background">#FAFAFA</color>
+    <color name="heading_color">#000000</color>
+    <color name="saveBtnBg">#F1F8F4</color>
+    <color name="saveBtnStroke">#CFE9D9</color>
+    <color name="saveBtnText">#1B8F3A</color>
+    <color name="yourAccounts">#000000</color>
+
+
+    <!--Your Accounts Card-->
+    <color name="your_account_card_bg">#FFFFFF</color>
+    <color name="your_account_card_stroke">#E6E6E6</color>
+    <color name="your_account_card_text">#000000</color>
+    <color name="icon_color_drop_down">#000000</color>
+
+
+
 
 
 
