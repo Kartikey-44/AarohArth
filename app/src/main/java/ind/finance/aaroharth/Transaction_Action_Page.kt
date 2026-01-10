@@ -1,39 +1,54 @@
 package ind.finance.aaroharth
 
+import android.app.Dialog
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.widget.ArrayAdapter
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.lifecycle.lifecycleScope
 import ind.finance.aaroharth.databinding.ActivityTransactionActionPageBinding
+import ind.finance.aaroharth.databinding.DialogScreenBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalQueries.zoneId
 
 class Transaction_Action_Page : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityTransactionActionPageBinding
-
+    private lateinit var dialogBinding: DialogScreenBinding
+    private lateinit var accountDao: Account_Dao
+    private lateinit var transactionDao: Transaction_Dao
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Layout Inflated
 
         binding = ActivityTransactionActionPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
-        val blur = RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
-        binding.background.setRenderEffect(blur)
+        //Background Blur Effect
+
+        if(Build.VERSION.SDK_INT> Build.VERSION_CODES.S){
+            val blur = RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
+            binding.background.setRenderEffect(blur)
+        }
+
+        //Getting Intent Passed from Home Fragment and as per condition of working
 
         val type=intent.getStringExtra("type")
-
         if(type=="income"){
             income_ui_changes()
         }
@@ -41,22 +56,53 @@ class Transaction_Action_Page : AppCompatActivity() {
             expense_ui_changes()
         }
 
-      val time= System.currentTimeMillis()
+
+
+        //Initializing DB
+
+        accountDao = App_Database.getInstance(this).accountDao()
+        transactionDao= App_Database.getInstance(this).transactionDao()
+
+
+
+        //Getting exact date and time of user device
+
+        val time= System.currentTimeMillis()
         val displaytime= Instant.ofEpochMilli(time)
             .atZone(ZoneId.systemDefault())
             .format(DateTimeFormatter.ofPattern("hh:mm a  dd/MM/yyyy"))
 
+
+        //Intializing The Transaction Medium Function
+        transactionMedium()
+
+        //setting Date and Time To Date Field
         binding.dateField.setText(displaytime)
 
+        //Save Button Working
         binding.saveButton.setOnClickListener {
-            if(isnotempty()){
-                save()
+            if (isnotempty()){
+                val amount=binding.amountField.text.toString().trim().toLongOrNull()
+                if(amount==null){
+                    return@setOnClickListener
+                }
+
+                if(type=="expense"){
+
+                    saveExpenseTransaction()
+                }
+                else{
+                    saveIncomeTransaction()
+                }
             }
-
-
         }
 
+
+
+
     }
+
+    // UI CHANGES ON INTENT INCOME
 
     private fun income_ui_changes(){
         binding.heading.text="Add Income"
@@ -67,6 +113,7 @@ class Transaction_Action_Page : AppCompatActivity() {
         binding.amountLayout.setStartIconTintList(
             ColorStateList.valueOf(getColor(R.color.rupee_symbol_income))
         )
+        binding.otherPartyLayout.hint="Received From"
         binding.amountField.setTextColor(getColor(R.color.save_button_background_income))
         binding.saveButton.setBackgroundColor(getColor(R.color.save_button_background_income))
         binding.amountLayout.boxStrokeColor=getColor(R.color.stroke_color_input_income)
@@ -79,6 +126,8 @@ class Transaction_Action_Page : AppCompatActivity() {
     }
 
 
+    //UI CHANGES ON INTENT EXPENSE
+
     private fun expense_ui_changes(){
         binding.heading.text="Add Expense"
         binding.subHeading.background=getDrawable(R.drawable.transaction_page_sub_heading_expense)
@@ -89,6 +138,7 @@ class Transaction_Action_Page : AppCompatActivity() {
             ColorStateList.valueOf(getColor(R.color.rupee_symbol_expense))
         )
         binding.amountField.setTextColor(getColor(R.color.save_button_background_expense))
+        binding.otherPartyLayout.hint="Paid To"
         binding.saveButton.setBackgroundColor(getColor(R.color.save_button_background_expense))
         binding.amountLayout.boxStrokeColor=getColor(R.color.stroke_color_input_expense)
         binding.otherPartyLayout.boxStrokeColor=getColor(R.color.stroke_color_input_expense)
@@ -98,6 +148,48 @@ class Transaction_Action_Page : AppCompatActivity() {
         binding.transactionWayLayout.boxStrokeColor=getColor(R.color.stroke_color_input_expense)
     }
 
+    //Drop Down Menu Item Declaration For Transaction Medium
+
+    private fun transactionMedium() {
+
+
+
+        lifecycleScope.launch {
+            val mediumList: List<String> = accountDao.getAllAccountType()
+
+            val adapter = ArrayAdapter(
+                this@Transaction_Action_Page,
+                android.R.layout.simple_list_item_1,
+                mediumList
+            )
+            binding.transactionMediumField.setAdapter(adapter)
+        }
+        binding.transactionMediumField.setOnItemClickListener{parent,_,position,_ ->
+            binding.transactionMediumField.setText(parent.getItemAtPosition(position).toString(),false)
+            transactionWay(binding.transactionMediumField.text.toString())
+        }
+    }
+
+    //Setting Drop Down For Transaction Way
+
+    private fun transactionWay(type: String){
+
+        lifecycleScope.launch {
+            val wayList:List<String> = accountDao.getAllAccountName(type)
+            val adapter= ArrayAdapter(this@Transaction_Action_Page,
+                android.R.layout.simple_list_item_1,
+                wayList
+            )
+            binding.transactionWayField.setAdapter(adapter)
+        }
+        binding.transactionWayField.setOnItemClickListener{parent,_,position,_ ->
+            binding.transactionWayField.setText(binding.transactionWayField.text.toString(),false)
+        }
+
+    }
+
+
+    //Checking that Any Field Is Empty Or Not
 
     private fun isnotempty(): Boolean {
 
@@ -112,36 +204,151 @@ class Transaction_Action_Page : AppCompatActivity() {
             binding.amountLayout.error = "Cannot Be Empty"
             return false
         }
-
         val otherParty = binding.otherPartyField.text?.toString()?.trim()
         if (otherParty.isNullOrEmpty()) {
             binding.otherPartyLayout.error = "Cannot Be Empty"
             return false
         }
-
         val category = binding.categoryField.text?.toString()?.trim()
         if (category.isNullOrEmpty()) {
             binding.categoryLayout.error = "Cannot Be Empty"
             return false
         }
-
         val transactionMedium = binding.transactionMediumField.text?.toString()?.trim()
         if (transactionMedium.isNullOrEmpty()) {
             binding.transactionMediumLayout.error = "Cannot Be Empty"
             return false
         }
-
         val transactionWay = binding.transactionWayField.text?.toString()?.trim()
         if (transactionWay.isNullOrEmpty()) {
             binding.transactionWayLayout.error = "Cannot Be Empty"
             return false
         }
-
         return true
     }
 
-    private fun save(){
+    //INCOME SAVE FUN
+
+    private fun saveIncomeTransaction() {
+
+        val amount = binding.amountField.text.toString().trim().toLongOrNull()
+            ?: return
+
+        val transactionWay = binding.transactionWayField.text.toString().trim()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            val balance = accountDao.getbalance(transactionWay)
+
+
+            accountDao.updatebalance(balance + amount, transactionWay)
+
+
+            transactionDao.insertTransaction(
+                Transaction_Info(
+                    0,
+                    binding.subHeading.text.toString().trim(),
+                    amount,
+                    binding.otherPartyField.text.toString().trim(),
+                    binding.categoryField.text.toString().trim().lowercase(),
+                    System.currentTimeMillis(),
+                    binding.transactionMediumField.text.toString().trim(),
+                    transactionWay,
+                    binding.remarkField.text.toString().trim()
+                )
+            )
+
+            withContext(Dispatchers.Main) {
+                successLottie("Income Saved")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    finish()
+                }, 1800)
+            }
+        }
+    }
+
+
+
+    // Save Expense Transaction Function
+
+    private fun saveExpenseTransaction() {
+
+        val amount = binding.amountField.text.toString().trim().toLongOrNull() ?: return
+
+        val transactionWay = binding.transactionWayField.text.toString().trim()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            val balance = accountDao.getbalance(transactionWay)
+
+            if (balance < amount) {
+                withContext(Dispatchers.Main) {
+                    binding.amountLayout.error = "Insufficient Balance"
+                }
+                return@launch
+            }
+
+
+            accountDao.updatebalance(balance - amount, transactionWay)
+
+
+            transactionDao.insertTransaction(
+                Transaction_Info(
+                    0,
+                    binding.subHeading.text.toString().trim(),
+                    amount,
+                    binding.otherPartyField.text.toString().trim(),
+                    binding.categoryField.text.toString().trim().lowercase(),
+                    System.currentTimeMillis(),
+                    binding.transactionMediumField.text.toString().trim(),
+                    transactionWay,
+                    binding.remarkField.text.toString().trim()
+                )
+            )
+
+            withContext(Dispatchers.Main) {
+                successLottie("Expense Saved")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    finish()
+                },1800)
+            }
+        }
+    }
+
+
+    private fun successLottie(message: String) {
+        val dialog = Dialog(this)
+        dialogBinding = DialogScreenBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
+        dialog.setCancelable(false)
+
+        dialogBinding.dialogLottie.setAnimation("Success.json")
+        dialogBinding.message.text = message
+        dialog.show()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            dialog.dismiss()
+        }, 2000)
+    }
+
+
+    private fun failedLottie(){dialog("Failed.json","Something Went Wrong")}
+    private fun dialog(lottie: String, message: String){
+        val dialog= Dialog(this)
+        dialogBinding=DialogScreenBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
+        dialogBinding.dialogLottie.setAnimation(lottie)
+        dialogBinding.message.text=message
+        dialog.show()
+        Handler(Looper.getMainLooper()).postDelayed({
+            dialog.dismiss()
+        },1800
+        )
+
 
     }
+
 
 }
