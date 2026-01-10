@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
+            android:name=".AccountManagement"
+            android:exported="false" />
+        <activity
+            android:name=".AccountActions"
+            android:exported="false" />
+        <activity
             android:name=".Transaction_Action_Page"
             android:exported="false"
             android:theme="@style/Theme.AarohArth" />

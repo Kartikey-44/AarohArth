@@ -66,4 +66,19 @@
     <color name="recent_tran_amount_income">#4ADE80</color>
     <color name="recent_tran_amount_expense">#F87171</color>
 
+
+    <!--Account Management Screen-->
+    <color name="screen_background">#121212</color>
+    <color name="heading_color">#FFFFFF</color>
+    <color name="saveBtnBg">#1A2E22</color>
+    <color name="saveBtnStroke">#2E6F4E</color>
+    <color name="saveBtnText">#4ADE80</color>
+    <color name="yourAccounts">#FFFFFF</color>
+
+    <!--Your Accounts Card-->
+    <color name="your_account_card_bg">#1E1E1E</color>
+    <color name="your_account_card_stroke">#2A2A2A</color>
+    <color name="your_account_card_text">#FFFFFF</color>
+    <color name="icon_color_drop_down">#FFFFFF</color>
+
 </resources>
