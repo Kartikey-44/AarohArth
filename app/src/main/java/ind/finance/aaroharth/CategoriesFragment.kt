@@ -70,7 +70,7 @@ class CategoriesFragment : Fragment() {
         list.add(CategoriesDataClass(R.drawable.freelance, "Freelance"))
         list.add(CategoriesDataClass(R.drawable.business , "Business"))
         list.add(CategoriesDataClass(R.drawable.rental , "Rental"))
-        list.add(CategoriesDataClass(R.drawable.upi , "Upi"))
+        list.add(CategoriesDataClass(R.drawable.upiicon , "Upi"))
         list.add(CategoriesDataClass(R.drawable.investment , "Investment"))
         list.add(CategoriesDataClass(R.drawable.housing , "Housing"))
         list.add(CategoriesDataClass(R.drawable.utilities , "Recharge"))

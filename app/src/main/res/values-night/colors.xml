@@ -76,9 +76,23 @@
     <color name="yourAccounts">#FFFFFF</color>
 
     <!--Your Accounts Card-->
-    <color name="your_account_card_bg">#1E1E1E</color>
+    <color name="your_account_card_bg">#1C1C1C</color>
     <color name="your_account_card_stroke">#2A2A2A</color>
-    <color name="your_account_card_text">#FFFFFF</color>
-    <color name="icon_color_drop_down">#FFFFFF</color>
+
+    <!-- Text hierarchy -->
+    <color name="your_account_text_primary">#F5F5F5</color>
+    <color name="your_account_text_secondary">#B0B0B0</color>
+    <color name="your_account_text_label">#9A9A9A</color>
+
+    <!-- Balance -->
+    <color name="your_account_amount">#F5F5F5</color>
+    <color name="your_account_balance_label">#9A9A9A</color>
+
+    <!-- Icon -->
+    <color name="icon_container_bg">#FAFAFA</color>
+    <color name="icon_container_stroke">#3A3A3A</color>
+    <color name="icon_color_primary">#FFFFFF</color>
+
+
 
 </resources>

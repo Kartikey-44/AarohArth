@@ -1,78 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:backgroundTint="@color/recent_transaction_card_back"
     app:strokeColor="#CFE9D9"
     app:strokeWidth="2dp"
-    android:elevation="4dp">
+    android:elevation="4dp"
+    android:id="@+id/card">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp">
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="10dp"
-            android:src="@drawable/rupee_list_icon"/>
+            android:src="@drawable/rupee_list_icon"
+            android:padding="10dp"
+            android:background="@drawable/transaction_card_background_income"/>
         <TextView
-            android:id="@+id/category"
+            android:id="@+id/transaction_medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/icon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="10dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginVertical="10dp"
-            android:text="UPI"
+            android:text="BANK Account"
             android:textStyle="bold"
             android:textColor="@color/icon_color"
-            android:textSize="20sp"/>
+            android:textSize="16sp"
+            android:maxEms="3"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
 
         <TextView
             android:id="@+id/dot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="6dp"
-            android:layout_marginStart="18dp"
+            android:layout_marginStart="8dp"
             android:text="&#183;"
             android:textColor="@color/icon_color"
             android:textSize="30sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/category"
+            app:layout_constraintStart_toEndOf="@id/transaction_medium"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBaseline_toBottomOf="@id/other_party"/>
+
         <TextView
             android:id="@+id/other_party"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/dot"
+            app:layout_constraintEnd_toStartOf="@id/amount"
             android:layout_marginHorizontal="5dp"
-            android:text="From: Atul And Vishal"
             android:layout_marginTop="10dp"
+            android:text="From: falandekhan.coma"
             android:textSize="15sp"
             android:textStyle="bold"
+            android:maxLines="1"
             android:ellipsize="end"
-            android:maxLines="1"/>
+            android:maxEms="7"/>
+
+
+
 
         <TextView
             android:id="@+id/dot2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="6dp"
-            android:layout_marginStart="18dp"
+            android:layout_marginStart="8dp"
             android:text="&#183;"
             android:textColor="@color/icon_color"
             android:textSize="30sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/category"
+            app:layout_constraintStart_toEndOf="@id/transaction_medium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintBaseline_toBottomOf="@id/date"/>
         <TextView
@@ -87,6 +101,7 @@
             android:layout_marginBottom="10dp"
             />
         <TextView
+            android:id="@+id/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -95,7 +110,7 @@
             android:text="+ &#8377; 4000"
             android:layout_marginEnd="20dp"
             android:textStyle="bold"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textColor="@color/recent_tran_amount_income"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
