@@ -26,4 +26,17 @@ interface Account_Dao {
     @Query("UPDATE AccountsTable SET balance= :balance WHERE AccountName=:accountName")
     suspend fun updatebalance(balance: Long,accountName: String)
 
+    @Query("""
+    SELECT * FROM AccountsTable
+    WHERE accountName LIKE '%' || :query || '%'
+       OR accountType LIKE '%' || :query || '%'
+       OR CAST(balance AS TEXT) LIKE '%' || :query || '%'
+""")
+    suspend fun searchAccounts(query: String): List<Account_Info>
+
+
+    @Query("SELECT * FROM AccountsTable WHERE accountType=:accountType")
+    suspend fun filter(accountType: String): List<Account_Info>
+
+
 }

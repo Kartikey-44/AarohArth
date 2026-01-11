@@ -42,7 +42,7 @@ class TransactionListAdapter(
         parent: ViewGroup,
         viewType: Int
     ): TransactionListAdapter.TransactionListViewholder {
-      val view= LayoutInflater.from(parent.context)
+        val view= LayoutInflater.from(parent.context)
           .inflate(R.layout.recent_transaction,parent,false)
         return TransactionListViewholder(view)
     }
@@ -52,7 +52,7 @@ class TransactionListAdapter(
         position: Int
     ) {
         val transaction=transaction[position]
-        val type=transaction.transactionType.toString().trim()
+        val type=transaction.transactionType.toString().lowercase().trim()
         if(type=="income"){
             holder.iconholder.setBackgroundResource(R.drawable.transaction_card_background_income)
             holder.card.setStrokeColor(
@@ -110,6 +110,7 @@ class TransactionListAdapter(
             DATE_ONLY_FORMATTER.format(
                 Instant.ofEpochMilli(transaction.dateAndTime)
             )
+        holder.medium.text=camelCaseToWords(toPascalCase(transaction.transacctionMedium))
 
         when(transaction.category.toString().toLowerCase()){
             "salary"->holder.iconholder.setImageResource(R.drawable.decoration)

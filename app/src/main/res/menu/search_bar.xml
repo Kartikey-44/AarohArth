@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -6,8 +5,14 @@
         android:id="@+id/action_search"
         android:title="Search"
         android:icon="@drawable/search"
-        app:showAsAction="collapseActionView|ifRoom"
+        app:showAsAction="ifRoom"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         android:iconTint="@color/search_icon_color"/>
 
+    <item
+        android:id="@+id/action_filter"
+        android:title="Filter"
+        android:icon="@drawable/filter"
+        app:showAsAction="ifRoom"
+        android:iconTint="@color/search_icon_color"/>
 </menu>
