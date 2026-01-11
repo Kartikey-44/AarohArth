@@ -52,7 +52,9 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.lifecycle.process)
     ksp(libs.room.compiler)
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))

@@ -13,4 +13,8 @@ data class Transaction_Info(@PrimaryKey(autoGenerate = true)
                             val dateAndTime: Long,
                             val transacctionMedium:String,
                             val transactionWay: String,
-                            val remark:String)
+                            val remark:String,
+                            val carbonEmissionFactor: Double,
+                            val carbonEmitted: Double,
+                            val carbonEmissionAuth: String
+)

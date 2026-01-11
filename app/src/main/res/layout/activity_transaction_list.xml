@@ -81,6 +81,7 @@
                 android:textColorHint="#005D48"
                 android:background="@android:color/transparent"
                 android:visibility="gone"
+                android:layout_marginStart="10dp"
                 app:layout_constraintStart_toEndOf="@id/back"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
