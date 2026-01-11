@@ -98,9 +98,12 @@ class Transaction_Action_Page : AppCompatActivity() {
         }
 
 
+        setupCategoryDropdown()
 
 
     }
+
+
 
     // UI CHANGES ON INTENT INCOME
 
@@ -147,6 +150,61 @@ class Transaction_Action_Page : AppCompatActivity() {
         binding.transactionMediumLayout.boxStrokeColor=getColor(R.color.stroke_color_input_expense)
         binding.transactionWayLayout.boxStrokeColor=getColor(R.color.stroke_color_input_expense)
     }
+
+
+
+    private fun setupCategoryDropdown() {
+
+        val categoryList = listOf(
+            "Salary",
+            "Business",
+            "Freelance",
+            "Investment",
+            "Savings",
+
+            "Food",
+            "Dining Out",
+            "Shopping",
+            "Personal Care",
+            "Entertainment",
+            "Subscriptions",
+
+            "Housing",
+            "Rental",
+            "Utilities",
+            "Transportation",
+            "Fuel",
+            "Travel",
+
+            "Medical",
+            "Insurance",
+            "Education",
+            "EMI / Loans",
+            "Tax",
+
+            "Gifts",
+            "Donations",
+            "Miscellaneous"
+        )
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            categoryList
+        )
+
+        binding.categoryField.apply {
+            setAdapter(adapter)
+            threshold = 0
+
+            setOnClickListener { showDropDown() }
+
+            setOnItemClickListener { parent, _, position, _ ->
+                setText(parent.getItemAtPosition(position).toString(), false)
+            }
+        }
+    }
+
 
     //Drop Down Menu Item Declaration For Transaction Medium
 
@@ -204,11 +262,6 @@ class Transaction_Action_Page : AppCompatActivity() {
             binding.amountLayout.error = "Cannot Be Empty"
             return false
         }
-        val otherParty = binding.otherPartyField.text?.toString()?.trim()
-        if (otherParty.isNullOrEmpty()) {
-            binding.otherPartyLayout.error = "Cannot Be Empty"
-            return false
-        }
         val category = binding.categoryField.text?.toString()?.trim()
         if (category.isNullOrEmpty()) {
             binding.categoryLayout.error = "Cannot Be Empty"
@@ -235,6 +288,11 @@ class Transaction_Action_Page : AppCompatActivity() {
             ?: return
 
         val transactionWay = binding.transactionWayField.text.toString().trim()
+        var otherparty: String=binding.otherPartyField.text.toString().trim()
+
+        if(otherparty.isEmpty()){
+            otherparty="Unknown"
+        }
 
         lifecycleScope.launch(Dispatchers.IO) {
 
@@ -249,7 +307,7 @@ class Transaction_Action_Page : AppCompatActivity() {
                     0,
                     binding.subHeading.text.toString().trim(),
                     amount,
-                    binding.otherPartyField.text.toString().trim(),
+                    otherparty,
                     binding.categoryField.text.toString().trim().lowercase(),
                     System.currentTimeMillis(),
                     binding.transactionMediumField.text.toString().trim(),
