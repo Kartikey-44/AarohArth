@@ -10,9 +10,11 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class TransactionListAdapter(
 
@@ -77,7 +79,11 @@ class TransactionListAdapter(
                 )
             )
             holder.otherparty.text="From: ${camelCaseToWords(toPascalCase(transaction.otherParty))}"
-            holder.amount.text="+ \u20B9 ${transaction.amount}"
+
+            val format= NumberFormat.getNumberInstance(Locale("en","IN"))
+            format.maximumFractionDigits=0
+            val amount=format.format(transaction.amount)
+            holder.amount.text="+ \u20B9 ${amount}"
         }
         else{
             holder.iconholder.setBackgroundResource(R.drawable.transaction_card_background_expense)
@@ -103,15 +109,24 @@ class TransactionListAdapter(
                 )
             )
             holder.otherparty.text="To: ${camelCaseToWords(toPascalCase(transaction.otherParty))}"
-            holder.amount.text="- \u20B9 ${transaction.amount}"
+
+            val format= NumberFormat.getNumberInstance(Locale("en","IN"))
+            format.maximumFractionDigits=0
+            val amount=format.format(transaction.amount)
+            holder.amount.text="- \u20B9 ${amount}"
         }
 
         holder.dateAndTime.text =
             DATE_ONLY_FORMATTER.format(
                 Instant.ofEpochMilli(transaction.dateAndTime)
             )
-        holder.medium.text=camelCaseToWords(toPascalCase(transaction.transacctionMedium))
-
+        val medium=transaction.transacctionMedium.toString().lowercase().trim()
+        if(medium=="upi"){
+            holder.medium.text="UPI"
+        }
+        else{
+            holder.medium.text=camelCaseToWords(toPascalCase(medium))
+        }
         when(transaction.category.toString().toLowerCase()){
             "salary"->holder.iconholder.setImageResource(R.drawable.decoration)
             "business"->holder.iconholder.setImageResource(R.drawable.business)
@@ -126,9 +141,6 @@ class TransactionListAdapter(
             "subscriptions"->holder.iconholder.setImageResource(R.drawable.subscription)
             "housing"->holder.iconholder.setImageResource(R.drawable.housing)
             "rental"->holder.iconholder.setImageResource(R.drawable.rental)
-            "utilities"->holder.iconholder.setImageResource(R.drawable.utilities)
-            "transportation"->holder.iconholder.setImageResource(R.drawable.transportation)
-            "fuel"->holder.iconholder.setImageResource(R.drawable.fuel)
             "travel"->holder.iconholder.setImageResource(R.drawable.travel)
             "medical"->holder.iconholder.setImageResource(R.drawable.medical)
             "insurance"->holder.iconholder.setImageResource(R.drawable.insurance)
@@ -138,6 +150,26 @@ class TransactionListAdapter(
             "gifts"->holder.iconholder.setImageResource(R.drawable.gift)
             "donations"->holder.iconholder.setImageResource(R.drawable.donation)
             "miscellaneous"->holder.iconholder.setImageResource(R.drawable.miscellaneous)
+            "mobile recharge"->holder.iconholder.setImageResource(R.drawable.recharge)
+            "fasttag recharge"->holder.iconholder.setImageResource(R.drawable.fastag)
+            "electricity"->holder.iconholder.setImageResource(R.drawable.electricity)
+            "water bill"->holder.iconholder.setImageResource(R.drawable.waterbill)
+            "taxi"->holder.iconholder.setImageResource(R.drawable.taxi)
+            "auto"->holder.iconholder.setImageResource(R.drawable.auto)
+            "hotel"->holder.iconholder.setImageResource(R.drawable.hotel)
+            "flight"->holder.iconholder.setImageResource(R.drawable.flight)
+            "petrol"->holder.iconholder.setImageResource(R.drawable.petrol)
+            "diesel"->holder.iconholder.setImageResource(R.drawable.diesel)
+            "cng"->holder.iconholder.setImageResource(R.drawable.cng)
+            "lpg"->holder.iconholder.setImageResource(R.drawable.lpgpng)
+            "png"->holder.iconholder.setImageResource(R.drawable.lpgpng)
+            "public transport"->holder.iconholder.setImageResource(R.drawable.publictransport)
+            "grocery"->holder.iconholder.setImageResource(R.drawable.grocery)
+
+
+
+
+
             else->holder.iconholder.setImageResource(R.drawable.other)
         }
 

@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="6dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="10dp"
             android:text="&#183;"
             android:textColor="@color/icon_color"
             android:textSize="30sp"
@@ -74,7 +74,7 @@
             android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end"
-            android:maxEms="7"/>
+            android:maxEms="8"/>
 
 
 
@@ -84,7 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="6dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="10dp"
             android:text="&#183;"
             android:textColor="@color/icon_color"
             android:textSize="30sp"
@@ -105,7 +105,7 @@
             />
         <TextView
             android:id="@+id/amount"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -113,8 +113,12 @@
             android:text="+ &#8377; 4000"
             android:layout_marginEnd="10dp"
             android:textStyle="bold"
-            android:textSize="20sp"
-            android:textColor="@color/recent_tran_amount_income"/>
+            android:textSize="22sp"
+            android:textColor="@color/recent_tran_amount_income"
+            app:layout_constraintStart_toEndOf="@id/other_party"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:gravity="end"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

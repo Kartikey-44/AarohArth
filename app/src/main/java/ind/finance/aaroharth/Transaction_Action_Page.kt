@@ -29,6 +29,14 @@ class Transaction_Action_Page : AppCompatActivity() {
     private lateinit var dialogBinding: DialogScreenBinding
     private lateinit var accountDao: Account_Dao
     private lateinit var transactionDao: Transaction_Dao
+
+    private val categoryList = listOf(
+        "Mobile Recharge", "FastTag Recharge", "Salary", "Business", "Freelance", "Investment", "Savings", "Food",
+        "Dining Out", "Shopping", "Personal Care", "Entertainment", "Subscriptions", "Housing", "Rental", "Utilities",
+        "Public Transport", "Petrol", "Diesel", "CNG", "Electricity", "LPG", "PNG", "Taxi", "Auto", "Hotel",
+        "Flight", "Medical", "Insurance", "Education", "EMI / Loans", "Tax", "Gifts", "Donations",
+        "Miscellaneous", "Water Bill","Grocery"
+    )
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,37 +163,7 @@ class Transaction_Action_Page : AppCompatActivity() {
 
     private fun setupCategoryDropdown() {
 
-        val categoryList = listOf(
-            "Salary",
-            "Business",
-            "Freelance",
-            "Investment",
-            "Savings",
 
-            "Food",
-            "Dining Out",
-            "Shopping",
-            "Personal Care",
-            "Entertainment",
-            "Subscriptions",
-
-            "Housing",
-            "Rental",
-            "Utilities",
-            "Transportation",
-            "Fuel",
-            "Travel",
-
-            "Medical",
-            "Insurance",
-            "Education",
-            "EMI / Loans",
-            "Tax",
-
-            "Gifts",
-            "Donations",
-            "Miscellaneous"
-        )
 
         val adapter = ArrayAdapter(
             this,
@@ -267,6 +245,10 @@ class Transaction_Action_Page : AppCompatActivity() {
             binding.categoryLayout.error = "Cannot Be Empty"
             return false
         }
+        if(category !in categoryList){
+            binding.categoryLayout.error="Select From List"
+            return false
+        }
         val transactionMedium = binding.transactionMediumField.text?.toString()?.trim()
         if (transactionMedium.isNullOrEmpty()) {
             binding.transactionMediumLayout.error = "Cannot Be Empty"
@@ -294,6 +276,7 @@ class Transaction_Action_Page : AppCompatActivity() {
             otherparty="Unknown"
         }
 
+
         lifecycleScope.launch(Dispatchers.IO) {
 
             val balance = accountDao.getbalance(transactionWay)
@@ -312,7 +295,12 @@ class Transaction_Action_Page : AppCompatActivity() {
                     System.currentTimeMillis(),
                     binding.transactionMediumField.text.toString().trim(),
                     transactionWay,
-                    binding.remarkField.text.toString().trim()
+                    binding.remarkField.text.toString().trim(),
+                    0.00,
+                    0.00,
+                    "None"
+
+
                 )
             )
 
@@ -349,6 +337,11 @@ class Transaction_Action_Page : AppCompatActivity() {
 
             accountDao.updatebalance(balance - amount, transactionWay)
 
+            val category = binding.categoryField.text.toString().trim().lowercase()
+            val factor=carbonEmissionFactor(category)
+            val emitted=carbonEmitted(amount,factor)
+            val auth=carbonEmissionAuth(emitted)
+
 
             transactionDao.insertTransaction(
                 Transaction_Info(
@@ -360,7 +353,10 @@ class Transaction_Action_Page : AppCompatActivity() {
                     System.currentTimeMillis(),
                     binding.transactionMediumField.text.toString().trim(),
                     transactionWay,
-                    binding.remarkField.text.toString().trim()
+                    binding.remarkField.text.toString().trim(),
+                   factor,
+                    emitted,
+                    auth
                 )
             )
 
@@ -405,6 +401,58 @@ class Transaction_Action_Page : AppCompatActivity() {
         },1800
         )
 
+
+    }
+
+    private fun carbonEmissionFactor(categoryName: String): Double{
+
+        when(categoryName.lowercase().trim()){
+            "food"-> return 0.0005
+            "grocery"->return 0.0006
+            "dining out"->return 0.0008
+            "shopping"-> return 0.0007
+            "personal care"->return 0.0006
+            "entertainment"->return 0.0005
+            "subscriptions"->return 0.0004
+            "medical"->return 0.0004
+            "education"-> return 0.0003
+            "gifts"->return 0.0006
+            "miscellaneous"->return 0.0005
+            "housing"->return 0.0006
+            "rental"->return 0.0005
+            "utilities"->return 0.0007
+            "public transport"->return 0.0004
+            "taxi"->return 0.0010
+            "auto"->return 0.0009
+            "hotel"->return 0.0012
+            "flight"->return 0.0025
+            "petrol"->return 0.0023
+            "diesel"->return 0.0027
+            "cng"->return 0.0019
+            "electricity"->return 0.0018
+            "lpg"->return 0.0021
+            "png"->return 0.0017
+            "water bill"->return 0.0002
+            else ->{
+                return 0.0
+            }
+
+
+        }
+
+
+    }
+    private fun carbonEmissionAuth(emitted: Double): String{
+        return when{
+            emitted<0.20 ->"Low"
+            emitted<1.00 ->"Medium"
+            else ->"High"
+
+        }
+    }
+
+    private fun carbonEmitted(amount: Long, factor: Double):Double{
+        return amount*factor
 
     }
 
