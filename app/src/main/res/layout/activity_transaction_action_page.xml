@@ -198,7 +198,12 @@
             android:inputType="none"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:padding="15dp"/>
+            android:paddingHorizontal="15dp"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:scrollHorizontally="true" />
+
 
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
@@ -230,7 +235,12 @@
             android:inputType="none"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:padding="15dp"/>
+            android:paddingHorizontal="15dp"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:scrollHorizontally="true" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
