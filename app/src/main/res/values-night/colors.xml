@@ -94,5 +94,7 @@
     <color name="icon_color_primary">#FFFFFF</color>
 
 
+    <color name="filtercardstroke">#F1F1F1</color>
+
 
 </resources>

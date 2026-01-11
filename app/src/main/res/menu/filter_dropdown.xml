@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:id="@+id/upi"
+    android:title="UPI"/>
+    <item
+        android:id="@+id/cash"
+        android:title="Cash"
+        />
+    <item
+        android:id="@+id/bank"
+        android:title="Bank Account"/>
+    <item
+        android:id="@+id/debit_card"
+        android:title="Debit Card"/>
+    <item
+        android:id="@+id/credit_card"
+        android:title="Credit Card"/>
+
+
+</menu>

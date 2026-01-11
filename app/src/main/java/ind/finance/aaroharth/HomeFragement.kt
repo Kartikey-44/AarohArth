@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
 import ind.finance.aaroharth.databinding.FragmentHomeFragementBinding
 import kotlinx.coroutines.launch
+import kotlin.jvm.java
 
 class HomeFragement : Fragment() {
 
@@ -40,6 +41,8 @@ class HomeFragement : Fragment() {
     ): View {
         binding = FragmentHomeFragementBinding.inflate(inflater, container, false)
 
+
+        setHasOptionsMenu(false)
         // Init animations ONCE here
         rotateOpen = AnimationUtils.loadAnimation(
             requireContext(),
@@ -86,7 +89,7 @@ class HomeFragement : Fragment() {
             )
         }
 
-        binding.accountManagement.setOnClickListener {
+        binding.accountManage.setOnClickListener {
             startActivity(
                 Intent(requireContext(), AccountManagement::class.java)
             )
@@ -96,65 +99,19 @@ class HomeFragement : Fragment() {
         adapter= TransactionListAdapter(emptyList())
         binding.tranList.adapter =adapter
 
+
+        binding.seeAll.setOnClickListener {
+            val intent= Intent(requireContext(), TransactionList::class.java)
+            intent.putExtra("category","all")
+            intent.putExtra("type","all")
+            startActivity(intent)
+
+        }
+
     }
 
     // ------------------ Toolbar Search ------------------
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.search_bar, menu)
-
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as? SearchView ?: return
-
-        val black = ContextCompat.getColor(requireContext(), android.R.color.black)
-
-        searchView.queryHint = "Search transactions"
-
-        val searchEditText =
-            searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-        searchEditText.setTextColor(black)
-        searchEditText.setHintTextColor(black)
-
-        searchView.findViewById<View>(
-            androidx.appcompat.R.id.search_plate
-        )?.setBackgroundColor(Color.TRANSPARENT)
-
-        searchView.findViewById<ImageView>(
-            androidx.appcompat.R.id.search_mag_icon
-        )?.setColorFilter(black)
-
-        searchView.findViewById<ImageView>(
-            androidx.appcompat.R.id.search_close_btn
-        )?.setColorFilter(black)
-
-        val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
-        val titleView = toolbar.findViewById<View>(R.id.toolbarTitle)
-
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                titleView.visibility = View.GONE
-
-                // Replace search icon with back arrow
-                searchView.setOnSearchClickListener {
-                    searchView.findViewById<ImageView>(
-                        androidx.appcompat.R.id.search_mag_icon
-                    )?.setImageResource(R.drawable.back_arrow)
-                }
-                return true
-            }
-
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                titleView.visibility = View.VISIBLE
-                return true
-            }
-        })
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = true
-            override fun onQueryTextChange(newText: String?): Boolean = true
-        })
-    }
 
     // ------------------ Toolbar Visibility ------------------
 

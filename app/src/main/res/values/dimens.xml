@@ -1,3 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="stroke_4dp">4dp</dimen>
+    <dimen name="stroke_2dp">2dp</dimen>
 </resources>

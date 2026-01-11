@@ -107,11 +107,12 @@
     <color name="icon_container_stroke">#D0D0D0</color>
     <color name="icon_color_primary">#111111</color>
 
+<color name="filtercardstroke">#121212</color>
 
 
-
-
-
+<color name="toggle_income_bg">#C8E6C9</color>
+    <color name="toggle_expense_bg">#F2C2C2</color>
+    <color name="toggle_bg">#E8F5E9</color>
 
 
 
