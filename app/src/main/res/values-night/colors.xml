@@ -96,5 +96,7 @@
 
     <color name="filtercardstroke">#F1F1F1</color>
 
+    <color name="income_card_bg">#666DFD70</color>
+    <color name="expense_card_bg">#66FA7870</color>
 
 </resources>

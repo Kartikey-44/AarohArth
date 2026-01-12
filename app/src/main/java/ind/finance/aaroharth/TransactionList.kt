@@ -94,7 +94,7 @@ class TransactionList : AppCompatActivity() {
         binding.btnExpense.setTypeface(null, android.graphics.Typeface.NORMAL)
         binding.btnIncome.setBackgroundColor(getColor(R.color.toggle_income_bg))
         binding.btnExpense.setBackgroundColor(getColor(R.color.toggle_bg))
-
+        binding.btnIncome.isChecked = true
     }
 
     private fun expense() {
@@ -114,6 +114,7 @@ class TransactionList : AppCompatActivity() {
         binding.btnIncome.setTypeface(null, android.graphics.Typeface.NORMAL)
         binding.btnIncome.setBackgroundColor(getColor(R.color.toggle_bg))
         binding.btnExpense.setBackgroundColor(getColor(R.color.toggle_expense_bg))
+        binding.btnExpense.isChecked = true
     }
 
     override fun onResume() {
