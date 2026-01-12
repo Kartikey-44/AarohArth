@@ -1,26 +1,33 @@
 package ind.finance.aaroharth
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.EditText
-import android.widget.ImageView
-import androidx.appcompat.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
-import ind.finance.aaroharth.databinding.FragmentHomeFragementBinding
+import ind.finance.aaroharth.databinding.FragmentHomeBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.jvm.java
 
 class HomeFragement : Fragment() {
 
-    private lateinit var binding: FragmentHomeFragementBinding
+    private lateinit var binding: FragmentHomeBinding
 
     // FAB animations
     private lateinit var rotateOpen: Animation
@@ -42,10 +49,13 @@ class HomeFragement : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeFragementBinding.inflate(inflater, container, false)
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
 
 
-        setHasOptionsMenu(false)
+        currentMonthAndYear()
+        overviewCardsData()
+        currentBalance()
+
         // Init animations ONCE here
         rotateOpen = AnimationUtils.loadAnimation(
             requireContext(),
@@ -78,7 +88,13 @@ class HomeFragement : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
+
+        if(hasUserName(requireContext())){
+            binding.username.text="${getUserName(requireContext())}"
+        }
+        else{
+            binding.username.text="User"
+        }
 
         binding.addTransactionBtn.setOnClickListener {
             if (isFabOpen) closeFab() else openFab()
@@ -137,7 +153,7 @@ class HomeFragement : Fragment() {
         super.onResume()
         requireActivity()
             .findViewById<MaterialToolbar>(R.id.toolbar)
-            .visibility = View.VISIBLE
+            .visibility = View.GONE
 
         val dao= App_Database.getInstance(requireContext()).transactionDao()
         lifecycleScope.launch {
@@ -145,6 +161,9 @@ class HomeFragement : Fragment() {
            adapter.updatelist(transactions)
 
         }
+        currentBalance()
+        overviewCardsData()
+        greeting()
     }
 
     override fun onDestroyView() {
@@ -202,6 +221,93 @@ class HomeFragement : Fragment() {
     }
 
     //LIST
+
+
+    private fun currentMonthAndYear(){
+        val current= LocalDate.now()
+        val formatter= DateTimeFormatter.ofPattern("MMMM yyyy")
+        val formatted=current.format(formatter)
+        binding.thisMonthOverview.text="$formatted Overview"
+
+    }
+
+    private fun overviewCardsData(){
+
+        val current=LocalDate.now()
+        val startOfMonth=current.withDayOfMonth(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        val endOfMonth=current.withDayOfMonth(current.lengthOfMonth())
+            .atTime(23,59,59)
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        val format= NumberFormat.getNumberInstance(Locale("en","IN"))
+        format.maximumFractionDigits=0
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val totalExpense=App_Database.getInstance(requireContext())
+                .transactionDao()
+                .monthWise(startOfMonth,endOfMonth,"Expense")
+            val totalIncome=App_Database.getInstance(requireContext())
+                .transactionDao().monthWise(startOfMonth,endOfMonth,"Income")
+            withContext(Dispatchers.Main){
+                val incomeBalance=format.format(totalIncome)
+                binding.expenseAmount.text="\u20B9 $incomeBalance"
+                val expenseBalance=format.format(totalExpense)
+                binding.incomeAmount.text="\u20B9 $expenseBalance"
+                if(totalExpense>totalIncome){
+                    binding.thisMonthOverview.setTextColor(ContextCompat.
+                    getColor(requireContext(),R.color.this_month_overview_expense))
+                }
+                else if(totalExpense<totalIncome){
+                    binding.thisMonthOverview.setTextColor(ContextCompat.
+                    getColor(requireContext(),R.color.this_month_overview_income))
+                }
+                else
+                {
+                    binding.thisMonthOverview.setTextColor(ContextCompat.
+                    getColor(requireContext(),R.color.this_month_overview_neutral))
+                }
+            }
+
+        }
+    }
+
+    private fun currentBalance(){
+        val format= NumberFormat.getNumberInstance(Locale("en","IN"))
+        format.maximumFractionDigits=0
+        lifecycleScope.launch(Dispatchers.IO) {
+            val currentBalance= App_Database.getInstance(requireContext())
+                .accountDao().currentbalance()
+            withContext(Dispatchers.Main){
+                val balance=format.format(currentBalance)
+                binding.currentBalanceAmount.text="\u20B9 $balance"
+            }
+
+        }
+    }
+
+    private fun greeting(){
+        val currentHour= LocalDateTime.now().hour
+        when(currentHour){
+            in 5..11->binding.greeting.text="Good Morning,"
+            in 12..16->binding.greeting.text="Good Afternoon,"
+            in 17..20->binding.greeting.text="Good Evening,"
+            else->binding.greeting.text="Good Night,"
+        }
+
+    }
+
+       fun getUserName(context: Context): String? =
+           context.getSharedPreferences("app_prefs", MODE_PRIVATE)
+               .getString("username", null)
+
+       fun hasUserName(context: Context): Boolean =
+           context.getSharedPreferences("app_prefs", MODE_PRIVATE)
+               .contains("username")
 
 
 }

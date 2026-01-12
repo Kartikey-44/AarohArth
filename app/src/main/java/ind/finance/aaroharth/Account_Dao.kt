@@ -39,4 +39,9 @@ interface Account_Dao {
     suspend fun filter(accountType: String): List<Account_Info>
 
 
+    @Query("SELECT SUM(balance) FROM AccountsTable")
+    suspend fun currentbalance(): Long
+
+    @Query("SELECT COUNT(*) FROM AccountsTable")
+    suspend fun numberOfAccounts(): Int
 }
