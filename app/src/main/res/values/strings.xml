@@ -6,6 +6,8 @@
     <string name="signup_text">Not Have An Account?  Sign Up</string>
     <string name="default_web_client_id">970778426890-j6gbhr1pusv4vcsco44qkp3564jpdesa.apps.googleusercontent.com</string>
     <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="welcome">Welcome! \n What Should We Call You?</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_transaction" />
     <string name="app_ai" />

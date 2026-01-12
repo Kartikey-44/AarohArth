@@ -44,6 +44,10 @@ interface Transaction_Dao {
 
     suspend fun searchTransactions(query: String,type: String): List<Transaction_Info>
 
+    @Query("SELECT SUM(amount)FROM TransactionTable WHERE dateAndTime BETWEEN  :startDate AND :endDate " +
+            "AND transactionType= :type")
+    suspend fun monthWise(startDate: Long,endDate: Long,type: String): Long
+
 
 
 }
