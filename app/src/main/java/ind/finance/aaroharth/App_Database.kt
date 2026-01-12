@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
         Transaction_Info::class,
         Account_Info::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class App_Database : RoomDatabase() {

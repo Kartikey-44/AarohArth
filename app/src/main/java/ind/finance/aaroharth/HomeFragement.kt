@@ -27,6 +27,9 @@ class HomeFragement : Fragment() {
     private lateinit var rotateClose: Animation
     private lateinit var fromBottom: Animation
     private lateinit var toBottom: Animation
+    private lateinit var fromLeft: Animation
+    private lateinit var toLeft: Animation
+
 
     private var isFabOpen = false
     private lateinit var adapter: TransactionListAdapter
@@ -60,6 +63,14 @@ class HomeFragement : Fragment() {
             requireContext(),
             R.anim.addtransaction_to_bottom_animation
         )
+        fromLeft = AnimationUtils.loadAnimation(
+            requireContext(),
+            R.anim.from_left)
+        toLeft = AnimationUtils.loadAnimation(
+            requireContext(),
+            R.anim.to_left)
+
+
 
         return binding.root
     }
@@ -86,6 +97,13 @@ class HomeFragement : Fragment() {
             startActivity(
                 Intent(requireContext(), Transaction_Action_Page::class.java)
                     .putExtra("type", "expense")
+            )
+        }
+
+        binding.aiBtn.setOnClickListener {
+            closeFab()
+            startActivity(
+                Intent(requireContext(), AI_Activity::class.java)
             )
         }
 
@@ -150,6 +168,11 @@ class HomeFragement : Fragment() {
             isClickable = true
             startAnimation(fromBottom)
         }
+        binding.aiBtn.apply {
+            visibility=View.VISIBLE
+            isClickable=true
+            startAnimation(fromLeft)
+        }
 
         binding.addTransactionBtn.startAnimation(rotateOpen)
     }
@@ -168,6 +191,12 @@ class HomeFragement : Fragment() {
             isClickable = false
             visibility = View.GONE
         }
+        binding.aiBtn.apply {
+            startAnimation(toLeft)
+            visibility=View.GONE
+
+        }
+
 
         binding.addTransactionBtn.startAnimation(rotateClose)
     }
