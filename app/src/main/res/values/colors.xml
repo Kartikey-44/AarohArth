@@ -20,6 +20,10 @@
     <color name="sign_in_background">#F8FAFC</color>
     <color name="signin">#0059FF</color>
 
+
+    <color name="attention">#1976D2</color>
+    <color name="color_skip_btn">#FBC02D</color>
+
     <color name="colorOnAiButton">#FFEBEE</color>
     <color name="colorAiButton">#4CAF50</color>
     <color name="colorOnAddTransactionBtn">#FFCCBC</color>
@@ -53,6 +57,13 @@
     <color name="search_icon_color">#000000</color>
 
     <!--Home Fragment-->
+    <color name="this_month_overview_income">#2E7D32</color>
+    <color name="this_month_overview_expense">#C62828</color>
+    <color name="this_month_overview_neutral">#616161</color>
+    <color name="overview_cards_label">#424242</color>
+    <color name="overview_cards_amount">#212121</color>
+    <color name="icon_bg_overview">#FFFFFF</color>
+    <color name="icon_stroke_overview">#212121</color>
     <color name="icon_color">#000000</color>
     <color name="management_stroke_color">#000000</color>
     <color name="managemnt_card_back">#EEF1F4</color>

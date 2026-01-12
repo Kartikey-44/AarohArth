@@ -29,10 +29,10 @@ import ind.finance.aaroharth.databinding.ActivitySignInBinding
 import ind.finance.aaroharth.databinding.DialogScreenBinding
 
 class SignIn : AppCompatActivity() {
-    private lateinit var database: DatabaseReference
 
     private lateinit var binding: ActivitySignInBinding
     private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var database: DatabaseReference
     private lateinit var loadingDialog: Dialog
     private lateinit var dialogBinding: DialogScreenBinding
 
@@ -47,135 +47,90 @@ class SignIn : AppCompatActivity() {
 
         binding = ActivitySignInBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        if (!isRunningTest() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val blur = RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
-            binding.bgImage.setRenderEffect(blur)
-        }
 
+        applyBlurIfNeeded()
+        setupUi()
+    }
 
+    private fun setupUi() {
 
-
-
-        // ---------- GOOGLE SIGN-IN BUTTON ----------
         binding.googleSignInButton.setOnClickListener {
-            if(isInternetAvailable(this)){
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(getString(R.string.default_web_client_id))
-                    .requestEmail()
-                    .build()
-
-                googleSignInClient = GoogleSignIn.getClient(this, gso)
-                startActivityForResult(
-                    googleSignInClient.signInIntent,
-                    RC_GOOGLE_SIGN_IN
-                )
-            }
-            else{
-                nointernetavailble("No Connection Availble")
-            }
+            if (isInternetAvailable(this)) startGoogleSignIn()
+            else showDialog("nointernet.json", "No internet connection")
         }
+
         binding.btnSignIn.setOnClickListener {
-            val email=binding.emailEntryField.text.toString().trim()
-            val password=binding.passwordEntryField.text.toString().trim()
-           if(isInternetAvailable(this)){
-               if(email.isEmpty()){
-                   dialogWarning("Email Cannot Be Empty")
-               }
-               else if(password.isEmpty()){
-                   dialogWarning("Password Cannot Be Empty")
-               }
-               else{
-                   signIn(email,password)
-               }
-            }
-            else{
-                nointernetavailble("No Connection Availble")
+            val email = binding.emailEntryField.text.toString().trim()
+            val password = binding.passwordEntryField.text.toString().trim()
 
-           }
+            when {
+                email.isEmpty() -> showDialog("DangerIcon.json", "Email cannot be empty")
+                password.isEmpty() -> showDialog("DangerIcon.json", "Password cannot be empty")
+                !isInternetAvailable(this) ->
+                    showDialog("nointernet.json", "No internet connection")
+                else -> signIn(email, password)
+            }
         }
 
-        // ---------- GO TO SIGN UP ----------
         binding.signinSignupButton.setOnClickListener {
             startActivity(Intent(this, SignUp::class.java))
+            finish()
         }
-        val text= "Don't Have An Account? Sign Up"
-        val spannable= SpannableString(text)
+
+        val text = "Don't Have An Account? Sign Up"
+        val spannable = SpannableString(text)
         spannable.setSpan(
             ForegroundColorSpan(getColor(R.color.signin)),
-            23,30,
+            23, 30,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-        binding.signinSignupButton.text=spannable
+        binding.signinSignupButton.text = spannable
     }
+
+    // ---------------- EMAIL SIGN-IN ----------------
 
     private fun signIn(email: String, password: String) {
         showLoading("Signing In")
 
-        Idling.bridge.increment()
-
         FirebaseAuth.getInstance()
             .signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
+                loadingDialog.dismiss()
+
                 if (task.isSuccessful) {
-
-                    val uid = FirebaseAuth.getInstance().currentUser?.uid
-                    if (uid == null) {
-                        loadingDialog.dismiss()
-                        dialogFailed("User not found")
-                        Idling.bridge.decrement()   // ✅ EXIT PATH
-                        return@addOnCompleteListener
-                    }
-
-                    database = FirebaseDatabase.getInstance().getReference("Users")
-                    database.child(uid).get()
-                        .addOnSuccessListener {
-                            loadingDialog.dismiss()
-
-                            if (it.exists()) {
-                                dialogSuccess("Sign In Successful \n Welcome")
-                                getSharedPreferences("app_prefs",MODE_PRIVATE).edit().putBoolean("firstopen",false).apply()
-                                Handler(Looper.getMainLooper()).postDelayed({
-                                    startActivity(Intent(this, MainActivity::class.java))
-                                }, 2500)
-                            } else {
-                                dialogFailed("User Data Not Found")
-                            }
-
-                            Idling.bridge.decrement()   // ✅ FINAL SUCCESS
-                        }
-                        .addOnFailureListener {
-                            loadingDialog.dismiss()
-                            dialogFailed("Unable To Fetch User Data")
-                            Idling.bridge.decrement()   // ✅ DB FAILURE
-                        }
-
+                    onAuthSuccess()
                 } else {
-                    loadingDialog.dismiss()
-                    dialogFailed("Some Error Occurred")
-                    Idling.bridge.decrement()           // ✅ AUTH FAILURE
+                    showDialog("Failed.json", task.exception?.message ?: "Sign in failed")
                 }
             }
     }
 
-    // ---------- GOOGLE RESULT ----------
+    // ---------------- GOOGLE SIGN-IN ----------------
+
+    private fun startGoogleSignIn() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+        startActivityForResult(googleSignInClient.signInIntent, RC_GOOGLE_SIGN_IN)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_GOOGLE_SIGN_IN) {
             try {
-                val account = GoogleSignIn
-                    .getSignedInAccountFromIntent(data)
+                val account = GoogleSignIn.getSignedInAccountFromIntent(data)
                     .getResult(ApiException::class.java)
-
                 firebaseAuthWithGoogle(account.idToken!!)
-
             } catch (e: Exception) {
-                // optional: show dialog/toast
+                showDialog("Failed.json", "Google sign-in failed")
             }
         }
     }
 
-    // ---------- FIREBASE AUTH ----------
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
 
@@ -183,18 +138,47 @@ class SignIn : AppCompatActivity() {
             .signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    dialogSuccess("Sign In Successfull \n Welcome")
-                    Handler(Looper.getMainLooper()).postDelayed(
-                        {
-                            startActivity(Intent(this, MainActivity::class.java))
-                        },2500
-                    )
-                    finish()
+                    ensureGoogleUserInDb()
+                    onAuthSuccess()
                 } else {
-                    // optional: show error dialog
+                    showDialog("Failed.json", "Google authentication failed")
                 }
             }
     }
+
+    private fun ensureGoogleUserInDb() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        database = FirebaseDatabase.getInstance().getReference("Users")
+        database.child(user.uid)
+            .setValue(user_detail(user.email ?: "", "GOOGLE_AUTH"))
+    }
+
+    // ---------------- SUCCESS ----------------
+
+    private fun onAuthSuccess() {
+        getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .edit()
+            .putBoolean("is_logged_in", true)
+            .apply()
+
+        showDialog("Success.json", "Sign In Successful")
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }, 2000)
+    }
+
+    // ---------------- UTILS ----------------
+
+    private fun applyBlurIfNeeded() {
+        if (!isRunningTest() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            binding.bgImage.setRenderEffect(
+                RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
+            )
+        }
+    }
+
     private fun isInternetAvailable(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = cm.activeNetwork ?: return false
@@ -207,47 +191,29 @@ class SignIn : AppCompatActivity() {
         dialogBinding = DialogScreenBinding.inflate(layoutInflater)
         loadingDialog.setContentView(dialogBinding.root)
         loadingDialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
-        setupLottie(dialogBinding.dialogLottie, "loading.json")
+        dialogBinding.dialogLottie.setAnimation("loading.json")
+        dialogBinding.dialogLottie.playAnimation()
         dialogBinding.message.text = message
         loadingDialog.show()
     }
 
-    private fun dialogWarning(message: String) = showDialog("DangerIcon.json", message)
-    private fun dialogFailed(message: String) = showDialog("Failed.json", message)
-    private fun dialogSuccess(message: String) = showDialog("Success.json", message)
-    private fun nointernetavailble(message: String)=showDialog("nointernet.json",message)
-
     private fun showDialog(animation: String, message: String) {
-
         val dialog = Dialog(this)
         val db = DialogScreenBinding.inflate(layoutInflater)
         dialog.setContentView(db.root)
         dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
-        setupLottie(db.dialogLottie, animation)
+        db.dialogLottie.setAnimation(animation)
+        db.dialogLottie.playAnimation()
         db.message.text = message
         dialog.show()
-        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 2500)
+        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 2000)
     }
-    private fun nointernet(message:String)=showDialog("nointernet.json",message)
-    fun isRunningTest(): Boolean {
-        return try {
+
+    private fun isRunningTest(): Boolean =
+        try {
             Class.forName("androidx.test.espresso.Espresso")
             true
         } catch (e: ClassNotFoundException) {
             false
         }
-    }
-    private fun setupLottie(lottie: com.airbnb.lottie.LottieAnimationView, animation: String) {
-        if (isRunningTest()) {
-            lottie.cancelAnimation()
-            lottie.progress = 1f
-            lottie.visibility = android.view.View.GONE
-        } else {
-            lottie.setAnimation(animation)
-            lottie.repeatCount = 0
-            lottie.playAnimation()
-        }
-    }
-
-
 }
