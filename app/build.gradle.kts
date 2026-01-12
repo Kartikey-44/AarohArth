@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     ksp(libs.room.compiler)
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
-
+    implementation("androidx.core:core-ktx:1.12.0")
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")

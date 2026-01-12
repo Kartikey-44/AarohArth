@@ -1,6 +1,7 @@
 package ind.finance.aaroharth
 
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
@@ -13,12 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import ind.finance.aaroharth.databinding.ActivityAccountActionsBinding
 import ind.finance.aaroharth.databinding.DialogScreenBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AccountActions : AppCompatActivity() {
 
     private lateinit var binding: ActivityAccountActionsBinding
-    private lateinit var dialogBinding: DialogScreenBinding
+    private var successDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,58 +32,24 @@ class AccountActions : AppCompatActivity() {
 
         applyBlur()
         setupAccountTypes()
+        numberOfAccounts()
 
         binding.saveBtn.setOnClickListener {
-            if (isInputValid()) {
-                saveAccount()
-            }
+            if (!isInputValid()) return@setOnClickListener
+            saveAccount()
         }
     }
 
     private fun applyBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val blur = RenderEffect.createBlurEffect(
-                18f,
-                18f,
-                Shader.TileMode.CLAMP
+            binding.bg.setRenderEffect(
+                RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
             )
-            binding.bg.setRenderEffect(blur)
         }
-    }
-
-    private fun isInputValid(): Boolean {
-        // clear old errors
-        binding.nameLayout.error = null
-        binding.typeLayout.error = null
-        binding.balanceLayout.error = null
-
-        val name = binding.nameField.text.toString().trim()
-        if (name.isEmpty()) {
-            binding.nameLayout.error = "Required"
-            binding.nameField.requestFocus()
-            return false
-        }
-
-        val type = binding.typeField.text.toString().trim()
-        if (type.isEmpty()) {
-            binding.typeLayout.error = "Required"
-            binding.typeField.requestFocus()
-            return false
-        }
-
-        val balanceText = binding.balanceField.text.toString().trim()
-        val balance = balanceText.toLongOrNull()
-        if (balance == null || balance < 0) {
-            binding.balanceLayout.error = "Enter valid amount"
-            binding.balanceField.requestFocus()
-            return false
-        }
-
-        return true
     }
 
     private fun setupAccountTypes() {
-        val accountTypes = listOf("UPI", "Cash", "Debit Card","Credit Card", "Bank Account")
+        val accountTypes = listOf("UPI", "Cash", "Debit Card", "Credit Card", "Bank Account")
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_1,
@@ -88,48 +57,117 @@ class AccountActions : AppCompatActivity() {
         )
         binding.typeField.setAdapter(adapter)
         binding.typeField.setOnItemClickListener { parent, _, position, _ ->
-            binding.typeField.setText(parent.getItemAtPosition(position).toString(), false)
+            val type = parent.getItemAtPosition(position).toString()
+            binding.typeField.setText(type, false)
+            updateHint(type)
         }
     }
 
+    private fun updateHint(type: String) {
+        binding.nameField.isEnabled = true
+        when (type.lowercase()) {
+            "upi" -> binding.nameLayout.hint = "UPI ID / App Name"
+            "cash" -> {binding.nameField.setText("Cash")
+                binding.nameLayout.isClickable=false
+            binding.nameLayout.isEnabled=false}
+            "debit card", "credit card" ->
+                binding.nameLayout.hint = "Card Name (SBI, HDFC, etc.)"
+            else -> binding.nameLayout.hint = "Account Name"
+        }
+    }
+
+    private fun isInputValid(): Boolean {
+        binding.nameLayout.error = null
+        binding.typeLayout.error = null
+        binding.balanceLayout.error = null
+
+        if (binding.nameField.text.toString().trim().isEmpty()) {
+            binding.nameLayout.error = "Required"
+            return false
+        }
+
+        if (binding.typeField.text.toString().trim().isEmpty()) {
+            binding.typeLayout.error = "Required"
+            return false
+        }
+
+        val balance = binding.balanceField.text.toString().toLongOrNull()
+        if (balance == null || balance < 0) {
+            binding.balanceLayout.error = "Invalid amount"
+            return false
+        }
+
+        return true
+    }
+
     private fun saveAccount() {
+        val dao = App_Database.getInstance(this).accountDao()
         val account = Account_Info(
             accountType = binding.typeField.text.toString().trim(),
             accountName = binding.nameField.text.toString().trim(),
             normalizedName = binding.nameField.text.toString().lowercase().trim(),
-            balance = binding.balanceField.text.toString().trim().toLong()
+            balance = binding.balanceField.text.toString().toLong()
         )
-
-        val dao = App_Database.getInstance(this).accountDao()
 
         lifecycleScope.launch {
             try {
                 dao.insertAccount(account)
+
+                getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("has_account", true)
+                    .apply()
+
                 showSuccessDialog()
-            }
-            catch (e:android.database.sqlite.SQLiteConstraintException){
-                binding.nameLayout.error="Account Name Already Exist"
+
+            } catch (e: android.database.sqlite.SQLiteConstraintException) {
+                binding.nameLayout.error = "Account already exists"
             }
         }
+
     }
 
     private fun showSuccessDialog() {
-        val dialog = Dialog(this)
-        dialogBinding = DialogScreenBinding.inflate(layoutInflater)
-        dialog.setContentView(dialogBinding.root)
-        dialog.setCancelable(false)
+        successDialog = Dialog(this)
+        val dialogBinding = DialogScreenBinding.inflate(layoutInflater)
 
-        dialog.window?.setBackgroundDrawable(
+        successDialog!!.setContentView(dialogBinding.root)
+        successDialog!!.setCancelable(false)
+        successDialog!!.window?.setBackgroundDrawable(
             getDrawable(R.drawable.dialog_background)
         )
 
-        dialogBinding.dialogLottie.setAnimation("Success.json")
         dialogBinding.message.text = "Account Saved"
-        dialog.show()
+        dialogBinding.dialogLottie.setAnimation("Success.json")
+
+        successDialog!!.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            dialog.dismiss()
+            successDialog!!.dismiss()
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }, 1800)
+    }
+
+    private fun numberOfAccounts(){
+        val dao=App_Database.getInstance(this).accountDao()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val numberOfAccounts=dao.numberOfAccounts()
+            withContext(Dispatchers.Main){
+                if(numberOfAccounts==0){
+                    binding.heading.text="Setup Your Account"
+                }
+                else{
+                    binding.heading.text="Add Account"
+                }
+            }
+
+        }
+
+    }
+
+    override fun onDestroy() {
+        successDialog?.dismiss()
+        super.onDestroy()
     }
 }
