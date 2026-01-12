@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
+            android:name=".CategoriesTransactionList"
+            android:exported="false" />
+        <activity
             android:name=".AI_Activity"
             android:exported="false" />
         <activity

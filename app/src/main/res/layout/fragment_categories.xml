@@ -22,9 +22,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:selectionRequired="false"
-            app:singleSelection="true"
-            tools:ignore="MissingConstraints">
-            <!-- app:checkedButton="@+id/btn_income"-->
+            app:singleSelection="true">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_income"
