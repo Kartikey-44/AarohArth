@@ -1,4 +1,5 @@
 package ind.finance.aaroharth
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,9 +8,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import ind.finance.aaroharth.databinding.FragmentCategoriesBinding
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
-
+import androidx.core.content.ContextCompat
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -22,11 +22,15 @@ private const val ARG_PARAM2 = "param2"
  * Use the [CategoriesFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+
+
 class CategoriesFragment : Fragment() {
+
     private lateinit var binding: FragmentCategoriesBinding
     private lateinit var categoriesList: ArrayList<CategoriesDataClass>
     private lateinit var fullList: ArrayList<CategoriesDataClass>
     private lateinit var categoriesAdapter: CategoriesAdapter
+    private var showingIncome: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,10 +45,10 @@ class CategoriesFragment : Fragment() {
         setHasOptionsMenu(true)
 
         binding.btnIncome.setOnClickListener {
-            Toast.makeText(requireContext(), "Income is Selected", Toast.LENGTH_SHORT).show()
+            income()
         }
         binding.btnExpense.setOnClickListener {
-            Toast.makeText(requireContext(), "Expense is Selected", Toast.LENGTH_SHORT).show()
+            expense()
         }
 
         init()
@@ -61,7 +65,22 @@ class CategoriesFragment : Fragment() {
         addDataToCategoriesList(fullList)
         categoriesList.addAll(fullList)
         categoriesAdapter = CategoriesAdapter(categoriesList)
+        categoriesAdapter.updateMode(null)
         recyclerView.adapter = categoriesAdapter
+
+        categoriesAdapter.onItemClick = { category ->
+            val toggleState = when (showingIncome) {
+                true -> "INCOME"
+                false -> "EXPENSE"
+                null -> "ALL"
+            }
+
+            val intent = Intent(requireContext(), CategoriesTransactionList::class.java).apply {
+                putExtra("CATEGORY_NAME", category.name)
+                putExtra("TRANSACTION_TYPE", toggleState)
+            }
+            startActivity(intent)
+        }
 
     }
 
@@ -105,8 +124,9 @@ class CategoriesFragment : Fragment() {
         list.add(CategoriesDataClass(R.drawable.loan , "EMI / Loans"))
         list.add(CategoriesDataClass(R.drawable.decoration , "Decoration"))
         list.add(CategoriesDataClass(R.drawable.grocery , "Grocery"))
-
     }
+
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search_bar, menu)
@@ -119,7 +139,7 @@ class CategoriesFragment : Fragment() {
                 return true
             }
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterCategories(newText) // live search
+                filterCategories(newText)
                 return true
             }
         })
@@ -147,8 +167,40 @@ class CategoriesFragment : Fragment() {
 
             categoriesList.addAll(filtered)
         }
+        val mode = when (showingIncome) {
+            true -> true
+            false -> false
+            null -> null
+        }
+        categoriesAdapter.updateMode(mode)
+    }
 
-        categoriesAdapter.notifyDataSetChanged()
+    private fun income() {
+        showingIncome = true
+        binding.btnIncome.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_4dp)
+        binding.btnExpense.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_2dp)
+        binding.btnIncome.isSelected = true
+        binding.btnExpense.isSelected = false
+        binding.btnIncome.setTypeface(null, android.graphics.Typeface.BOLD)
+        binding.btnExpense.setTypeface(null, android.graphics.Typeface.NORMAL)
+        binding.btnIncome.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_income_bg))
+        binding.btnExpense.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_bg))
+        categoriesAdapter.updateMode(true)
+        binding.btnIncome.isChecked = true
+    }
+
+    private fun expense() {
+        showingIncome = false
+        binding.btnExpense.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_4dp)
+        binding.btnIncome.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_2dp)
+        binding.btnExpense.isSelected = true
+        binding.btnIncome.isSelected = false
+        binding.btnExpense.setTypeface(null, android.graphics.Typeface.BOLD)
+        binding.btnIncome.setTypeface(null, android.graphics.Typeface.NORMAL)
+        binding.btnExpense.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_expense_bg))
+        binding.btnIncome.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_bg))
+        categoriesAdapter.updateMode(false)
+        binding.btnExpense.isChecked = true
     }
 
     companion object {
