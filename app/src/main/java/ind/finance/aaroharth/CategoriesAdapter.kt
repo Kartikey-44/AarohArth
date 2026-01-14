@@ -56,7 +56,7 @@ class CategoriesAdapter(private val categoriesList:ArrayList<CategoriesDataClass
                 holder.cardView.setCardBackgroundColor(
                     ContextCompat.getColor(holder.itemView.context, colorRes))
             }
-            else -> { // Neutral/Default - NO COLOR
+            else -> { ///Default
 
             }
         }
