@@ -1,6 +1,7 @@
 package ind.finance.aaroharth
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,8 @@ import ind.finance.aaroharth.databinding.FragmentCategoriesBinding
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import android.view.inputmethod.InputMethodManager
+import android.text.TextWatcher
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -44,6 +47,30 @@ class CategoriesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
+        binding.searchIcon.setOnClickListener {
+            binding.searchIcon.visibility = View.GONE
+            binding.titleText.visibility = View.GONE
+            binding.searchInput.visibility = View.VISIBLE
+            binding.back.visibility = View.VISIBLE
+            binding.searchInput.requestFocus()
+
+            val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.searchInput, InputMethodManager.SHOW_IMPLICIT)
+        }
+
+        // Back button
+        binding.back.setOnClickListener {
+            binding.searchIcon.visibility = View.VISIBLE
+            binding.titleText.visibility = View.VISIBLE
+            binding.searchInput.visibility = View.GONE
+            binding.back.visibility = View.GONE
+            binding.searchInput.text?.clear()
+            filterCategories("")  // Reset list
+
+            val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(binding.searchInput.windowToken, 0)
+        }
+
         binding.btnIncome.setOnClickListener {
             income()
         }
@@ -70,8 +97,8 @@ class CategoriesFragment : Fragment() {
 
         categoriesAdapter.onItemClick = { category ->
             val toggleState = when (showingIncome) {
-                true -> "INCOME"
-                false -> "EXPENSE"
+                true -> "Income"
+                false -> "Expense"
                 null -> "ALL"
             }
 
@@ -81,7 +108,7 @@ class CategoriesFragment : Fragment() {
             }
             startActivity(intent)
         }
-
+        setupSearch()
     }
 
     private fun addDataToCategoriesList(list: ArrayList<CategoriesDataClass>) {
@@ -201,6 +228,17 @@ class CategoriesFragment : Fragment() {
         binding.btnIncome.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_bg))
         categoriesAdapter.updateMode(false)
         binding.btnExpense.isChecked = true
+    }
+
+    private fun setupSearch() {
+        binding.searchInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val query = s?.toString().orEmpty()
+                filterCategories(query)
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 
     companion object {
