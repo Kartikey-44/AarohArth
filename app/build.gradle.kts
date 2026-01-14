@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.room.common.jvm)
     ksp(libs.room.compiler)
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation("androidx.core:core-ktx:1.12.0")

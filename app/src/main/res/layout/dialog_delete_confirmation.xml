@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="40dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/dialogbackground">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/dialogLottie"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/attention" />
+
+        <TextView
+            android:id="@+id/attention"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/dialogLottie"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Note: You Can Change Name In Profile Section"
+            android:gravity="center"
+            android:paddingStart="15dp"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:textColor="@color/attention"
+            android:textSize="15sp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/attention"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/skip"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/save_button_background_income"
+            android:text="Save"
+            android:gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="30dp"
+            android:textSize="14sp"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/skip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            app:layout_constraintStart_toEndOf="@id/save"
+            app:layout_constraintTop_toBottomOf="@id/attention"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/color_skip_btn"
+            android:text="Skip"
+            android:gravity="center"
+            android:layout_marginEnd="20dp"
+            android:textSize="13sp"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

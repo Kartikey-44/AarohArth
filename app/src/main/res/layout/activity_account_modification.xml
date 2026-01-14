@@ -30,6 +30,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/attention"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/heading"
+        app:layout_constraintBottom_toTopOf="@id/type_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="This Account Have Transaction Editing/Deleting Is Prohibited"
+        android:textSize="18sp"
+        android:textColor="@color/attention"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="10dp"/>
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/balance_layout"
         android:layout_width="0dp"
@@ -69,7 +85,7 @@
         android:id="@+id/type_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/heading"
+        app:layout_constraintTop_toBottomOf="@id/attention"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="20dp"
@@ -137,12 +153,26 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/balance_layout"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/deleteBtn"
+        android:layout_marginHorizontal="20dp"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:text="Save "
+        android:textColor="#FFFFFF"
+        android:visibility="gone"
+        android:backgroundTint="@color/save_button_background_income"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/deleteBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/balance_layout"
+        app:layout_constraintStart_toEndOf="@id/saveBtn"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="20dp"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:text="Save Account"
+        android:text="Delete"
         android:textColor="#FFFFFF"
-        android:backgroundTint="@color/save_button_background_income"/>
+        android:backgroundTint="@color/red"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
