@@ -19,9 +19,12 @@ import ind.finance.aaroharth.databinding.DialogScreenBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 class Transaction_Action_Page : AppCompatActivity() {
 
@@ -35,17 +38,28 @@ class Transaction_Action_Page : AppCompatActivity() {
         "Dining Out", "Shopping", "Personal Care", "Entertainment", "Subscriptions", "Housing", "Rental", "Utilities",
         "Public Transport", "Petrol", "Diesel", "CNG", "Electricity", "LPG", "PNG", "Taxi", "Auto", "Hotel",
         "Flight", "Medical", "Insurance", "Education", "EMI / Loans", "Tax", "Gifts", "Donations",
-        "Miscellaneous", "Water Bill","Grocery"
+        "Miscellaneous", "Water Bill","Grocery","Other"
     )
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         //Layout Inflated
 
         binding = ActivityTransactionActionPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        binding.amountLayout.setOnClickListener {
+            binding.amountLayout.error=null
+        }
+
+        binding.dateLayout.isEnabled=false
+        binding.dateField.isEnabled=false
+        binding.dateField.isClickable=false
+        binding.dateField.isFocusable=false
+        binding.dateLayout.isClickable=false
 
         //Background Blur Effect
 
@@ -203,6 +217,7 @@ class Transaction_Action_Page : AppCompatActivity() {
         binding.transactionMediumField.setOnItemClickListener{parent,_,position,_ ->
             binding.transactionMediumField.setText(parent.getItemAtPosition(position).toString(),false)
             transactionWay(binding.transactionMediumField.text.toString())
+            binding.transactionWayField.text.clear()
         }
     }
 
@@ -275,6 +290,9 @@ class Transaction_Action_Page : AppCompatActivity() {
         if(otherparty.isEmpty()){
             otherparty="Unknown"
         }
+        val now= System.currentTimeMillis()
+        val monthKey= SimpleDateFormat("yyyy-MM", Locale.US)
+            .format(Date(now))
 
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -291,14 +309,15 @@ class Transaction_Action_Page : AppCompatActivity() {
                     binding.subHeading.text.toString().trim(),
                     amount,
                     otherparty,
-                    binding.categoryField.text.toString().trim().lowercase(),
-                    System.currentTimeMillis(),
+                    binding.categoryField.text.toString().trim(),
+                    now,
                     binding.transactionMediumField.text.toString().trim(),
                     transactionWay,
                     binding.remarkField.text.toString().trim(),
                     0.00,
                     0.00,
-                    "None"
+                    "None",
+                    monthKey
 
 
                 )
@@ -322,6 +341,14 @@ class Transaction_Action_Page : AppCompatActivity() {
         val amount = binding.amountField.text.toString().trim().toLongOrNull() ?: return
 
         val transactionWay = binding.transactionWayField.text.toString().trim()
+
+        var otherparty=binding.otherPartyField.text.toString().trim()
+        if(otherparty.isEmpty()){
+            otherparty="Unknown"
+        }
+        val now= System.currentTimeMillis()
+        val monthKey= SimpleDateFormat("yyyy-MM", Locale.US)
+            .format(Date(now))
 
         lifecycleScope.launch(Dispatchers.IO) {
 
@@ -348,15 +375,16 @@ class Transaction_Action_Page : AppCompatActivity() {
                     0,
                     binding.subHeading.text.toString().trim(),
                     amount,
-                    binding.otherPartyField.text.toString().trim(),
-                    binding.categoryField.text.toString().trim().lowercase(),
-                    System.currentTimeMillis(),
+                    binding.otherPartyField.text.toString().trim()?:"Unknown",
+                    binding.categoryField.text.toString().trim(),
+                    now,
                     binding.transactionMediumField.text.toString().trim(),
                     transactionWay,
                     binding.remarkField.text.toString().trim(),
                    factor,
                     emitted,
-                    auth
+                    auth,
+                    monthKey
                 )
             )
 

@@ -44,4 +44,19 @@ interface Account_Dao {
 
     @Query("SELECT COUNT(*) FROM AccountsTable")
     suspend fun numberOfAccounts(): Int
+
+    @Query("SELECT balance FROM AccountsTable WHERE accountName=:name")
+    suspend fun getamount(name: String): Long
+
+    @Query("UPDATE AccountsTable SET balance= :balance WHERE accountName=:name")
+    suspend fun update(balance: Long,name: String)
+
+    @Query("SELECT * FROM AccountsTable WHERE id = :id")
+    suspend fun getAccountById(id: Long): Account_Info
+
+    @Query("DELETE  FROM AccountsTable WHERE id=:id")
+    suspend fun deletebyid(id: Long)
+
+    @Update
+    suspend fun updateaccountinfo(account: Account_Info)
 }

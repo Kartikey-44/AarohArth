@@ -219,7 +219,7 @@
            android:layout_height="wrap_content"
            app:layout_constraintTop_toBottomOf="@id/current_balance_card"
            app:layout_constraintStart_toStartOf="parent"
-           app:layout_constraintEnd_toStartOf="@id/loan_manage"
+           app:layout_constraintEnd_toStartOf="@id/budget_manage"
            android:layout_marginTop="20dp"
            android:layout_marginHorizontal="20dp"
            android:backgroundTint="@color/managemnt_card_back"
@@ -253,7 +253,7 @@
 
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/loan_manage"
+            android:id="@+id/budget_manage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/current_balance_card"
@@ -311,7 +311,7 @@
             android:id="@+id/see_all"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/loan_manage"
+            app:layout_constraintTop_toBottomOf="@id/budget_manage"
             android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             android:text="See All"
