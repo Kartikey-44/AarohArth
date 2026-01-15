@@ -50,7 +50,9 @@
     <color name="save_button_background_income">#2E7D32</color>
     <color name="subheading_color_expense">#EE4444</color>
     <color name="subheading_color_income">  #0FB880</color>
-    <color name="save_button_background_expense">#C62828</color>
+    <color name="save_button_background_expense">#F9D6D5</color>
+    <color name="save_btn_textcolor_income">#FFFFFF</color>
+    <color name="save_btn_textcolor_expense">#B3261E</color>
 
 
     <color name="Fragment_background">#FFFDF8</color>
@@ -129,5 +131,7 @@
     <color name="expense_card_bg">#FFEBEE</color>
 
 
+    <color name="red">#D32F2F</color>
+<color name="budgetmanage">#000000</color>
 
 </resources>

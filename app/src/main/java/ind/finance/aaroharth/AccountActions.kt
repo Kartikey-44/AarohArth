@@ -34,6 +34,9 @@ class AccountActions : AppCompatActivity() {
         setupAccountTypes()
         numberOfAccounts()
 
+        binding.nameLayout.setOnClickListener {
+            binding.nameLayout.error=null
+        }
         binding.saveBtn.setOnClickListener {
             if (!isInputValid()) return@setOnClickListener
             saveAccount()
@@ -59,6 +62,7 @@ class AccountActions : AppCompatActivity() {
         binding.typeField.setOnItemClickListener { parent, _, position, _ ->
             val type = parent.getItemAtPosition(position).toString()
             binding.typeField.setText(type, false)
+            binding.nameField.text?.clear()
             updateHint(type)
         }
     }
@@ -142,11 +146,25 @@ class AccountActions : AppCompatActivity() {
 
         successDialog!!.show()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            successDialog!!.dismiss()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }, 1800)
+        val dao= App_Database.getInstance(this).accountDao()
+      lifecycleScope.launch(Dispatchers.IO) {
+          val numberofAccount=dao.numberOfAccounts()
+          withContext(Dispatchers.Main){
+              if(numberofAccount<=1){
+                  Handler(Looper.getMainLooper()).postDelayed({
+                      startActivity(Intent(this@AccountActions,MainActivity::class.java))
+                      finish()
+                  },1800)
+              }
+              else{
+                  Handler(Looper.getMainLooper()).postDelayed({
+                      finish()
+                  },1800)
+
+              }
+          }
+      }
+
     }
 
     private fun numberOfAccounts(){

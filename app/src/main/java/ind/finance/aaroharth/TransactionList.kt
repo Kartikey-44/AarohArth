@@ -14,6 +14,7 @@ import ind.finance.aaroharth.databinding.ActivityTransactionListBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.exp
 
 class TransactionList : AppCompatActivity() {
@@ -95,6 +96,7 @@ class TransactionList : AppCompatActivity() {
         binding.btnIncome.setBackgroundColor(getColor(R.color.toggle_income_bg))
         binding.btnExpense.setBackgroundColor(getColor(R.color.toggle_bg))
         binding.btnIncome.isChecked = true
+
     }
 
     private fun expense() {
