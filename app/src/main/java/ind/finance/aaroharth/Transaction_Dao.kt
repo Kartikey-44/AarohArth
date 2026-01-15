@@ -69,9 +69,6 @@ interface Transaction_Dao {
     @Query("SELECT COUNT(*) FROM transactiontable where transactionWay=:way")
     suspend fun getNoOfTransaction(way: String?): Long
 
-}
-
-
     //Categories Transaction List (getTransactionsByCategory)
     @Query("""
     SELECT * FROM TransactionTable 
@@ -80,5 +77,7 @@ interface Transaction_Dao {
     ORDER BY dateAndTime DESC
 """)
     suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info>
+
+}
 
 
