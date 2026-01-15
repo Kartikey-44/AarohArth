@@ -73,4 +73,8 @@
     <string name="loan_management">Manage\nLoans</string>
     <string name="expense">Expense</string>
     <string name="income">Income</string>
+
+    <string name="quit">Changes Are Unsaved!\nAre you sure you want to quit?</string>
+    <string name="delete">Are you sure?\nYou Want To Delete The Transaction</string>
+
 </resources>

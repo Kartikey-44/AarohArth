@@ -13,6 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
+            android:name=".BudgetModification"
+            android:exported="false" />
+        <activity
+            android:name=".AccountModification"
+            android:exported="false" />
+        <activity
+            android:name=".TransactionModification"
+            android:exported="false" />
+        <activity
+            android:name=".BudgetActions"
+            android:exported="false" />
+        <activity
+            android:name=".BudgetManagement"
+            android:exported="false" />
+        <activity
             android:name=".CategoriesTransactionList"
             android:exported="false" />
         <activity

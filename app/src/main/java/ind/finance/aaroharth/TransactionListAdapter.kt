@@ -1,13 +1,12 @@
 package ind.finance.aaroharth
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getColor
-import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import java.text.NumberFormat
@@ -15,6 +14,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.jvm.java
+
 
 class TransactionListAdapter(
 
@@ -120,7 +121,7 @@ class TransactionListAdapter(
             DATE_ONLY_FORMATTER.format(
                 Instant.ofEpochMilli(transaction.dateAndTime)
             )
-        val medium=transaction.transacctionMedium.toString().lowercase().trim()
+        val medium=transaction.transactionMedium.toString().lowercase().trim()
         if(medium=="upi"){
             holder.medium.text="UPI"
         }
@@ -165,12 +166,23 @@ class TransactionListAdapter(
             "png"->holder.iconholder.setImageResource(R.drawable.lpgpng)
             "public transport"->holder.iconholder.setImageResource(R.drawable.publictransport)
             "grocery"->holder.iconholder.setImageResource(R.drawable.grocery)
+            "other"->holder.iconholder.setImageResource(R.drawable.other)
 
 
 
 
 
             else->holder.iconholder.setImageResource(R.drawable.other)
+        }
+
+
+
+        holder.card.setOnClickListener {
+            val intent = Intent(holder.itemView.context, TransactionModification::class.java)
+            intent.putExtra("id", transaction.id)
+            intent.putExtra("type",transaction.transactionType)
+            holder.itemView.context.startActivity(intent)
+
         }
 
     }

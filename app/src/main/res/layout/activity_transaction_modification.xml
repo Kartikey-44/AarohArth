@@ -103,8 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:textSize="16dp"
-            android:textStyle="bold"
-            android:scrollHorizontally="true"/>
+            android:textStyle="bold"/>
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/category_layout"
@@ -279,14 +278,28 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/remark_layout"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/delete_button"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="20dp"
         android:text="Save"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/save_btn_textcolor_income"
+       android:visibility="gone"
         android:backgroundTint="@color/save_button_background_expense" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/delete_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/remark_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/save_button"
+        android:layout_margin="20dp"
+        android:text="Delete"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="@color/red" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

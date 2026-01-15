@@ -1,5 +1,6 @@
 package ind.finance.aaroharth
 
+
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -8,14 +9,17 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         Transaction_Info::class,
-        Account_Info::class
+        Account_Info::class,
+        Budget_Info::class
     ],
-    version = 4,
+    version = 7,
     exportSchema = false
 )
 abstract class App_Database : RoomDatabase() {
     abstract fun transactionDao(): Transaction_Dao
     abstract fun accountDao(): Account_Dao
+    abstract fun budgetDao(): BudgetDao
+
 
     companion object {
         @Volatile

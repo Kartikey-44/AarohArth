@@ -11,10 +11,11 @@ data class Transaction_Info(@PrimaryKey(autoGenerate = true)
                             val otherParty:String,
                             val category:String,
                             val dateAndTime: Long,
-                            val transacctionMedium:String,
+                            val transactionMedium:String,
                             val transactionWay: String,
                             val remark:String,
                             val carbonEmissionFactor: Double,
                             val carbonEmitted: Double,
-                            val carbonEmissionAuth: String
+                            val carbonEmissionAuth: String,
+                            val monthKey:String
 )

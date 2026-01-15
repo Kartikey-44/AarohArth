@@ -113,4 +113,6 @@
     <color name="income_card_bg">#666DFD70</color>
     <color name="expense_card_bg">#66FA7870</color>
 
+
+    <color name="budgetmanage">#FFFFFF</color>
 </resources>

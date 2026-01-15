@@ -1,11 +1,13 @@
 package ind.finance.aaroharth
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -18,6 +20,7 @@ class YourAccountListAdapter(
         val type: TextView = itemView.findViewById(R.id.type)
         val name: TextView = itemView.findViewById(R.id.name)
         val icon: ImageView=itemView.findViewById<ImageView>(R.id.icon_container)
+        val card: MaterialCardView=itemView.findViewById(R.id.card)
     }
 
 
@@ -67,6 +70,12 @@ class YourAccountListAdapter(
             "Bank Account" -> holder.icon.setImageResource(R.drawable.bank)
         }
 
+        holder.card.setOnClickListener {
+            val intent= Intent(holder.itemView.context, AccountModification::class.java)
+            intent.putExtra("id",account.id)
+            intent.putExtra("name",account.accountName)
+            holder.itemView.context.startActivity(intent)
+        }
 
     }
 

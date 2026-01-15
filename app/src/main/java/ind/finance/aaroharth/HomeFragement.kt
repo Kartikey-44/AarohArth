@@ -142,6 +142,10 @@ class HomeFragement : Fragment() {
 
         }
 
+        binding.budgetManage.setOnClickListener {
+                startActivity(Intent(requireContext(),BudgetManagement::class.java))
+        }
+
     }
 
     // ------------------ Toolbar Search ------------------
@@ -255,9 +259,9 @@ class HomeFragement : Fragment() {
                 .transactionDao().monthWise(startOfMonth,endOfMonth,"Income")
             withContext(Dispatchers.Main){
                 val incomeBalance=format.format(totalIncome)
-                binding.expenseAmount.text="\u20B9 $incomeBalance"
+                binding.incomeAmount.text="\u20B9 $incomeBalance"
                 val expenseBalance=format.format(totalExpense)
-                binding.incomeAmount.text="\u20B9 $expenseBalance"
+                binding.expenseAmount.text="\u20B9 $expenseBalance"
                 if(totalExpense>totalIncome){
                     binding.thisMonthOverview.setTextColor(ContextCompat.
                     getColor(requireContext(),R.color.this_month_overview_expense))

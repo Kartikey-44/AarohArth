@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AccountActions">
+    tools:context=".BudgetModification">
     <ImageView
         android:id="@+id/bg"
         android:layout_width="match_parent"
@@ -23,18 +23,53 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:text="Add Account"
+        android:text="Add Monthly Budget"
         android:textColor="@color/label_colors"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/balance_layout"
+        android:id="@+id/category_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/name_layout"
+        app:layout_constraintTop_toBottomOf="@id/heading"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:hint="Budget Category"
+        app:endIconMode="dropdown_menu"
+        app:endIconTint="@color/icon_color"
+        app:boxCornerRadiusBottomEnd="25dp"
+        app:boxCornerRadiusBottomStart="25dp"
+        app:boxCornerRadiusTopEnd="25dp"
+        app:boxCornerRadiusTopStart="25dp"
+        app:boxBackgroundColor="@color/transaction_page_input_field_background"
+        app:boxStrokeWidth="1.5dp"
+        app:boxStrokeWidthFocused="3dp"
+        app:boxStrokeErrorColor="@color/stroke_color_input_error"
+        app:errorTextColor="@color/stroke_color_input_error"
+        app:errorEnabled="true">
+
+        <AutoCompleteTextView
+            android:id="@+id/category_field"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:inputType="none"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingStart="20dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/amount_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/category_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="10dp"
@@ -51,12 +86,12 @@
         app:layout_constraintBottom_toTopOf="@id/saveBtn"
         app:boxStrokeWidthFocused="3dp"
         app:boxStrokeErrorColor="@color/stroke_color_input_error"
-        android:hint="Current Balance"
+        android:hint="Budget Amount"
         app:errorTextColor="@color/stroke_color_input_error"
         app:errorEnabled="true"
         app:startIconDrawable="@drawable/rupee_income">
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/balance_field"
+            android:id="@+id/amount_field"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:textSize="18sp"
@@ -65,84 +100,34 @@
             android:paddingStart="40dp"
             android:gravity="start"/>
     </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/type_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/heading"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="20dp"
-        android:hint="Account Type"
-        app:endIconMode="dropdown_menu"
-        app:endIconTint="@color/icon_color"
-        app:boxCornerRadiusBottomEnd="25dp"
-        app:boxCornerRadiusBottomStart="25dp"
-        app:boxCornerRadiusTopEnd="25dp"
-        app:boxCornerRadiusTopStart="25dp"
-        app:boxBackgroundColor="@color/transaction_page_input_field_background"
-        app:boxStrokeWidth="1.5dp"
-        app:boxStrokeWidthFocused="3dp"
-        app:boxStrokeErrorColor="@color/stroke_color_input_error"
-        app:errorTextColor="@color/stroke_color_input_error"
-        app:errorEnabled="true">
 
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/type_field"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:inputType="none"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingStart="20dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/name_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/type_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:boxCornerRadiusBottomEnd="25dp"
-        app:boxCornerRadiusBottomStart="25dp"
-        app:boxCornerRadiusTopEnd="25dp"
-        app:boxCornerRadiusTopStart="25dp"
-        app:hintTextColor="@color/transaction_hint_color"
-        app:boxBackgroundColor="@color/transaction_page_input_field_background"
-        app:boxStrokeWidth="1.5dp"
-        app:boxStrokeWidthFocused="3dp"
-        app:boxStrokeErrorColor="@color/stroke_color_input_error"
-        android:hint="Account Name"
-        app:errorTextColor="@color/stroke_color_input_error"
-        app:errorEnabled="true">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/name_field"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:textColor="@color/transaction_hint_color"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/balance_layout"
+        app:layout_constraintTop_toBottomOf="@id/amount_layout"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/deleteBtn"
+        android:layout_marginHorizontal="20dp"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:text="Save"
+        android:visibility="gone"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="@color/save_button_background_income"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/deleteBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/amount_layout"
+        app:layout_constraintStart_toEndOf="@id/saveBtn"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="20dp"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:text="Save Account"
+        android:text="Delete"
         android:textColor="#FFFFFF"
-        android:backgroundTint="@color/save_button_background_income"/>
+        android:backgroundTint="@color/red"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
