@@ -133,5 +133,20 @@
 
     <color name="red">#D32F2F</color>
 <color name="budgetmanage">#000000</color>
+    <color name="redwarn">#FF0000</color>
+    <color name="amber">#FFC107</color>
+    <color name="green">#4CAF50</color>
+    <color name="dashboardText">#121212</color>
+
+
+    <color name="chartAccent">#4FC3F7</color>
+
+
+    <color name="pie1">#42A5F5</color>
+    <color name="pie2">#66BB6A</color>
+    <color name="pie3">#FFA726</color>
+    <color name="pie4">#AB47BC</color>
+    <color name="pie5">#EF5350</color>
+
 
 </resources>
