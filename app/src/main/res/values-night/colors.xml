@@ -115,4 +115,5 @@
 
 
     <color name="budgetmanage">#FFFFFF</color>
+    <color name="dashboardText">#FFFFFF</color>
 </resources>

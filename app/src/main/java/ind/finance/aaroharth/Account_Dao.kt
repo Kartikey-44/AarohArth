@@ -59,4 +59,7 @@ interface Account_Dao {
 
     @Update
     suspend fun updateaccountinfo(account: Account_Info)
+
+    @Query("SELECT SUM(balance) AS total FROM AccountsTable")
+    suspend fun gettotalbalance(): Long
 }

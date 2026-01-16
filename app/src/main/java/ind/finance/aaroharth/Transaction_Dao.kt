@@ -69,6 +69,45 @@ interface Transaction_Dao {
     @Query("SELECT COUNT(*) FROM transactiontable where transactionWay=:way")
     suspend fun getNoOfTransaction(way: String?): Long
 
+
+    @Query("SELECT \n" +
+            "    date(dateAndTime / 86400000) AS day,\n" +
+            "    SUM(amount) AS total\n" +
+            "FROM TransactionTable\n" +
+            "WHERE transactionType = 'Expense'\n" +
+            "GROUP BY day\n" +
+            "ORDER BY day ASC\n" +
+            "LIMIT 30;\n")
+    suspend fun get30Days():List<filterchart>
+    @Query("""
+    SELECT ( dateAndTime/ 86400000) AS day,
+           SUM(amount) AS total
+    FROM TransactionTable
+    WHERE transactionType='Expense'
+      AND dateAndTime >= :from
+    GROUP BY day
+    ORDER BY day ASC
+""")
+    fun getDailyExpense(from: Long): List<filterchart>
+
+    @Query("""
+    SELECT SUM(amount)
+    FROM transactiontable
+    WHERE transactionType='Expense'
+      AND dateAndTime >= :from
+""")
+    fun getTotalExpense(from: Long): Double
+
+    @Query("""
+    SELECT category, SUM(amount) AS total
+    FROM transactiontable
+    WHERE transactionType='Expense'
+      AND dateAndTime >= :from
+    GROUP BY category
+    ORDER BY total DESC
+""")
+    fun getCategoryExpense(from: Long): List<CategoryExpense>
+
 }
 
 
