@@ -62,6 +62,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.android.gms:play-services-auth:21.1.1")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
