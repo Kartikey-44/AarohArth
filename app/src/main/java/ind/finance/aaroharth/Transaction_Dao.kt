@@ -120,4 +120,6 @@ interface Transaction_Dao {
 """)
     suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info>
 
+}
+
 
