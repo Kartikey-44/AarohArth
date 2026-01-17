@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
+            android:name=".Co2AllTransactions"
+            android:exported="false" />
+        <activity
             android:name=".BudgetModification"
             android:exported="false" />
         <activity
