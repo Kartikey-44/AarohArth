@@ -1,5 +1,6 @@
 package ind.finance.aaroharth
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import androidx.fragment.app.Fragment
@@ -76,6 +77,15 @@ class CategoriesFragment : Fragment() {
         }
         binding.btnExpense.setOnClickListener {
             expense()
+        }
+
+        binding.btnIncome.apply {
+            setBackgroundColor(Color.parseColor("#E8F5E9"))
+            setTextColor(Color.parseColor("#4CAF50"))
+        }
+        binding.btnExpense.apply {
+            setBackgroundColor(Color.parseColor("#FFEBEE"))
+            setTextColor(Color.parseColor("#D32F2F"))
         }
 
         init()
@@ -204,31 +214,36 @@ class CategoriesFragment : Fragment() {
 
     private fun income() {
         showingIncome = true
-        binding.btnIncome.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_4dp)
-        binding.btnExpense.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_2dp)
-        binding.btnIncome.isSelected = true
-        binding.btnExpense.isSelected = false
-        binding.btnIncome.setTypeface(null, android.graphics.Typeface.BOLD)
-        binding.btnExpense.setTypeface(null, android.graphics.Typeface.NORMAL)
-        binding.btnIncome.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_income_bg))
-        binding.btnExpense.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_bg))
         categoriesAdapter.updateMode(true)
-        binding.btnIncome.isChecked = true
+
+
+        binding.btnIncome.apply {
+            setBackgroundColor(Color.parseColor("#4CAF50"))
+            setTextColor(Color.WHITE)
+        }
+
+        binding.btnExpense.apply {
+            setBackgroundColor(Color.parseColor("#FFEBEE"))
+            setTextColor(Color.parseColor("#D32F2F"))
+        }
     }
 
     private fun expense() {
         showingIncome = false
-        binding.btnExpense.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_4dp)
-        binding.btnIncome.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_2dp)
-        binding.btnExpense.isSelected = true
-        binding.btnIncome.isSelected = false
-        binding.btnExpense.setTypeface(null, android.graphics.Typeface.BOLD)
-        binding.btnIncome.setTypeface(null, android.graphics.Typeface.NORMAL)
-        binding.btnExpense.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_expense_bg))
-        binding.btnIncome.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.toggle_bg))
         categoriesAdapter.updateMode(false)
-        binding.btnExpense.isChecked = true
+
+
+        binding.btnExpense.apply {
+            setBackgroundColor(Color.parseColor("#D32F2F"))
+            setTextColor(Color.WHITE)
+        }
+
+        binding.btnIncome.apply {
+            setBackgroundColor(Color.parseColor("#E8F5E9"))
+            setTextColor(Color.parseColor("#4CAF50"))
+        }
     }
+
 
     private fun setupSearch() {
         binding.searchInput.addTextChangedListener(object : TextWatcher {
