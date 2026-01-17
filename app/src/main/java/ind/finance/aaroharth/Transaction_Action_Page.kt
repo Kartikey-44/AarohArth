@@ -461,6 +461,9 @@ class Transaction_Action_Page : AppCompatActivity() {
             "lpg"->return 0.0021
             "png"->return 0.0017
             "water bill"->return 0.0002
+            "mobile recharge", "fasttag recharge", "recharge" ->return 0.00025
+            "emi / loans", "emi/loans" ->return 0.0003
+
             else ->{
                 return 0.0
             }

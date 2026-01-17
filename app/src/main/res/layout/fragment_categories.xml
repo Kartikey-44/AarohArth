@@ -120,7 +120,7 @@
                 app:backgroundTint="#E8F5E9"
                 app:cornerRadius="25dp"
                 app:strokeColor="#4CAF50"
-                app:strokeWidth="2dp" />
+                app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_expense"
@@ -134,7 +134,7 @@
                 app:backgroundTint="#E8F5E9"
                 app:cornerRadius="25dp"
                 app:strokeColor="#F44336"
-                app:strokeWidth="2dp" />
+                app:strokeWidth="1dp" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
