@@ -143,6 +143,7 @@ class BudgetModification : AppCompatActivity() {
         val dialog = Dialog(this)
         val dBinding = DialogScreenBinding.inflate(layoutInflater)
         dialog.setContentView(dBinding.root)
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
 
         dBinding.dialogLottie.setAnimation(lottie)
         dBinding.message.text = message

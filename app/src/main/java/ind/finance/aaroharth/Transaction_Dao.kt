@@ -108,6 +108,10 @@ interface Transaction_Dao {
 """)
     fun getCategoryExpense(from: Long): List<CategoryExpense>
 
+
+
+
+    //Categories Transaction List (getTransactionsByCategory)
     @Query("""
     SELECT * FROM TransactionTable 
     WHERE UPPER(category) = UPPER(:category) 
