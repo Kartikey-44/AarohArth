@@ -1,8 +1,8 @@
 [versions]
 # Core tools
-agp = "8.13.2"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.25"
+agp = "9.0.0"
+kotlin = "2.2.10"
+ksp = "2.3.2"
 
 # AndroidX
 coreKtx = "1.13.1"

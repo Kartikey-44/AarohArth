@@ -60,11 +60,15 @@ class AccountModification : AppCompatActivity() {
         lifecycleScope.launch {
             val txCount = db.transactionDao().getNoOfTransaction(intent.getStringExtra("name"))
 
+            original = db.accountDao().getAccountById(accountId)
             if (txCount > 0) {
                 binding.heading.text = "Account Info"
                 binding.attention.visibility = View.VISIBLE
                 binding.saveBtn.visibility = View.GONE
                 binding.deleteBtn.visibility = View.GONE
+                binding.nameField.setText(original.accountName)
+                binding.typeField.setText(original.accountType)
+                binding.balanceField.setText(original.balance.toString())
             } else {
                 binding.heading.text = "Edit / Delete Account"
                 binding.attention.visibility = View.GONE
@@ -72,8 +76,6 @@ class AccountModification : AppCompatActivity() {
                 binding.deleteBtn.visibility = View.VISIBLE
 
                 setupAccountTypes()
-
-                original = db.accountDao().getAccountById(accountId)
                 populateUI(original)
                 updateHint(original.accountType)
                 addTextWatchers()
@@ -240,6 +242,7 @@ class AccountModification : AppCompatActivity() {
         val dialog = Dialog(this)
         val dBinding = DialogScreenBinding.inflate(layoutInflater)
         dialog.setContentView(dBinding.root)
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
 
         dBinding.dialogLottie.setAnimation(lottie)
         dBinding.message.text = message

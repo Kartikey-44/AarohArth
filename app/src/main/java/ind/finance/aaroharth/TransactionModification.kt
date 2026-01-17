@@ -253,6 +253,7 @@ class TransactionModification : AppCompatActivity() {
         dialog.setContentView(binding.root)
         binding.dialogLottie.setAnimation(lottie)
         binding.message.text = message
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
         dialog.show()
 
         Handler(Looper.getMainLooper()).postDelayed({

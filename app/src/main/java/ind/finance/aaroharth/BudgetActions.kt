@@ -143,7 +143,7 @@ class BudgetActions : AppCompatActivity() {
         dialogBinding = DialogScreenBinding.inflate(layoutInflater)
         dialog.setContentView(dialogBinding.root)
         dialog.setCancelable(false)
-
+        dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
         dialogBinding.dialogLottie.setAnimation("Success.json")
         dialogBinding.message.text = message
 
