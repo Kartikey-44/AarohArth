@@ -1,7 +1,6 @@
 package ind.finance.aaroharth
 
-import android.content.Context
-import android.graphics.Color
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,10 @@ import android.widget.ArrayAdapter
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.ValueFormatter
 import ind.finance.aaroharth.databinding.FragmentDashboardBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,11 +37,19 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         db = App_Database.getInstance(requireContext())
+        binding.categoryWiseExpense.layoutManager =
+            LinearLayoutManager(requireContext())
+
 
         setupFilter()
         setupLineChartUI()
-
         refreshDashboard()
+
+        binding.seeall.setOnClickListener {
+            val intent = Intent(requireContext(), CategoryWiseTransaction::class.java)
+            startActivity(intent)
+        }
+
     }
 
     // ---------------- FILTER ----------------
@@ -57,33 +66,59 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun refreshDashboard() {
-        loadExpenseGraph()
-        loadSpendingPace()
-        loadCategoryPie()
-    }
-
     private fun daysRange(): Int =
         if (binding.filter.text.toString() == "Last 7 Days") 7 else 30
 
     private fun fromTime(): Long =
         System.currentTimeMillis() - daysRange() * 24 * 60 * 60 * 1000L
 
-    // ---------------- LINE CHART ----------------
+    // ---------------- DASHBOARD ----------------
 
-    private fun setupLineChartUI() {
-        binding.linechart.apply {
-            xAxis.position = XAxis.XAxisPosition.BOTTOM
-            xAxis.granularity = 1f
-            xAxis.textColor = ContextCompat.getColor(requireContext(), R.color.dashboardText)
-            axisLeft.textColor = ContextCompat.getColor(requireContext(), R.color.dashboardText)
-            axisRight.isEnabled = false
-            legend.isEnabled = false
-            description.isEnabled = false
+    private fun refreshDashboard() {
+        lifecycleScope.launch {
+            val topCategories = withContext(Dispatchers.IO) {
+                db.transactionDao().getCategoryExpense(fromTime()).take(5)
+            }
+
+            loadExpenseLineChart()
+            loadSpendingPace()
+            loadPieChart(topCategories)
+            loadBarChart(topCategories)
+            val adapter = CategoryOverviewAdapter(topCategories)
+            binding.categoryWiseExpense.adapter = adapter
+
         }
     }
 
-    private fun loadExpenseGraph() {
+    // ---------------- LINE CHART (TOTAL EXPENSE) ----------------
+
+    private fun setupLineChartUI() {
+        binding.linechart.apply {
+            description.isEnabled = false
+            legend.isEnabled = false
+            axisRight.isEnabled = false
+
+            axisLeft.apply {
+                textColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+                axisLineColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+                setDrawAxisLine(true)
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float) = "₹${value.toInt()}"
+                }
+            }
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                textColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+                axisLineColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+                setDrawGridLines(false)
+                setDrawAxisLine(true)
+            }
+        }
+    }
+
+    private fun loadExpenseLineChart() {
         lifecycleScope.launch {
             val data = withContext(Dispatchers.IO) {
                 db.transactionDao().getDailyExpense(fromTime())
@@ -96,145 +131,153 @@ class DashboardFragment : Fragment() {
             val dataSet = LineDataSet(entries, "").apply {
                 setDrawValues(false)
                 setDrawCircles(false)
-                lineWidth = 2f
-                mode = LineDataSet.Mode.LINEAR
+                lineWidth = 2.5f
                 color = ContextCompat.getColor(requireContext(), R.color.chartAccent)
             }
 
-            binding.linechart.data = LineData(dataSet)
-            binding.linechart.invalidate()
+            binding.linechart.apply {
+                this.data = LineData(dataSet)
+                xAxis.valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float) =
+                        (value.toInt() + 1).toString()
+                }
+                invalidate()
+            }
         }
     }
 
-    // ---------------- PACE ----------------
+    // ---------------- SPENDING PACE ----------------
 
     private fun loadSpendingPace() {
         lifecycleScope.launch {
             val totalSpent = withContext(Dispatchers.IO) {
                 db.transactionDao().getTotalExpense(fromTime())
             }
-
             val balance = withContext(Dispatchers.IO) {
                 db.accountDao().gettotalbalance()
             }
 
-            val days = daysRange()
-            val pace = totalSpent / days
+            val pace = if (daysRange() > 0) totalSpent / daysRange() else 0.0
             val remaining = if (pace > 0) ceil(balance / pace).toInt() else 0
 
             binding.pace.text = "₹${pace.toInt()} / day"
-            binding.pace.setTextColor(ContextCompat.getColor(requireContext(),R.color.dashboardText))
-
-            when {
-                remaining <= 7 -> {
-                    binding.remainingDays.setTextColor(
-                        ContextCompat.getColor(requireContext(), R.color.redwarn)
-                    )
-                }
-                remaining <= 15 -> {
-                    binding.remainingDays.setTextColor(
-                        ContextCompat.getColor(requireContext(), R.color.amber)
-                    )
-                }
-                else -> {
-                    binding.remainingDays.setTextColor(
-                        ContextCompat.getColor(requireContext(), R.color.green)
-                    )
-                }
-            }
-
             binding.remainingDays.text =
-                if (remaining > 0)
-                    "Balance will be exhausted in ~$remaining days"
-                else
-                    "No spending detected"
+                if (remaining > 0) "Balance will be exhausted in ~$remaining days"
+                else "No spending detected"
         }
     }
 
-    // ---------------- PIE CHART ----------------
+    // ---------------- PIE CHART (PERCENTAGE ONLY) ----------------
 
-    private fun loadCategoryPie() {
-        lifecycleScope.launch {
-            val categories = withContext(Dispatchers.IO) {
-                db.transactionDao().getCategoryExpense(fromTime())
-            }
+    private fun loadPieChart(categories: List<CategoryExpense>) {
+        if (categories.isEmpty()) {
+            binding.pieChart.clear()
+            return
+        }
 
-            if (categories.isEmpty()) {
-                binding.piechart.clear()
-                return@launch
-            }
+        val total = categories.sumOf { it.total }
 
-            // 1️⃣ Pie entries
-            val entries = categories.take(5).map {
-                PieEntry(it.total.toFloat(), it.category)
-            }
+        val entries = categories.map {
+            val percent = (it.total / total) * 100
+            PieEntry(
+                percent.toFloat(),
+                "${it.category} (₹${it.total.toInt()})"
+            )
+        }
 
-            // 2️⃣ DataSet (FIXED)
-            val dataSet = PieDataSet(entries, "").apply {
-                sliceSpace = 2f
-                setDrawValues(true)
 
-                // 🔹 VALUE LINES (THIS WAS MISSING)
-                valueLinePart1Length = 0.4f
-                valueLinePart2Length = 0.6f
-                valueLineWidth = 1.5f
-                valueLineColor =
-                    ContextCompat.getColor(requireContext(), R.color.dashboardText)
 
-                yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-                xValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+        val dataSet = PieDataSet(entries, "").apply {
+            colors = listOf(
+                ContextCompat.getColor(requireContext(), R.color.pie1),
+                ContextCompat.getColor(requireContext(), R.color.pie2),
+                ContextCompat.getColor(requireContext(), R.color.pie3),
+                ContextCompat.getColor(requireContext(), R.color.pie4),
+                ContextCompat.getColor(requireContext(), R.color.pie5)
+            )
+            setDrawValues(true)   // NO % TEXT ON PIE
+        }
 
-                colors = listOf(
-                    ContextCompat.getColor(requireContext(), R.color.pie1),
-                    ContextCompat.getColor(requireContext(), R.color.pie2),
-                    ContextCompat.getColor(requireContext(), R.color.pie3),
-                    ContextCompat.getColor(requireContext(), R.color.pie4),
-                    ContextCompat.getColor(requireContext(), R.color.pie5)
-                )
-            }
 
-            // 3️⃣ PieData (₹ formatter is correct)
-            val pieData = PieData(dataSet).apply {
-                setValueTextColor(
-                    ContextCompat.getColor(requireContext(), R.color.dashboardText)
-                )
-                setValueTextSize(12f)
-                setValueFormatter(object :
-                    com.github.mikephil.charting.formatter.ValueFormatter() {
+        binding.pieChart.apply {
+            setUsePercentValues(true)
+            data = PieData(dataSet).apply {
+                setValueFormatter(object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
-                        return "₹${value.toInt()}"
+                        return if (value >= 10f) {
+                            "${value.toInt()}%"
+                        } else {
+                            ""   // 🔥 hide text below 10%
+                        }
                     }
                 })
+                setValueTextSize(18f)
             }
-            binding.piechart.rotationAngle=-260f
 
-            // 4️⃣ Apply to chart
-            binding.piechart.apply {
-                setExtraOffsets(
-                    30f,  // left
-                    30f,  // top   👈 IMPORTANT
-                    30f,  // right
-                    10f   // bottom
-                )
 
-                data = pieData
-                description.isEnabled = false
-
-                legend.isEnabled = true
-                legend.textColor =
-                    ContextCompat.getColor(requireContext(), R.color.dashboardText)
-                legend.textSize=10f
-
-                setDrawEntryLabels(false)   // IMPORTANT
-                setUsePercentValues(false)
-                isRotationEnabled = false
-
-                holeRadius = 60f
-                setHoleColor(Color.TRANSPARENT)
-
-                invalidate()
-            }
+            setDrawEntryLabels(false)
+            description.isEnabled = false
+            legend.isEnabled = true
+            legend.textSize=10f
+            invalidate()
         }
     }
 
+    // ---------------- BAR CHART ----------------
+
+    private fun loadBarChart(categories: List<CategoryExpense>) {
+        if (categories.isEmpty()) {
+            binding.barChart.clear()
+            return
+        }
+
+        val entries = categories.mapIndexed { index, item ->
+            BarEntry(index.toFloat(), item.total.toFloat())
+        }
+
+        val dataSet = BarDataSet(entries, "").apply {
+            colors = listOf(
+                ContextCompat.getColor(requireContext(), R.color.pie1),
+                ContextCompat.getColor(requireContext(), R.color.pie2),
+                ContextCompat.getColor(requireContext(), R.color.pie3),
+                ContextCompat.getColor(requireContext(), R.color.pie4),
+                ContextCompat.getColor(requireContext(), R.color.pie5)
+            )
+            valueTextColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+            valueTextSize = 14f
+        }
+
+        binding.barChart.apply {
+            data = BarData(dataSet).apply {
+                barWidth = 0.6f
+                setValueFormatter(object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float) = "₹${value.toInt()}"
+                })
+            }
+
+            description.isEnabled = false
+            legend.isEnabled = false
+            axisRight.isEnabled = false
+
+            axisLeft.textColor =
+                ContextCompat.getColor(requireContext(), android.R.color.black)
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                textColor =
+                    ContextCompat.getColor(requireContext(), android.R.color.black)
+                setDrawGridLines(false)
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        val i = value.toInt()
+                        return if (i in categories.indices) categories[i].category else ""
+                    }
+                }
+            }
+
+            setFitBars(true)
+            invalidate()
+        }
+    }
 }

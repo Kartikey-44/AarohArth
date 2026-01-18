@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.MaterialToolbar
+import ind.finance.aaroharth.databinding.ActivityAiBinding
 import ind.finance.aaroharth.databinding.FragmentHomeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -144,6 +145,10 @@ class HomeFragement : Fragment() {
 
         binding.budgetManage.setOnClickListener {
                 startActivity(Intent(requireContext(),BudgetManagement::class.java))
+        }
+
+        binding.aiBtn.setOnClickListener {
+            startActivity(Intent(requireContext(), AI_Activity::class.java))
         }
 
     }
@@ -287,8 +292,15 @@ class HomeFragement : Fragment() {
             val currentBalance= App_Database.getInstance(requireContext())
                 .accountDao().currentbalance()
             withContext(Dispatchers.Main){
-                val balance=format.format(currentBalance)
-                binding.currentBalanceAmount.text="\u20B9 $balance"
+                if(currentBalance>0){
+                    val balance=format.format(currentBalance)
+                    binding.currentBalanceAmount.text="\u20B9 $balance"
+                }
+                else{
+                    val balance=format.format(currentBalance)
+                    binding.currentBalanceAmount.text="\u20B9 $balance Deficit"
+                    binding.currentBalanceAmount.setTextColor(ContextCompat.getColor(requireContext(),R.color.red))
+                }
             }
 
         }
@@ -315,3 +327,6 @@ class HomeFragement : Fragment() {
 
 
 }
+
+
+

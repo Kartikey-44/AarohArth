@@ -77,7 +77,7 @@
     <color name="top_card_income_color">#0FB880</color>
     <color name="top_card_expense_color">#EE4444</color>
     <color name="top_card_neutral">#000000</color>
-    <color name="top_card_back_neutral">#EEF1F4</color>
+    <color name="top_card_back_neutral">#1C1F26</color>
     <color name="total_balance_color_neutral">#000000</color>
     <color name="top_card_stroke_neutral">#000000</color>
     <color name="recent_transaction">#000000</color>
