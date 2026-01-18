@@ -70,13 +70,14 @@ class Transaction_Action_Page : AppCompatActivity() {
 
         //Getting Intent Passed from Home Fragment and as per condition of working
 
-        val type=intent.getStringExtra("type")
-        if(type=="income"){
+        val type = intent.getStringExtra("type") ?: "expense"
+
+        if (type == "income") {
             income_ui_changes()
-        }
-        else{
+        } else {
             expense_ui_changes()
         }
+
 
 
 
@@ -121,6 +122,7 @@ class Transaction_Action_Page : AppCompatActivity() {
 
 
         setupCategoryDropdown()
+        catchAssistantIntent()
 
 
     }
@@ -434,41 +436,50 @@ class Transaction_Action_Page : AppCompatActivity() {
 
     private fun carbonEmissionFactor(categoryName: String): Double{
 
-        when(categoryName.lowercase().trim()){
-            "food"-> return 0.0005
-            "grocery"->return 0.0006
-            "dining out"->return 0.0008
-            "shopping"-> return 0.0007
-            "personal care"->return 0.0006
-            "entertainment"->return 0.0005
-            "subscriptions"->return 0.0004
-            "medical"->return 0.0004
-            "education"-> return 0.0003
-            "gifts"->return 0.0006
-            "miscellaneous"->return 0.0005
-            "housing"->return 0.0006
-            "rental"->return 0.0005
-            "utilities"->return 0.0007
-            "public transport"->return 0.0004
-            "taxi"->return 0.0010
-            "auto"->return 0.0009
-            "hotel"->return 0.0012
-            "flight"->return 0.0025
-            "petrol"->return 0.0023
-            "diesel"->return 0.0027
-            "cng"->return 0.0019
-            "electricity"->return 0.0018
-            "lpg"->return 0.0021
-            "png"->return 0.0017
-            "water bill"->return 0.0002
-            "mobile recharge", "fasttag recharge", "recharge" ->return 0.00025
-            "emi / loans", "emi/loans" ->return 0.0003
+        return when (categoryName.lowercase().trim()) {
 
-            else ->{
-                return 0.0
-            }
+            // ---------- DAILY CONSUMPTION (PROXY VALUES) ----------
+            // Relative carbon-impact weights (NOT emission factors)
 
+            "food" -> 0.0004
+            "grocery" -> 0.0005
+            "dining out" -> 0.0006
+            "shopping" -> 0.0006
+            "personal care" -> 0.0005
+            "entertainment" -> 0.0004
+            "subscriptions" -> 0.0003
+            "medical" -> 0.0003
+            "education" -> 0.0003
+            "gifts" -> 0.0005
+            "miscellaneous" -> 0.0004
+            "housing" -> 0.0004
+            "utilities" -> 0.0005
+            "water bill" -> 0.0002
 
+            // ---------- TRANSPORT (HIGHER IMPACT PROXIES) ----------
+
+            "public transport" -> 0.0004
+            "auto" -> 0.0007
+            "taxi" -> 0.0008
+            "hotel" -> 0.0010
+            "flight" -> 0.0012   // conservative, awareness-based
+
+            // ---------- ENERGY / FUEL (DERIVED + NORMALIZED) ----------
+
+            "electricity" -> 0.0010
+            "petrol" -> 0.0016
+            "diesel" -> 0.0018
+            "cng" -> 0.0013
+            "lpg" -> 0.0015
+            "png" -> 0.0012
+
+            // ---------- FINANCIAL FLOWS (NO DIRECT EMISSIONS) ----------
+
+            "emi / loans", "emi/loans" -> 0.0
+            "rental" -> 0.0
+            "mobile recharge", "fasttag recharge", "recharge" -> 0.0002
+
+            else -> 0.0
         }
 
 
@@ -486,6 +497,38 @@ class Transaction_Action_Page : AppCompatActivity() {
         return amount*factor
 
     }
+
+    private fun catchAssistantIntent() {
+
+        val amount = intent.getLongExtra("amount", -1L)
+        val category = intent.getStringExtra("category")
+        val accountType = intent.getStringExtra("accountType")
+        val note = intent.getStringExtra("note")
+
+        // 1. Amount
+        if (amount > 0) {
+            binding.amountField.setText(amount.toString())
+        }
+
+        // 2. Category (must be from list)
+        if (!category.isNullOrBlank() && category in categoryList) {
+            binding.categoryField.setText(category, false)
+        }
+
+        // 3. Transaction Medium (Account Type)
+        if (!accountType.isNullOrBlank()) {
+            binding.transactionMediumField.setText(accountType, false)
+
+            // load corresponding account names automatically
+            transactionWay(accountType)
+        }
+
+        // 4. Original AI text as remark/note
+        if (!note.isNullOrBlank()) {
+            binding.remarkField.setText(note)
+        }
+    }
+
 
 
 }

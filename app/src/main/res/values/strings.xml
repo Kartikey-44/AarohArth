@@ -76,5 +76,7 @@
 
     <string name="quit">Changes Are Unsaved!\nAre you sure you want to quit?</string>
     <string name="delete">Are you sure?\nYou Want To Delete The Transaction</string>
+    <string name="ai">This Is Your In App Assisaint That Can Add Transaction, Account And Budget For You
+    You Can Type Or Speak By Tapping The Microphone Button Below</string>
 
 </resources>

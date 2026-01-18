@@ -42,7 +42,7 @@ class BudgetManagement : AppCompatActivity() {
     // ---------------- SETUP ----------------
 
     private fun setupRecycler() {
-        adapter = BudgetAdapter { budget ->
+        adapter = BudgetAdapter(emptyList()) { budget ->
 
             // navigate to modification screen
             val intent = Intent(this, BudgetModification::class.java)
@@ -81,7 +81,7 @@ class BudgetManagement : AppCompatActivity() {
     private fun loadBudgets() {
         lifecycleScope.launch {
             val list = db.budgetDao().getBudgetSummary(currentMonthKey)
-            adapter.submitList(list)
+            adapter.updateList(list)
         }
     }
 
