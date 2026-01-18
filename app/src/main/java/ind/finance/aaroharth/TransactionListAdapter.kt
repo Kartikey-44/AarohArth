@@ -128,8 +128,8 @@ class TransactionListAdapter(
         else{
             holder.medium.text=camelCaseToWords(toPascalCase(medium))
         }
-        when(transaction.category.toString().toLowerCase()){
-            "salary"->holder.iconholder.setImageResource(R.drawable.decoration)
+        when(transaction.category.toString().lowercase()){
+            "salary"->holder.iconholder.setImageResource(R.drawable.salary)
             "business"->holder.iconholder.setImageResource(R.drawable.business)
             "freelance"->holder.iconholder.setImageResource(R.drawable.freelance)
             "investment"->holder.iconholder.setImageResource(R.drawable.investment)
@@ -167,6 +167,7 @@ class TransactionListAdapter(
             "public transport"->holder.iconholder.setImageResource(R.drawable.publictransport)
             "grocery"->holder.iconholder.setImageResource(R.drawable.grocery)
             "other"->holder.iconholder.setImageResource(R.drawable.other)
+            "decoration"->holder.iconholder.setImageResource(R.drawable.decoration)
 
 
 

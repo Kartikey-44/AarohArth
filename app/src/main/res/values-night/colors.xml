@@ -66,7 +66,7 @@
     <color name="management_stroke_color">#FFFFFF</color>
     <color name="managemnt_card_back">#1C1F26</color>
     <color name="management_text_color">#FFFFFF</color>
-    <color name="top_card_back_neutral">#1C1F26</color>
+    <color name="top_card_back_neutral">#EEF1F4</color>
     <color name="total_balance_color_neutral">#FFFFFF</color>
     <color name="top_card_stroke_neutral">#FFFFFF</color>
     <color name="recent_transaction">#FFFFFF</color>

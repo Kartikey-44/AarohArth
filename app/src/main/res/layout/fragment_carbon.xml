@@ -33,7 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="CO₂ Emissions"
+                android:text="CO₂ Impact (Estimated)"
                 android:textColor="#005D48"
                 android:textSize="28sp"
                 android:textStyle="bold"

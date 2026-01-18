@@ -62,4 +62,9 @@ interface Account_Dao {
 
     @Query("SELECT SUM(balance) AS total FROM AccountsTable")
     suspend fun gettotalbalance(): Long
+
+    @Query("SELECT accountType FROM AccountsTable")
+    suspend fun getAllType(): List<String>
+    @Query("SELECT accountName FROM AccountsTable")
+    suspend fun getAllName(): List<String>
 }

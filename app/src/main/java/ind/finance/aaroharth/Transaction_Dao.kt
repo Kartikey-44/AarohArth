@@ -150,5 +150,27 @@ interface Transaction_Dao {
 """)
     suspend fun getRecentCo2Transactions(startDate: Long, endDate: Long): List<Transaction_Info>
 
+
+    @Query("""
+    SELECT category, SUM(amount) AS total
+    FROM transactiontable
+    WHERE transactionType = :type
+      AND dateAndTime >= :from
+    GROUP BY category
+    ORDER BY total DESC
+""")
+    fun getCategoryExpenseFiltered(from: Long, type: String): List<CategoryExpense>
+
+
+    @Query("""
+    SELECT category, SUM(amount) AS total
+    FROM transactiontable
+    WHERE dateAndTime >= :from
+    GROUP BY category
+    ORDER BY total DESC
+""")
+    fun getCategoryAll(from: Long): List<CategoryExpense>
+
+
 }
 
