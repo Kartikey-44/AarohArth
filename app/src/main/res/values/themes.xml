@@ -13,5 +13,17 @@
         <item name="android:color">#228B22</item>
     </style>
 
+    <style name="CircleImageOverlay" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CircleBorderOverlay" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="AppTheme.PopupOverlay" parent="">
+        <item name="android:popupBackground">@android:color/transparent</item>
+    </style>
 
 </resources>
