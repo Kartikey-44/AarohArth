@@ -29,7 +29,7 @@ class Co2TransactionAdapter(private var transactions: List<Transaction_Info>) :
         // Fill each card with real data!
         holder.category.text = transaction.category
         holder.amount.text = "₹${transaction.amount}"
-        holder.co2.text = "~ ${String.format("%.1f", transaction.carbonEmitted)}kg CO₂"
+        holder.co2.text = "~ ${String.format("%.1f", transaction.carbonImpact)}kg CO₂"
 
         // Set icon based on category (simple version)
         when(transaction.category.toString().lowercase()){
