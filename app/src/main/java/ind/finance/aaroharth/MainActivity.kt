@@ -9,6 +9,7 @@ import android.os.Looper
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
@@ -24,6 +25,15 @@ class MainActivity : BaseSecureActivity() {
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val prefs = getSharedPreferences("dark_mode_prefs", MODE_PRIVATE)
+        val isDarkMode = prefs.getBoolean("is_dark_mode", false)
+
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -34,7 +44,11 @@ class MainActivity : BaseSecureActivity() {
         setupBottomNav()
         decideStartFlow()
 
-        changeFragment(HomeFragement())
+        if (savedInstanceState == null) {
+            changeFragment(HomeFragement())
+        }
+
+        //changeFragment(HomeFragement())
     }
 
     private fun setupInsets() {
