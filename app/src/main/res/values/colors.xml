@@ -132,21 +132,25 @@
 
 
     <color name="red">#D32F2F</color>
-<color name="budgetmanage">#000000</color>
+    <color name="budgetmanage">#000000</color>
     <color name="redwarn">#FF0000</color>
     <color name="amber">#FFC107</color>
     <color name="green">#4CAF50</color>
     <color name="dashboardText">#121212</color>
-
-
     <color name="chartAccent">#4FC3F7</color>
-
-
     <color name="pie1">#42A5F5</color>
     <color name="pie2">#66BB6A</color>
     <color name="pie3">#FFA726</color>
     <color name="pie4">#AB47BC</color>
     <color name="pie5">#EF5350</color>
+
+    <color name="profile_menu">#005D48</color>
+    <color name="switch_thumb_off">#F5F5F5</color>
+    <color name="switch_thumb_on">#005D48</color>
+    <color name="switch_track_off">#BDBDBD</color>
+    <color name="switch_track_on">#66C197</color>
+
+
 
 
 </resources>
