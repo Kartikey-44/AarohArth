@@ -121,33 +121,39 @@ interface Transaction_Dao {
     suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info>
 
     //
-    @Query("""
-    SELECT category, SUM(carbonEmitted) as totalCO2, COUNT(*) as count
+    @Query(
+        """
+    SELECT category, SUM(carbonImpact) as totalCO2, COUNT(*) as count
     FROM TransactionTable 
     WHERE dateAndTime BETWEEN :startDate AND :endDate
     AND transactionType = 'Expense'  
     GROUP BY category 
     ORDER BY totalCO2 DESC LIMIT 5
-""")
+"""
+    )
     suspend fun getCo2ByCategoryPeriod(startDate: Long, endDate: Long): List<Co2CategoryItem>
 
     // (Line Chart)
-    @Query("""
-    SELECT (dateAndTime/86400000) as day, SUM(carbonEmitted) as totalCO2
+    @Query(
+        """
+    SELECT (dateAndTime/86400000) as day, SUM(carbonImpact) as totalCO2
     FROM TransactionTable
     WHERE dateAndTime BETWEEN :startDate AND :endDate
     AND transactionType = 'Expense'
     GROUP BY day ORDER BY day ASC
-""")
+"""
+    )
     suspend fun getCo2LineChart(startDate: Long, endDate: Long): List<Co2LineItem>
 
     // Recent transactions list
-    @Query("""
+    @Query(
+        """
     SELECT * FROM TransactionTable 
     WHERE dateAndTime BETWEEN :startDate AND :endDate
-    AND transactionType = 'Expense' AND carbonEmitted > 0
+    AND transactionType = 'Expense' AND carbonImpact > 0
     ORDER BY dateAndTime DESC LIMIT 5
-""")
+"""
+    )
     suspend fun getRecentCo2Transactions(startDate: Long, endDate: Long): List<Transaction_Info>
 
 

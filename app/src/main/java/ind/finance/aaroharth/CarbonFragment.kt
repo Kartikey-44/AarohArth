@@ -159,7 +159,7 @@ class CarbonFragment : Fragment() {
 
         val categoryTotals = transactions.groupBy { it.category }
             .mapValues { entry ->
-                entry.value.sumOf { it.carbonEmitted }
+                entry.value.sumOf { it.carbonImpact }
             }
 
         updatePieChart(categoryTotals)
@@ -251,7 +251,7 @@ class CarbonFragment : Fragment() {
         val dailyData = transactions
             .groupBy { (it.dateAndTime / 86400000L).toInt() }
             .map { (day, txns) ->
-                val totalCo2 = txns.sumOf { it.carbonEmitted }
+                val totalCo2 = txns.sumOf { it.carbonImpact }
                 Entry(day.toFloat(), totalCo2.toFloat())
             }
             .sortedBy { it.x }
