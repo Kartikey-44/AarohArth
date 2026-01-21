@@ -27,12 +27,22 @@ class MainActivity : BaseSecureActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val prefs = getSharedPreferences("dark_mode_prefs", MODE_PRIVATE)
-        val isDarkMode = prefs.getBoolean("is_dark_mode", false)
 
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
+        if (!prefs.contains("is_dark_mode")) {
+            // First launch → follow device theme
+            AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            )
+        } else {
+            val isDarkMode = prefs.getBoolean("is_dark_mode", false)
+            AppCompatDelegate.setDefaultNightMode(
+                if (isDarkMode)
+                    AppCompatDelegate.MODE_NIGHT_YES
+                else
+                    AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
