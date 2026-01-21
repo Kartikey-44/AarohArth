@@ -3,28 +3,41 @@ package ind.finance.aaroharth
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import android.widget.PopupMenu
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
+import ind.finance.aaroharth.databinding.DialogDeleteConfirmationBinding
 import ind.finance.aaroharth.databinding.FragmentProfileBinding
 import ind.finance.aaroharth.databinding.UsernameDialogBinding
+import java.io.File
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
+    // ---------------- IMAGE PICKER ----------------
+
+    private val imagePicker =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                saveProfileImage(uri)
+            }
+        }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -35,85 +48,104 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         loadUsername()
+        loadEmail()
         setupDarkModeSwitch()
-        setupProfileMenu()
         setupSocialMediaLinks()
-    }
-
-    private fun setupSocialMediaLinks() {
-        // Email
-        binding.logo1.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:support@aaroharth.com")
-                putExtra(Intent.EXTRA_SUBJECT, "AarohArth Support")
-                putExtra(Intent.EXTRA_TEXT, "Hi AarohArth Team,\n\n")
-            }
-            startActivity(Intent.createChooser(intent, "Send Email"))
+        loadProfileImage()
+        binding.shapeableImageView.setOnClickListener {
+            imagePicker.launch("image/*")
         }
 
-        // Discord
-        binding.logo2.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/"))
-            startActivity(intent)
+        binding.userTextView.setOnClickListener {
+            showUsernameDialog()
         }
 
-        // GitHub
-        binding.logo3.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/"))
-            startActivity(intent)
+        binding.logoutCardView.setOnClickListener {
+            showDeleteConfirmationDialog()
         }
     }
+    private fun loadProfileImage() {
+        val path = requireContext()
+            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            .getString("profile_image_path", null)
 
-    private fun setupProfileMenu() {
-        binding.profileMenu.setOnClickListener { view ->
-            showProfilePopup(view)
-        }
-    }
-
-    private fun showProfilePopup(view: View) {
-        val popup = PopupMenu(requireContext(), view)
-        popup.menuInflater.inflate(R.menu.profile_menu, popup.menu)
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.edit_profile -> {
-                    Toast.makeText(requireContext(), "Edit Profile", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                R.id.change_username -> {
-                    showChangeUsernameDialog()
-                    true
-                }
-                else -> false
+        if (!path.isNullOrEmpty()) {
+            val file = File(path)
+            if (file.exists()) {
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                binding.shapeableImageView.setImageBitmap(bitmap)
             }
         }
-        try {
-            val popupField = PopupMenu::class.java.getDeclaredField("mPopup")
-            popupField.isAccessible = true
-            val popupWindow = popupField.get(popup) as android.widget.PopupWindow
-
-            val width = (resources.displayMetrics.widthPixels * 0.8).toInt()
-            popupWindow.width = width
-            popupWindow.height = ViewGroup.LayoutParams.WRAP_CONTENT
-
-            popupWindow.setBackgroundDrawable(
-                ContextCompat.getDrawable(requireContext(), R.drawable.icon_container_bg)
-            )
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        popup.show()
     }
 
-    private fun showChangeUsernameDialog() {
+
+    // ---------------- PROFILE IMAGE ----------------
+    private fun saveProfileImage(uri: Uri) {
+        val resolver = requireContext().contentResolver
+
+        // 1. Get image bounds only
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+
+        resolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, options)
+        }
+
+        // 2. Calculate scale (target ~300px)
+        val targetSize = 300
+        var scale = 1
+        while (options.outWidth / scale > targetSize || options.outHeight / scale > targetSize) {
+            scale *= 2
+        }
+
+        // 3. Decode scaled bitmap
+        val scaledOptions = BitmapFactory.Options().apply {
+            inSampleSize = scale
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+
+        val bitmap = resolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, scaledOptions)
+        } ?: return
+
+        // 4. Save compressed bitmap
+        val file = File(requireContext().filesDir, "profile_image.jpg")
+        file.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+        }
+
+        // 5. Save path
+        requireContext()
+            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putString("profile_image_path", file.absolutePath)
+            .apply()
+
+        // 6. Display safely
+        binding.shapeableImageView.setImageBitmap(bitmap)
+    }
+
+
+    // ---------------- USERNAME ----------------
+
+    private fun loadUsername() {
+        val prefs = requireContext()
+            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+
+        val name = prefs.getString("username", null)
+        if (!name.isNullOrEmpty()) {
+            binding.userTextView.text = name
+        }
+    }
+
+    private fun showUsernameDialog() {
         val dialogBinding = UsernameDialogBinding.inflate(layoutInflater)
         val dialog = Dialog(requireContext())
 
         dialog.setContentView(dialogBinding.root)
-        dialog.setCancelable(true)
         dialog.window?.setBackgroundDrawable(
-            requireContext().getDrawable(R.drawable.dialog_background)
+            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
         )
         dialog.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.9).toInt(),
@@ -121,36 +153,34 @@ class ProfileFragment : Fragment() {
         )
         dialog.show()
 
-        val currentName = getUserName(requireContext())
-        if (currentName != null) {
+        val prefs = requireContext()
+            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+
+        val currentName = prefs.getString("username", null)
+        if (!currentName.isNullOrEmpty()) {
             dialogBinding.nameField.setText(currentName)
             dialogBinding.nameField.setSelection(currentName.length)
         }
 
-        dialogBinding.nameField.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                dialogBinding.nameLayout.error = null
-            }
-        })
+        dialogBinding.nameField.addTextChangedListener {
+            dialogBinding.nameLayout.error = null
+        }
 
         dialogBinding.save.setOnClickListener {
             val name = dialogBinding.nameField.text.toString().trim()
+
             if (name.isEmpty()) {
                 dialogBinding.nameLayout.error = "Required"
                 return@setOnClickListener
             }
 
-            requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .edit()
+            prefs.edit()
                 .putString("username", name)
                 .apply()
 
             binding.userTextView.text = name
-
             dialog.dismiss()
-            Toast.makeText(requireContext(), "Username updated!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Username updated", Toast.LENGTH_SHORT).show()
         }
 
         dialogBinding.skip.setOnClickListener {
@@ -158,42 +188,98 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun loadUsername() {
-        if (hasUserName(requireContext())) {
-            val name = getUserName(requireContext())!!
-            binding.userTextView.text = name
+    // ---------------- EMAIL ----------------
 
-            // Email To Update From FireBase
-            binding.emailTextView.text = "$name@aaroharth.com"
+    private fun loadEmail() {
+        val email = requireContext()
+            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            .getString("email", null)
+
+        if (!email.isNullOrEmpty()) {
+            binding.emailTextView.text = email
         }
     }
 
-    private fun setupDarkModeSwitch() {
-        val sharedPrefs = requireContext()
-            .getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPrefs.getBoolean("is_dark_mode", false)
+    // ---------------- DARK MODE ----------------
 
+    private fun setupDarkModeSwitch() {
+        val prefs = requireContext()
+            .getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
+
+        val isDarkMode = prefs.getBoolean("is_dark_mode", false)
         binding.switchDarkMode.isChecked = isDarkMode
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit()
+            prefs.edit()
                 .putBoolean("is_dark_mode", isChecked)
                 .apply()
 
             AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
+                if (isChecked)
+                    AppCompatDelegate.MODE_NIGHT_YES
+                else
+                    AppCompatDelegate.MODE_NIGHT_NO
             )
         }
     }
 
-    private fun getUserName(context: Context): String? =
-        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            .getString("username", null)
+    // ---------------- SOCIAL LINKS ----------------
 
-    private fun hasUserName(context: Context): Boolean =
-        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            .contains("username")
+    private fun setupSocialMediaLinks() {
+
+        binding.logo1.setOnClickListener {
+            startActivity(
+                Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@aaroharth.com"))
+            )
+        }
+
+        binding.logo2.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/")))
+        }
+
+        binding.logo3.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/")))
+        }
+    }
+
+    // ---------------- LOGOUT / DELETE ----------------
+
+    private fun showDeleteConfirmationDialog() {
+        val dialog = Dialog(requireContext())
+        val db = DialogDeleteConfirmationBinding.inflate(layoutInflater)
+
+        dialog.setContentView(db.root)
+        dialog.window?.setBackgroundDrawable(
+            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
+        )
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        db.save.textSize=14f
+
+        db.attention.setText(R.string.delete)
+        db.dialogLottie.setAnimation("stirict.json")
+        db.save.text = "Logout"
+        db.skip.text = "Cancel"
+
+        db.save.setOnClickListener {
+            requireContext()
+                .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("is_logged_in", false)
+                .apply()
+
+            startActivity(Intent(requireContext(), SignIn::class.java))
+            requireActivity().finish()
+        }
+
+        db.skip.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

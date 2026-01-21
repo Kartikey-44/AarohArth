@@ -121,6 +121,11 @@ class SignUp : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val result = task.result!!
                     val user = result.user!!
+                    val email=user.email?:""
+                    getSharedPreferences("app_prefs",MODE_PRIVATE)
+                        .edit()
+                        .putString("email",email)
+                        .apply()
 
                     if (result.additionalUserInfo?.isNewUser == true) {
                         saveGoogleUserToDatabase(user)
@@ -163,6 +168,10 @@ class SignUp : AppCompatActivity() {
 
     private fun signUp(email: String, password: String) {
         showLoading("Signing up...")
+        getSharedPreferences("app_prefs",MODE_PRIVATE)
+            .edit()
+            .putString("email",email)
+            .apply()
 
         FirebaseAuth.getInstance()
             .createUserWithEmailAndPassword(email, password)
