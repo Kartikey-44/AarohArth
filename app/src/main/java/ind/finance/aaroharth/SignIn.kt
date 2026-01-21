@@ -90,6 +90,7 @@ class SignIn : AppCompatActivity() {
     // ---------------- EMAIL SIGN-IN ----------------
 
     private fun signIn(email: String, password: String) {
+        getSharedPreferences("app_prefs",MODE_PRIVATE).edit().putString("email",email).apply()
         showLoading("Signing In")
 
         FirebaseAuth.getInstance()
@@ -140,6 +141,12 @@ class SignIn : AppCompatActivity() {
                 if (task.isSuccessful) {
                     ensureGoogleUserInDb()
                     onAuthSuccess()
+                    val user= FirebaseAuth.getInstance().currentUser
+                    val email=user?.email?:""
+                    getSharedPreferences("app_prefs", MODE_PRIVATE)
+                        .edit()
+                        .putString("email", email)
+                        .apply()
                 } else {
                     showDialog("Failed.json", "Google authentication failed")
                 }
