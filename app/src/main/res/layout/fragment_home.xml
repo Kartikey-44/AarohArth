@@ -47,7 +47,7 @@
             app:layout_constraintBottom_toTopOf="@id/this_month_overview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:padding="8dp"/>
+            android:padding="12dp"/>
 
         <TextView
             android:id="@+id/this_month_overview"
