@@ -9,6 +9,8 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,9 +28,11 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.jvm.java
 
+
 class HomeFragement : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
 
     // FAB animations
     private lateinit var rotateOpen: Animation
@@ -38,64 +42,72 @@ class HomeFragement : Fragment() {
     private lateinit var fromLeft: Animation
     private lateinit var toLeft: Animation
 
-
     private var isFabOpen = false
     private lateinit var adapter: TransactionListAdapter
 
-
-    // ------------------ Fragment Lifecycle ------------------
+    // ------------------ Lifecycle ------------------
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
-
-
-        currentMonthAndYear()
-        overviewCardsData()
-        currentBalance()
-
-        // Init animations ONCE here
-        rotateOpen = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.addtransaction_rotate_open_animation
-        )
-        rotateClose = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.addtransaction_rotate_close_animation
-        )
-        fromBottom = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.addtransaction_from_bottom_animation
-        )
-        toBottom = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.addtransaction_to_bottom_animation
-        )
-        fromLeft = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.from_left)
-        toLeft = AnimationUtils.loadAnimation(
-            requireContext(),
-            R.anim.to_left)
-
-
-
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // ✅ Insets applied ONCE per view lifecycle
+        val initialTopPadding = view.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            v.setPadding(
+                v.paddingLeft,
+                initialTopPadding + topInset,
+                v.paddingRight,
+                v.paddingBottom
+            )
+            insets
+        }
 
-        if(hasUserName(requireContext())){
-            binding.username.text="${getUserName(requireContext())}"
+        initAnimations()
+        initRecyclerView()
+        initClickListeners()
+        initStaticUi()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshData()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    // ------------------ Init blocks ------------------
+
+    private fun initAnimations() {
+        rotateOpen = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_open_animation)
+        rotateClose = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_rotate_close_animation)
+        fromBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_from_bottom_animation)
+        toBottom = AnimationUtils.loadAnimation(requireContext(), R.anim.addtransaction_to_bottom_animation)
+        fromLeft = AnimationUtils.loadAnimation(requireContext(), R.anim.from_left)
+        toLeft = AnimationUtils.loadAnimation(requireContext(), R.anim.to_left)
+    }
+
+    private fun initRecyclerView() {
+        adapter = TransactionListAdapter(emptyList())
+        binding.tranList.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@HomeFragement.adapter
         }
-        else{
-            binding.username.text="User"
-        }
+    }
+
+    private fun initClickListeners() {
 
         binding.addTransactionBtn.setOnClickListener {
             if (isFabOpen) closeFab() else openFab()
@@ -119,68 +131,48 @@ class HomeFragement : Fragment() {
 
         binding.aiBtn.setOnClickListener {
             closeFab()
-            startActivity(
-                Intent(requireContext(), AI_Activity::class.java)
-            )
-        }
-
-        binding.accountManage.setOnClickListener {
-            startActivity(
-                Intent(requireContext(), AccountManagement::class.java)
-            )
-        }
-
-        binding.tranList.layoutManager = LinearLayoutManager(requireContext())
-        adapter= TransactionListAdapter(emptyList())
-        binding.tranList.adapter =adapter
-
-
-        binding.seeAll.setOnClickListener {
-            val intent= Intent(requireContext(), TransactionList::class.java)
-            intent.putExtra("category","all")
-            intent.putExtra("type","all")
-            startActivity(intent)
-
-        }
-
-        binding.budgetManage.setOnClickListener {
-                startActivity(Intent(requireContext(),BudgetManagement::class.java))
-        }
-
-        binding.aiBtn.setOnClickListener {
             startActivity(Intent(requireContext(), AI_Activity::class.java))
         }
 
+        binding.accountManage.setOnClickListener {
+            startActivity(Intent(requireContext(), AccountManagement::class.java))
+        }
+
+        binding.budgetManage.setOnClickListener {
+            startActivity(Intent(requireContext(), BudgetManagement::class.java))
+        }
+
+        binding.seeAll.setOnClickListener {
+            startActivity(
+                Intent(requireContext(), TransactionList::class.java)
+                    .putExtra("category", "all")
+                    .putExtra("type", "all")
+            )
+        }
     }
 
-    // ------------------ Toolbar Search ------------------
+    private fun initStaticUi() {
+        binding.username.text =
+            getUserName(requireContext()) ?: "User"
 
-
-    // ------------------ Toolbar Visibility ------------------
-
-    override fun onResume() {
-        super.onResume()
-        requireActivity()
-            .findViewById<MaterialToolbar>(R.id.toolbar)
-            .visibility = View.GONE
-
-        val dao= App_Database.getInstance(requireContext()).transactionDao()
-        lifecycleScope.launch {
-            val transactions=dao.getalltransaction()
-           adapter.updatelist(transactions)
-
-        }
-        currentBalance()
-        overviewCardsData()
+        currentMonthAndYear()
         greeting()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        requireActivity().invalidateOptionsMenu()
+    // ------------------ Data refresh ------------------
+
+    private fun refreshData() {
+        currentBalance()
+        overviewCardsData()
+
+        val dao = App_Database.getInstance(requireContext()).transactionDao()
+        lifecycleScope.launch {
+            val transactions = dao.getalltransaction()
+            adapter.updatelist(transactions)
+        }
     }
 
-    // ------------------ FAB Animations ------------------
+    // ------------------ FAB helpers ------------------
 
     private fun openFab() {
         isFabOpen = true
@@ -196,9 +188,10 @@ class HomeFragement : Fragment() {
             isClickable = true
             startAnimation(fromBottom)
         }
+
         binding.aiBtn.apply {
-            visibility=View.VISIBLE
-            isClickable=true
+            visibility = View.VISIBLE
+            isClickable = true
             startAnimation(fromLeft)
         }
 
@@ -219,114 +212,80 @@ class HomeFragement : Fragment() {
             isClickable = false
             visibility = View.GONE
         }
+
         binding.aiBtn.apply {
             startAnimation(toLeft)
-            visibility=View.GONE
-
+            isClickable = false
+            visibility = View.GONE
         }
-
 
         binding.addTransactionBtn.startAnimation(rotateClose)
     }
 
-    //LIST
+    // ------------------ UI helpers ------------------
 
-
-    private fun currentMonthAndYear(){
-        val current= LocalDate.now()
-        val formatter= DateTimeFormatter.ofPattern("MMMM yyyy")
-        val formatted=current.format(formatter)
-        binding.thisMonthOverview.text="$formatted Overview"
-
+    private fun currentMonthAndYear() {
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+        binding.thisMonthOverview.text =
+            "${LocalDate.now().format(formatter)} Overview"
     }
 
-    private fun overviewCardsData(){
+    private fun greeting() {
+        val hour = LocalDateTime.now().hour
+        binding.greeting.text = when (hour) {
+            in 5..11 -> "Good Morning,"
+            in 12..16 -> "Good Afternoon,"
+            in 17..20 -> "Good Evening,"
+            else -> "Good Night,"
+        }
+    }
 
-        val current=LocalDate.now()
-        val startOfMonth=current.withDayOfMonth(1)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-        val endOfMonth=current.withDayOfMonth(current.lengthOfMonth())
-            .atTime(23,59,59)
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-
-        val format= NumberFormat.getNumberInstance(Locale("en","IN"))
-        format.maximumFractionDigits=0
+    private fun currentBalance() {
+        val format = NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
+            maximumFractionDigits = 0
+        }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val totalExpense=App_Database.getInstance(requireContext())
-                .transactionDao()
-                .monthWise(startOfMonth,endOfMonth,"Expense")
-            val totalIncome=App_Database.getInstance(requireContext())
-                .transactionDao().monthWise(startOfMonth,endOfMonth,"Income")
-            withContext(Dispatchers.Main){
-                val incomeBalance=format.format(totalIncome)
-                binding.incomeAmount.text="\u20B9 $incomeBalance"
-                val expenseBalance=format.format(totalExpense)
-                binding.expenseAmount.text="\u20B9 $expenseBalance"
-                if(totalExpense>totalIncome){
-                    binding.thisMonthOverview.setTextColor(ContextCompat.
-                    getColor(requireContext(),R.color.this_month_overview_expense))
-                }
-                else if(totalExpense<totalIncome){
-                    binding.thisMonthOverview.setTextColor(ContextCompat.
-                    getColor(requireContext(),R.color.this_month_overview_income))
-                }
-                else
-                {
-                    binding.thisMonthOverview.setTextColor(ContextCompat.
-                    getColor(requireContext(),R.color.this_month_overview_neutral))
-                }
+            val balance =
+                App_Database.getInstance(requireContext()).accountDao().currentbalance()
+            withContext(Dispatchers.Main) {
+                val text = "\u20B9 ${format.format(balance)}"
+                binding.currentBalanceAmount.text =
+                    if (balance >= 0) text else "$text Deficit"
             }
-
         }
     }
 
-    private fun currentBalance(){
-        val format= NumberFormat.getNumberInstance(Locale("en","IN"))
-        format.maximumFractionDigits=0
+    private fun overviewCardsData() {
+        val now = LocalDate.now()
+        val start = now.withDayOfMonth(1)
+            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val end = now.withDayOfMonth(now.lengthOfMonth())
+            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        val format = NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
+            maximumFractionDigits = 0
+        }
+
         lifecycleScope.launch(Dispatchers.IO) {
-            val currentBalance= App_Database.getInstance(requireContext())
-                .accountDao().currentbalance()
-            withContext(Dispatchers.Main){
-                if(currentBalance>0){
-                    val balance=format.format(currentBalance)
-                    binding.currentBalanceAmount.text="\u20B9 $balance"
-                }
-                else{
-                    val balance=format.format(currentBalance)
-                    binding.currentBalanceAmount.text="\u20B9 $balance Deficit"
-                    binding.currentBalanceAmount.setTextColor(ContextCompat.getColor(requireContext(),R.color.red))
-                }
+            val dao = App_Database.getInstance(requireContext()).transactionDao()
+            val expense = dao.monthWise(start, end, "Expense")
+            val income = dao.monthWise(start, end, "Income")
+
+            withContext(Dispatchers.Main) {
+                binding.incomeAmount.text = "\u20B9 ${format.format(income)}"
+                binding.expenseAmount.text = "\u20B9 ${format.format(expense)}"
             }
-
         }
     }
 
-    private fun greeting(){
-        val currentHour= LocalDateTime.now().hour
-        when(currentHour){
-            in 5..11->binding.greeting.text="Good Morning,"
-            in 12..16->binding.greeting.text="Good Afternoon,"
-            in 17..20->binding.greeting.text="Good Evening,"
-            else->binding.greeting.text="Good Night,"
-        }
+    // ------------------ Pref helpers ------------------
 
-    }
-
-       fun getUserName(context: Context): String? =
-           context.getSharedPreferences("app_prefs", MODE_PRIVATE)
-               .getString("username", null)
-
-       fun hasUserName(context: Context): Boolean =
-           context.getSharedPreferences("app_prefs", MODE_PRIVATE)
-               .contains("username")
-
-
+    private fun getUserName(context: Context): String? =
+        context.getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .getString("username", null)
 }
+
 
 
 

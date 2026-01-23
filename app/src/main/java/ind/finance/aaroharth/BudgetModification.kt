@@ -37,11 +37,6 @@ class BudgetModification : AppCompatActivity() {
         binding = ActivityBudgetModificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-            insets
-        }
 
         db = App_Database.getInstance(this)
 
