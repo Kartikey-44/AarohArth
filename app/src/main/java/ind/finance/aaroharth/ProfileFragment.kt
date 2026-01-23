@@ -14,8 +14,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelStore
 import ind.finance.aaroharth.databinding.DialogDeleteConfirmationBinding
 import ind.finance.aaroharth.databinding.FragmentProfileBinding
 import ind.finance.aaroharth.databinding.UsernameDialogBinding
@@ -46,6 +49,17 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(
+                view.paddingLeft,
+                topInset,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
+        }
+
 
         loadUsername()
         loadEmail()
@@ -201,13 +215,24 @@ class ProfileFragment : Fragment() {
     }
 
     // ---------------- DARK MODE ----------------
-
     private fun setupDarkModeSwitch() {
+
         val prefs = requireContext()
             .getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
 
-        val isDarkMode = prefs.getBoolean("is_dark_mode", false)
-        binding.switchDarkMode.isChecked = isDarkMode
+        val currentNightMode =
+            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+
+        val isCurrentlyDark = currentNightMode ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        // ✅ Sync switch with REAL mode
+        binding.switchDarkMode.isChecked = isCurrentlyDark
+
+        // ✅ Persist it once (important for first install)
+        prefs.edit()
+            .putBoolean("is_dark_mode", isCurrentlyDark)
+            .apply()
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit()
@@ -285,4 +310,5 @@ class ProfileFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

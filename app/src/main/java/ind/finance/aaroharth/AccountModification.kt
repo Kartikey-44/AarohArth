@@ -1,6 +1,9 @@
 package ind.finance.aaroharth
 
 import android.app.Dialog
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -31,6 +35,7 @@ class AccountModification : AppCompatActivity() {
     // prevents fake "changed" events when we clear text programmatically
     private var suppressChange = false
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -38,12 +43,11 @@ class AccountModification : AppCompatActivity() {
         binding = ActivityAccountModificationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-            insets
-        }
 
+        if(Build.VERSION.SDK_INT> Build.VERSION_CODES.S){
+            val blur = RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
+            binding.bg.setRenderEffect(blur)
+        }
         db = App_Database.getInstance(this)
 
         onBackPressedDispatcher.addCallback(this) {
@@ -69,6 +73,13 @@ class AccountModification : AppCompatActivity() {
                 binding.nameField.setText(original.accountName)
                 binding.typeField.setText(original.accountType)
                 binding.balanceField.setText(original.balance.toString())
+                binding.balanceField.isClickable=false
+                binding.balanceField.isEnabled=false
+                binding.nameField.isEnabled=false
+                binding.nameField.isClickable=false
+                binding.typeField.isClickable=false
+                binding.typeField.isEnabled=false
+                binding.typeField.setTextColor(getColor(R.color.black))
             } else {
                 binding.heading.text = "Edit / Delete Account"
                 binding.attention.visibility = View.GONE
