@@ -14,6 +14,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import android.view.inputmethod.InputMethodManager
 import android.text.TextWatcher
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -41,6 +43,16 @@ class CategoriesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentCategoriesBinding.inflate(inflater, container, false)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(
+                view.paddingLeft,
+                topInset,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
+        }
         return binding.root
     }
 
