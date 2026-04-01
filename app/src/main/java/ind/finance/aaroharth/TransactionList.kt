@@ -6,46 +6,46 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import ind.finance.aaroharth.adapters.TransactionListAdapter
 import ind.finance.aaroharth.databinding.ActivityTransactionListBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import ind.finance.aaroharth.viewmodels.TransactionViewModel
+import ind.finance.aaroharth.viewmodels.ViewModelFactory
 
 class TransactionList : AppCompatActivity() {
 
     private lateinit var binding: ActivityTransactionListBinding
-    private lateinit var dao: Transaction_Dao
+    private val viewModel: TransactionViewModel by viewModels {
+        val app = application as MyApplication
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+    }
     private lateinit var adapter: TransactionListAdapter
-
-    private var searchJob: Job? = null
-
-    // SINGLE SOURCE OF TRUTH
-    private var selectedType = "ALL" // ALL | Income | Expense
+    private var selectedType = "ALL"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         binding = ActivityTransactionListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dao = App_Database.getInstance(this).transactionDao()
         adapter = TransactionListAdapter(emptyList())
         binding.tranList.adapter = adapter
 
         setupUI()
         setupSearch()
+        observeViewModel()
 
-        updateToggleUI()   // 🔥 force UI sync
-        loadData()
+        updateToggleUI()
+        viewModel.loadTransactions(selectedType)
     }
 
-    // ---------------- UI ----------------
+    private fun observeViewModel() {
+        viewModel.transactions.observe(this) { transactions ->
+            adapter.updatelist(transactions)
+        }
+    }
 
     private fun setupUI() {
         binding.toggleGroup.visibility = View.VISIBLE
@@ -53,16 +53,15 @@ class TransactionList : AppCompatActivity() {
         binding.btnIncome.setOnClickListener {
             selectedType = if (selectedType == "Income") "ALL" else "Income"
             updateToggleUI()
-            loadData()
+            viewModel.loadTransactions(selectedType)
         }
 
         binding.btnExpense.setOnClickListener {
             selectedType = if (selectedType == "Expense") "ALL" else "Expense"
             updateToggleUI()
-            loadData()
+            viewModel.loadTransactions(selectedType)
         }
 
-        // Search
         binding.searchIcon.setOnClickListener {
             binding.searchIcon.visibility = View.GONE
             binding.titleText.visibility = View.GONE
@@ -80,67 +79,28 @@ class TransactionList : AppCompatActivity() {
             binding.searchInput.visibility = View.GONE
             binding.back.visibility = View.GONE
             binding.searchInput.text?.clear()
-
-            updateToggleUI() // 🔥 restore UI safely
+            updateToggleUI()
 
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(binding.searchInput.windowToken, 0)
+            viewModel.loadTransactions(selectedType)
         }
     }
-
-    // ---------------- DATA ----------------
-
-    private fun loadData() {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                when (selectedType) {
-                    "Income" -> dao.gettransaction("Income")
-                    "Expense" -> dao.gettransaction("Expense")
-                    else -> dao.getalltransaction()
-                }
-            }
-            adapter.updatelist(result)
-        }
-    }
-
-    // ---------------- SEARCH ----------------
 
     private fun setupSearch() {
         binding.searchInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString().orEmpty()
-
-                searchJob?.cancel()
-                searchJob = lifecycleScope.launch {
-                    delay(300)
-
-                    val result = withContext(Dispatchers.IO) {
-                        when {
-                            query.isBlank() -> {
-                                when (selectedType) {
-                                    "Income" -> dao.gettransaction("Income")
-                                    "Expense" -> dao.gettransaction("Expense")
-                                    else -> dao.getalltransaction()
-                                }
-                            }
-                            selectedType == "Income" ->
-                                dao.searchTransactions(query, "Income")
-                            selectedType == "Expense" ->
-                                dao.searchTransactions(query, "Expense")
-                            else ->
-                                dao.searchTransactionstype(query)
-                        }
-                    }
-                    adapter.updatelist(result)
+                if (query.isBlank()) {
+                    viewModel.loadTransactions(selectedType)
+                } else {
+                    viewModel.searchTransactions(query, selectedType)
                 }
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
-
-    // ---------------- UI STATE ----------------
 
     private fun updateToggleUI() {
         when (selectedType) {
@@ -165,9 +125,7 @@ class TransactionList : AppCompatActivity() {
     private fun styleSelected(btn: MaterialButton, income: Boolean) {
         btn.strokeWidth = resources.getDimensionPixelSize(R.dimen.stroke_4dp)
         btn.setTypeface(null, android.graphics.Typeface.BOLD)
-        btn.setBackgroundColor(
-            getColor(if (income) R.color.toggle_income_bg else R.color.toggle_expense_bg)
-        )
+        btn.setBackgroundColor(getColor(if (income) R.color.toggle_income_bg else R.color.toggle_expense_bg))
     }
 
     private fun styleUnselected(btn: MaterialButton) {

@@ -18,18 +18,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelStore
+import androidx.fragment.app.viewModels
+import ind.finance.aaroharth.authFragments.SignIn
 import ind.finance.aaroharth.databinding.DialogDeleteConfirmationBinding
 import ind.finance.aaroharth.databinding.FragmentProfileBinding
 import ind.finance.aaroharth.databinding.UsernameDialogBinding
+import ind.finance.aaroharth.viewmodels.ProfileViewModel
 import java.io.File
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
-
-    // ---------------- IMAGE PICKER ----------------
+    
+    private val viewModel: ProfileViewModel by viewModels()
 
     private val imagePicker =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -49,23 +51,14 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            view.setPadding(
-                view.paddingLeft,
-                topInset,
-                view.paddingRight,
-                view.paddingBottom
-            )
+            v.setPadding(v.paddingLeft, topInset, v.paddingRight, v.paddingBottom)
             insets
         }
 
+        observeViewModel()
 
-        loadUsername()
-        loadEmail()
-        setupDarkModeSwitch()
-        setupSocialMediaLinks()
-        loadProfileImage()
         binding.shapeableImageView.setOnClickListener {
             imagePicker.launch("image/*")
         }
@@ -75,234 +68,117 @@ class ProfileFragment : Fragment() {
         }
 
         binding.logoutCardView.setOnClickListener {
-            showDeleteConfirmationDialog()
+            showLogoutConfirmationDialog()
         }
-    }
-    private fun loadProfileImage() {
-        val path = requireContext()
-            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            .getString("profile_image_path", null)
 
-        if (!path.isNullOrEmpty()) {
-            val file = File(path)
-            if (file.exists()) {
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                binding.shapeableImageView.setImageBitmap(bitmap)
+        setupSocialMediaLinks()
+        setupDarkModeSwitch()
+    }
+
+    private fun observeViewModel() {
+        viewModel.username.observe(viewLifecycleOwner) { name ->
+            binding.userTextView.text = if (name.isNullOrEmpty()) "User" else name
+        }
+
+        viewModel.email.observe(viewLifecycleOwner) { email ->
+            binding.emailTextView.text = email
+        }
+
+        viewModel.profileImagePath.observe(viewLifecycleOwner) { path ->
+            if (!path.isNullOrEmpty()) {
+                val file = File(path)
+                if (file.exists()) {
+                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    binding.shapeableImageView.setImageBitmap(bitmap)
+                }
             }
         }
     }
 
-
-    // ---------------- PROFILE IMAGE ----------------
     private fun saveProfileImage(uri: Uri) {
         val resolver = requireContext().contentResolver
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
 
-        // 1. Get image bounds only
-        val options = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-
-        resolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, options)
-        }
-
-        // 2. Calculate scale (target ~300px)
         val targetSize = 300
         var scale = 1
-        while (options.outWidth / scale > targetSize || options.outHeight / scale > targetSize) {
-            scale *= 2
-        }
+        while (options.outWidth / scale > targetSize || options.outHeight / scale > targetSize) { scale *= 2 }
 
-        // 3. Decode scaled bitmap
         val scaledOptions = BitmapFactory.Options().apply {
             inSampleSize = scale
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }
 
-        val bitmap = resolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, scaledOptions)
-        } ?: return
-
-        // 4. Save compressed bitmap
+        val bitmap = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, scaledOptions) } ?: return
         val file = File(requireContext().filesDir, "profile_image.jpg")
-        file.outputStream().use { out ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
-        }
+        file.outputStream().use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out) }
 
-        // 5. Save path
-        requireContext()
-            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            .edit()
-            .putString("profile_image_path", file.absolutePath)
-            .apply()
-
-        // 6. Display safely
-        binding.shapeableImageView.setImageBitmap(bitmap)
-    }
-
-
-    // ---------------- USERNAME ----------------
-
-    private fun loadUsername() {
-        val prefs = requireContext()
-            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-
-        val name = prefs.getString("username", null)
-        if (!name.isNullOrEmpty()) {
-            binding.userTextView.text = name
-        }
+        viewModel.updateProfileImage(file.absolutePath)
     }
 
     private fun showUsernameDialog() {
         val dialogBinding = UsernameDialogBinding.inflate(layoutInflater)
         val dialog = Dialog(requireContext())
-
         dialog.setContentView(dialogBinding.root)
-        dialog.window?.setBackgroundDrawable(
-            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
-        )
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.9).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        dialog.show()
+        dialog.window?.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background))
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        
+        dialogBinding.nameField.setText(viewModel.username.value)
+        dialogBinding.nameField.setSelection(dialogBinding.nameField.text?.length ?: 0)
 
-        val prefs = requireContext()
-            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-
-        val currentName = prefs.getString("username", null)
-        if (!currentName.isNullOrEmpty()) {
-            dialogBinding.nameField.setText(currentName)
-            dialogBinding.nameField.setSelection(currentName.length)
-        }
-
-        dialogBinding.nameField.addTextChangedListener {
-            dialogBinding.nameLayout.error = null
-        }
+        dialogBinding.nameField.addTextChangedListener { dialogBinding.nameLayout.error = null }
 
         dialogBinding.save.setOnClickListener {
             val name = dialogBinding.nameField.text.toString().trim()
-
             if (name.isEmpty()) {
                 dialogBinding.nameLayout.error = "Required"
                 return@setOnClickListener
             }
-
-            prefs.edit()
-                .putString("username", name)
-                .apply()
-
-            binding.userTextView.text = name
+            viewModel.updateUsername(name)
             dialog.dismiss()
             Toast.makeText(requireContext(), "Username updated", Toast.LENGTH_SHORT).show()
         }
 
-        dialogBinding.skip.setOnClickListener {
-            dialog.dismiss()
-        }
+        dialogBinding.skip.setOnClickListener { dialog.dismiss() }
+        dialog.show()
     }
 
-    // ---------------- EMAIL ----------------
-
-    private fun loadEmail() {
-        val email = requireContext()
-            .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            .getString("email", null)
-
-        if (!email.isNullOrEmpty()) {
-            binding.emailTextView.text = email
-        }
-    }
-
-    // ---------------- DARK MODE ----------------
     private fun setupDarkModeSwitch() {
-
-        val prefs = requireContext()
-            .getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
-
-        val currentNightMode =
-            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-
-        val isCurrentlyDark = currentNightMode ==
-                android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-        // ✅ Sync switch with REAL mode
+        val prefs = requireContext().getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
+        val isCurrentlyDark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         binding.switchDarkMode.isChecked = isCurrentlyDark
 
-        // ✅ Persist it once (important for first install)
-        prefs.edit()
-            .putBoolean("is_dark_mode", isCurrentlyDark)
-            .apply()
-
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit()
-                .putBoolean("is_dark_mode", isChecked)
-                .apply()
-
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked)
-                    AppCompatDelegate.MODE_NIGHT_YES
-                else
-                    AppCompatDelegate.MODE_NIGHT_NO
-            )
+            prefs.edit().putBoolean("is_dark_mode", isChecked).apply()
+            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
-
-    // ---------------- SOCIAL LINKS ----------------
 
     private fun setupSocialMediaLinks() {
-
-        binding.logo1.setOnClickListener {
-            startActivity(
-                Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@aaroharth.com"))
-            )
-        }
-
-        binding.logo2.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/")))
-        }
-
-        binding.logo3.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/")))
-        }
+        binding.logo1.setOnClickListener { startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@aaroharth.com"))) }
+        binding.logo2.setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/"))) }
+        binding.logo3.setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/"))) }
     }
 
-    // ---------------- LOGOUT / DELETE ----------------
-
-    private fun showDeleteConfirmationDialog() {
+    private fun showLogoutConfirmationDialog() {
         val dialog = Dialog(requireContext())
         val db = DialogDeleteConfirmationBinding.inflate(layoutInflater)
-
         dialog.setContentView(db.root)
-        dialog.window?.setBackgroundDrawable(
-            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
-        )
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.9).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        db.save.textSize=14f
-
+        dialog.window?.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background))
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+        
+        db.save.textSize = 14f
         db.attention.setText(R.string.delete)
         db.dialogLottie.setAnimation("stirict.json")
         db.save.text = "Logout"
         db.skip.text = "Cancel"
 
         db.save.setOnClickListener {
-            requireContext()
-                .getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                .edit()
-                .putBoolean("is_logged_in", false)
-                .apply()
-
+            viewModel.logout()
             startActivity(Intent(requireContext(), SignIn::class.java))
             requireActivity().finish()
         }
-
-        db.skip.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        db.skip.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
@@ -310,5 +186,4 @@ class ProfileFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
 }

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BudgetManagement"
+    tools:context=".managementFragments.BudgetManagement"
     android:background="@color/screen_background">
 
     <com.google.android.material.card.MaterialCardView

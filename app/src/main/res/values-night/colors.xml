@@ -72,7 +72,7 @@
     <color name="recent_transaction">#FFFFFF</color>
     <color name="recent_transaction_card_back">#121212</color>
     <color name="recent_transaction_card_stroke_income">#1F3D2B</color>
-    <color name="recent_transaction_card_stroke_expense">#3A1E1E</color>
+    <color name="recent_transaction_card_stroke_expense">#3D1F1F</color>
     <color name="recent_tran_icon_income">#4ADE80</color>
     <color name="recent_tran_icon_expense">#F87171</color>
     <color name="recent_tran_amount_income">#4ADE80</color>
@@ -107,8 +107,8 @@
     <color name="icon_container_stroke">#3A3A3A</color>
     <color name="icon_color_primary">#FFFFFF</color>
     <color name="filtercardstroke">#F1F1F1</color>
-    <color name="income_card_bg">#666DFD70</color>
-    <color name="expense_card_bg">#66FA7870</color>
+    <color name="income_card_bg">#1E3A2F</color>
+    <color name="expense_card_bg">#8E2A2A</color>
     <color name="budgetmanage">#FFFFFF</color>
     <color name="dashboardText">#FFFFFF</color>
 
