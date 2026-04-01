@@ -15,28 +15,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AarohArth">
         <activity
-            android:name=".CategoryWiseTransaction"
+            android:name=".categoriesFragments.CategoryWiseTransaction"
             android:exported="false" />
         <activity
-            android:name=".Co2AllTransactions"
+            android:name=".carbonFragments.Co2AllTransactions"
             android:exported="false" />
         <activity
-            android:name=".BudgetModification"
+            android:name=".modificationsFragments.BudgetModification"
             android:exported="false" />
         <activity
-            android:name=".AccountModification"
+            android:name=".modificationsFragments.AccountModification"
             android:exported="false" />
         <activity
-            android:name=".TransactionModification"
+            android:name=".modificationsFragments.TransactionModification"
             android:exported="false" />
         <activity
-            android:name=".BudgetActions"
+            android:name=".add_delete_edit_Fragments.BudgetActions"
             android:exported="false" />
         <activity
-            android:name=".BudgetManagement"
+            android:name=".managementFragments.BudgetManagement"
             android:exported="false" />
         <activity
-            android:name=".CategoriesTransactionList"
+            android:name=".categoriesFragments.CategoriesTransactionList"
             android:exported="false" />
         <activity
             android:name=".AI_Activity"
@@ -45,23 +45,23 @@
             android:name=".TransactionList"
             android:exported="false" />
         <activity
-            android:name=".AccountManagement"
+            android:name=".managementFragments.AccountManagement"
             android:exported="false" />
         <activity
-            android:name=".AccountActions"
+            android:name=".add_delete_edit_Fragments.AccountActions"
             android:exported="false" />
         <activity
-            android:name=".Transaction_Action_Page"
+            android:name=".add_delete_edit_Fragments.Transaction_Action_Page"
             android:exported="false"
             android:theme="@style/Theme.AarohArth" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".SignIn"
+            android:name=".authFragments.SignIn"
             android:exported="false" />
         <activity
-            android:name=".SignUp"
+            android:name=".authFragments.SignUp"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"

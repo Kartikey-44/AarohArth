@@ -11,6 +11,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import ind.finance.aaroharth.add_delete_edit_Fragments.AccountActions
+import ind.finance.aaroharth.authFragments.SignIn
+import ind.finance.aaroharth.carbonFragments.CarbonFragment
+import ind.finance.aaroharth.categoriesFragments.CategoriesFragment
+import ind.finance.aaroharth.dashboardFragments.DashboardFragment
 import ind.finance.aaroharth.databinding.ActivityMainBinding
 
 class MainActivity : BaseSecureActivity() {
