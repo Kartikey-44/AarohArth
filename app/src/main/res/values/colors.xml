@@ -50,7 +50,7 @@
     <color name="save_button_background_income">#2E7D32</color>
     <color name="subheading_color_expense">#EE4444</color>
     <color name="subheading_color_income">  #0FB880</color>
-    <color name="save_button_background_expense">#F9D6D5</color>
+    <color name="save_button_background_expense">#EF5350</color>
     <color name="save_btn_textcolor_income">#FFFFFF</color>
     <color name="save_btn_textcolor_expense">#B3261E</color>
 
@@ -84,7 +84,7 @@
     <!--Recent Transaction Card-->
     <color name="recent_transaction_card_back">#FAFAFA</color>
     <color name="recent_transaction_card_stroke_income">#CFE9D9</color>
-    <color name="recent_transaction_card_stroke_expense">#3A1E1E</color>
+    <color name="recent_transaction_card_stroke_expense">#F9D6D5</color>
     <color name="recent_tran_icon_income">#1B8F3A</color>
     <color name="recent_tran_icon_expense"> #C62828</color>
     <color name="recent_tran_amount_income">#1B8F3A</color>
