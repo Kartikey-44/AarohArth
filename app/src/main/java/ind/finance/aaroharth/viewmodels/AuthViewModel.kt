@@ -7,16 +7,28 @@ import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import ind.finance.aaroharth.data.local.App_Database
+import ind.finance.aaroharth.data.model.Account_Info
+import ind.finance.aaroharth.data.model.Budget_Info
+import ind.finance.aaroharth.data.model.Transaction_Info
 import ind.finance.aaroharth.data.model.user_detail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance().getReference("Users")
+    private val rtdb = FirebaseDatabase.getInstance().getReference("Users")
+    private val firestore = FirebaseFirestore.getInstance()
     private val prefs = application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    private val database = App_Database.getInstance(application)
 
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
@@ -26,6 +38,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         object Loading : AuthState()
         data class Success(val message: String) : AuthState()
         data class Error(val animation: String, val message: String) : AuthState()
+        data class Restoring(val message: String) : AuthState()
     }
 
     fun isInternetAvailable(): Boolean {
@@ -50,8 +63,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val userId = auth.currentUser?.uid ?: ""
                     prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
-                    _authState.value = AuthState.Success("Sign In Successful")
+                    restoreUserData(userId)
                 } else {
                     _authState.value = AuthState.Error("Failed.json", task.exception?.message ?: "Sign in failed")
                 }
@@ -74,7 +88,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser!!
-                    database.child(user.uid).setValue(user_detail(email, password))
+                    rtdb.child(user.uid).setValue(user_detail(email, password))
                         .addOnSuccessListener {
                             prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
                             _authState.value = AuthState.Success("Signed up successfully")
@@ -100,12 +114,64 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
 
                     if (result.additionalUserInfo?.isNewUser == true) {
-                        database.child(user.uid).setValue(user_detail(email, "GOOGLE_AUTH"))
+                        rtdb.child(user.uid).setValue(user_detail(email, "GOOGLE_AUTH"))
+                        _authState.value = AuthState.Success("Welcome to Aaroh Arth!")
+                    } else {
+                        restoreUserData(user.uid)
                     }
-                    _authState.value = AuthState.Success("Sign In Successful")
                 } else {
                     _authState.value = AuthState.Error("Failed.json", "Google authentication failed")
                 }
             }
+    }
+
+    private fun restoreUserData(userId: String) {
+        _authState.value = AuthState.Restoring("Restoring your data from cloud...")
+        
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Restore Profile info to Prefs
+                val userDoc = firestore.collection("users").document(userId).get().await()
+                if (userDoc.exists()) {
+                    withContext(Dispatchers.Main) {
+                        prefs.edit()
+                            .putString("username", userDoc.getString("username"))
+                            .putString("profile_image_url", userDoc.getString("profileImageUrl"))
+                            .apply()
+                    }
+                }
+
+                // 2. Restore Accounts
+                val accounts = firestore.collection("users").document(userId).collection("accounts").get().await()
+                if (!accounts.isEmpty) {
+                    val accountList = accounts.toObjects(Account_Info::class.java).map { it.copy(isSynced = true) }
+                    accountList.forEach { database.accountDao().insertAccount(it) }
+                    withContext(Dispatchers.Main) { prefs.edit().putBoolean("has_account", true).apply() }
+                }
+
+                // 3. Restore Transactions
+                val transactions = firestore.collection("users").document(userId).collection("transactions").get().await()
+                if (!transactions.isEmpty) {
+                    val transactionList = transactions.toObjects(Transaction_Info::class.java).map { it.copy(isSynced = true) }
+                    transactionList.forEach { database.transactionDao().insertTransaction(it) }
+                }
+
+                // 4. Restore Budgets
+                val budgets = firestore.collection("users").document(userId).collection("budgets").get().await()
+                if (!budgets.isEmpty) {
+                    val budgetList = budgets.toObjects(Budget_Info::class.java).map { it.copy(isSynced = true) }
+                    budgetList.forEach { database.budgetDao().insertInfo(it) }
+                }
+
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Success("Data restored successfully!")
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Success("Sign In Successful (Restore skipped: ${e.message})")
+                }
+            }
+        }
     }
 }

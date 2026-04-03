@@ -4,11 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.data.model.Account_Info
 import kotlinx.coroutines.launch
 
 class AccountViewModel(private val repository: AccountRepository) : ViewModel() {
+
+    private val auth = FirebaseAuth.getInstance()
 
     private val _accounts = MutableLiveData<List<Account_Info>>()
     val accounts: LiveData<List<Account_Info>> = _accounts
@@ -57,14 +60,21 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
         }
     }
 
-    fun deleteAccount(id: Long) {
+    fun deleteAccount(accountId: Long) {
+        val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
-            repository.deleteAccountById(id)
-            _operationSuccess.value = "Account Deleted Successfully"
+            try {
+                repository.deleteAccountById(accountId, userId)
+                _operationSuccess.value = "Account Deleted Successfully"
+                loadAccounts()
+            } catch (e: Exception) {
+                _error.value = "Failed to delete account"
+            }
         }
     }
 
     fun saveAccount(type: String, name: String, balance: Long) {
+        val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             val account = Account_Info(
                 accountType = type,
@@ -73,8 +83,9 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
                 balance = balance
             )
             try {
-                repository.insertAccount(account)
+                repository.insertAccount(account, userId)
                 _saveStatus.value = true
+                loadAccounts()
             } catch (e: Exception) {
                 _error.value = "Account already exists or error occurred"
             }
@@ -82,9 +93,15 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
     }
 
     fun updateAccount(account: Account_Info) {
+        val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
-            repository.updateAccountInfo(account)
-            _operationSuccess.value = "Account Updated Successfully"
+            try {
+                repository.updateAccount(account, userId)
+                _operationSuccess.value = "Account Updated Successfully"
+                loadAccounts()
+            } catch (e: Exception) {
+                _error.value = "Failed to update account"
+            }
         }
     }
 }

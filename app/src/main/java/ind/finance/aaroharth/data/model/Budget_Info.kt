@@ -7,8 +7,9 @@ import androidx.room.PrimaryKey
 data class Budget_Info(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-    val category: String,
-    val amount: Long,
-    val date: Long,
-    val monthKey: String
+    val category: String = "",
+    val amount: Long = 0L,
+    val date: Long = 0L,
+    val monthKey: String = "",
+    val isSynced: Boolean = false
 )

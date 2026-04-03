@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
 import ind.finance.aaroharth.data.model.Transaction_Info
@@ -16,6 +17,8 @@ class TransactionActionViewModel(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository
 ) : ViewModel() {
+
+    private val auth = FirebaseAuth.getInstance()
 
     private val _accountTypes = MutableLiveData<List<String>>()
     val accountTypes: LiveData<List<String>> = _accountTypes
@@ -59,6 +62,8 @@ class TransactionActionViewModel(
         accountType: String,
         remark: String
     ) {
+        val userId = auth.currentUser?.uid ?: return
+        
         viewModelScope.launch {
             try {
                 val balance = accountRepository.getBalance(accountName)
@@ -70,14 +75,14 @@ class TransactionActionViewModel(
                         _error.value = "Insufficient Balance"
                         return@launch
                     }
-                    accountRepository.updateBalance(balance - amount, accountName)
+                    accountRepository.updateBalance(balance - amount, accountName, userId)
                 } else {
-                    accountRepository.updateBalance(balance + amount, accountName)
+                    accountRepository.updateBalance(balance + amount, accountName, userId)
                 }
 
                 val factor = if (type == "expense") carbonEmissionFactor(category) else 0.0
                 val emitted = if (type == "expense") amount * factor else 0.0
-                val auth = if (type == "expense") carbonEmissionAuth(emitted) else "None"
+                val level = if (type == "expense") carbonEmissionAuth(emitted) else "None"
 
                 val transaction = Transaction_Info(
                     id = 0,
@@ -91,11 +96,12 @@ class TransactionActionViewModel(
                     remark = remark,
                     carbonImpactFactor = factor,
                     carbonImpact = emitted,
-                    carbonImpactLevel = auth,
-                    monthKey = monthKey
+                    carbonImpactLevel = level,
+                    monthKey = monthKey,
+                    isSynced = false
                 )
 
-                transactionRepository.insertTransaction(transaction)
+                transactionRepository.insertTransaction(transaction, userId)
                 _saveStatus.value = if (type == "income") "Income Saved" else "Expense Saved"
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to save transaction"
@@ -104,6 +110,8 @@ class TransactionActionViewModel(
     }
 
     fun updateTransaction(original: Transaction_Info, updated: Transaction_Info) {
+        val userId = auth.currentUser?.uid ?: return
+
         viewModelScope.launch {
             try {
                 // 1. Revert original balance
@@ -115,25 +123,32 @@ class TransactionActionViewModel(
                 }
 
                 // 2. Check sufficient balance for updated if Expense
-                if (original.transactionType == "Expense" || original.transactionType == "expense") {
+                if (updated.transactionType == "Expense") {
                     if (restoredBalance < updated.amount) {
                         _error.value = "Insufficient Balance"
                         return@launch
                     }
                 }
 
-                // 3. Update to new account balance
-                accountRepository.updateBalance(restoredBalance, original.transactionWay)
-                val newAccountBalance = accountRepository.getBalance(updated.transactionWay)
-                val finalBalance = if (original.transactionType == "Income") {
-                    newAccountBalance + updated.amount
+                // 3. Update balance on original account (if changed account, this reverts the old one)
+                accountRepository.updateBalance(restoredBalance, original.transactionWay, userId)
+                
+                // 4. If account changed, get balance of new account, else use restoredBalance
+                val currentBalanceOnTargetAccount = if (original.transactionWay == updated.transactionWay) {
+                    restoredBalance
                 } else {
-                    newAccountBalance - updated.amount
+                    accountRepository.getBalance(updated.transactionWay)
                 }
-                accountRepository.updateBalance(finalBalance, updated.transactionWay)
+                
+                val finalBalance = if (updated.transactionType == "Income") {
+                    currentBalanceOnTargetAccount + updated.amount
+                } else {
+                    currentBalanceOnTargetAccount - updated.amount
+                }
+                accountRepository.updateBalance(finalBalance, updated.transactionWay, userId)
 
-                // 4. Update transaction entry
-                transactionRepository.updateTransaction(updated)
+                // 5. Update transaction entry
+                transactionRepository.updateTransaction(updated, userId)
                 _saveStatus.value = "Transaction Edited Successfully"
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to update transaction"
@@ -142,6 +157,8 @@ class TransactionActionViewModel(
     }
 
     fun deleteTransaction(transaction: Transaction_Info) {
+        val userId = auth.currentUser?.uid ?: return
+
         viewModelScope.launch {
             try {
                 val balance = accountRepository.getBalance(transaction.transactionWay)
@@ -150,8 +167,8 @@ class TransactionActionViewModel(
                 } else {
                     balance + transaction.amount
                 }
-                accountRepository.updateBalance(newBalance, transaction.transactionWay)
-                transactionRepository.deleteTransactionById(transaction.id)
+                accountRepository.updateBalance(newBalance, transaction.transactionWay, userId)
+                transactionRepository.deleteTransactionById(transaction.id, userId)
                 _saveStatus.value = "Transaction Deleted Successfully"
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to delete transaction"

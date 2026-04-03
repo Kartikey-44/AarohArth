@@ -3,6 +3,7 @@ package ind.finance.aaroharth.data.local
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import ind.finance.aaroharth.data.model.BudgetSummary
 import ind.finance.aaroharth.data.model.Budget_Info
 
@@ -12,7 +13,7 @@ interface BudgetDao {
     /* ---------- INSERT ---------- */
 
     @Insert
-    suspend fun insertInfo(budget: Budget_Info)
+    suspend fun insertInfo(budget: Budget_Info): Long
 
     /* ---------- READ ---------- */
 
@@ -37,10 +38,14 @@ interface BudgetDao {
 
     /* ---------- UPDATE ---------- */
 
+    @Update
+    suspend fun updateBudgetInfo(budget: Budget_Info)
+
     @Query("""
     UPDATE BudgetTable
     SET category = :category,
-        amount = :amount
+        amount = :amount,
+        isSynced = 0
     WHERE id = :id
     """)
     suspend fun updateBudget(
@@ -62,5 +67,11 @@ interface BudgetDao {
     """)
     suspend fun budgetExists(category: String, monthKey: String): Int
 
+    /* ---------- SYNC ---------- */
 
+    @Query("SELECT * FROM BudgetTable WHERE isSynced = 0")
+    suspend fun getUnsynced(): List<Budget_Info>
+
+    @Query("UPDATE BudgetTable SET isSynced = 1 WHERE id = :id")
+    suspend fun setSynced(id: Long)
 }
