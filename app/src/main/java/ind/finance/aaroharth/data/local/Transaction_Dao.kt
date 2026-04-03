@@ -13,7 +13,7 @@ import ind.finance.aaroharth.data.model.filterchart
 @Dao
 interface Transaction_Dao {
     @Insert
-    suspend fun insertTransaction(transaction: Transaction_Info)
+    suspend fun insertTransaction(transaction: Transaction_Info): Long
 
     @Query("SELECT * FROM TransactionTable ORDER BY dateAndTime DESC")
     suspend fun getalltransaction(): List<Transaction_Info>
@@ -186,4 +186,12 @@ interface Transaction_Dao {
 """
     )
     fun getCategoryAll(from: Long): List<CategoryExpense>
+
+    /* ---------- SYNC ---------- */
+
+    @Query("SELECT * FROM TransactionTable WHERE isSynced = 0")
+    suspend fun getUnsynced(): List<Transaction_Info>
+
+    @Query("UPDATE TransactionTable SET isSynced = 1 WHERE id = :id")
+    suspend fun setSynced(id: Long)
 }

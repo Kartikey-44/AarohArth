@@ -3,8 +3,6 @@ package ind.finance.aaroharth
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,12 +17,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.bumptech.glide.Glide
 import ind.finance.aaroharth.authFragments.SignIn
 import ind.finance.aaroharth.databinding.DialogDeleteConfirmationBinding
 import ind.finance.aaroharth.databinding.FragmentProfileBinding
 import ind.finance.aaroharth.databinding.UsernameDialogBinding
 import ind.finance.aaroharth.viewmodels.ProfileViewModel
-import java.io.File
 
 class ProfileFragment : Fragment() {
 
@@ -36,7 +34,7 @@ class ProfileFragment : Fragment() {
     private val imagePicker =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
-                saveProfileImage(uri)
+                viewModel.updateProfileImage(uri)
             }
         }
 
@@ -51,6 +49,10 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Load cloud data on startup
+        viewModel.loadProfileFromCloud()
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val topInset = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
             v.setPadding(v.paddingLeft, topInset, v.paddingRight, v.paddingBottom)
@@ -65,6 +67,16 @@ class ProfileFragment : Fragment() {
 
         binding.userTextView.setOnClickListener {
             showUsernameDialog()
+        }
+
+        binding.backupCardView.setOnClickListener {
+            viewModel.backupProfileNow()
+            Toast.makeText(requireContext(), "Profile backed up to cloud", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.restoreCardView.setOnClickListener {
+            viewModel.loadProfileFromCloud()
+            Toast.makeText(requireContext(), "Profile restored from cloud", Toast.LENGTH_SHORT).show()
         }
 
         binding.logoutCardView.setOnClickListener {
@@ -84,36 +96,14 @@ class ProfileFragment : Fragment() {
             binding.emailTextView.text = email
         }
 
-        viewModel.profileImagePath.observe(viewLifecycleOwner) { path ->
-            if (!path.isNullOrEmpty()) {
-                val file = File(path)
-                if (file.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                    binding.shapeableImageView.setImageBitmap(bitmap)
-                }
-            }
+        viewModel.profileImageUrl.observe(viewLifecycleOwner) { url ->
+            Glide.with(this)
+                .load(url)
+                .placeholder(R.drawable.user_png)
+                .error(R.drawable.user_png)
+                .circleCrop()
+                .into(binding.shapeableImageView)
         }
-    }
-
-    private fun saveProfileImage(uri: Uri) {
-        val resolver = requireContext().contentResolver
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
-
-        val targetSize = 300
-        var scale = 1
-        while (options.outWidth / scale > targetSize || options.outHeight / scale > targetSize) { scale *= 2 }
-
-        val scaledOptions = BitmapFactory.Options().apply {
-            inSampleSize = scale
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
-
-        val bitmap = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, scaledOptions) } ?: return
-        val file = File(requireContext().filesDir, "profile_image.jpg")
-        file.outputStream().use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out) }
-
-        viewModel.updateProfileImage(file.absolutePath)
     }
 
     private fun showUsernameDialog() {
@@ -168,14 +158,16 @@ class ProfileFragment : Fragment() {
         dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
         
         db.save.textSize = 14f
-        db.attention.setText(R.string.delete)
+        db.attention.text = "Are you sure you want to log out?"
         db.dialogLottie.setAnimation("stirict.json")
         db.save.text = "Logout"
         db.skip.text = "Cancel"
 
         db.save.setOnClickListener {
             viewModel.logout()
-            startActivity(Intent(requireContext(), SignIn::class.java))
+            val intent = Intent(requireContext(), SignIn::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             requireActivity().finish()
         }
         db.skip.setOnClickListener { dialog.dismiss() }
