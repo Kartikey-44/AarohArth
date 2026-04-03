@@ -72,7 +72,8 @@ class Transaction_Action_Page : AppCompatActivity() {
 
         binding.saveButton.setOnClickListener {
             if (validateInput()) {
-                val amount = binding.amountField.text.toString().trim().toLong()
+                val amountText = binding.amountField.text.toString().trim()
+                val amount = amountText.toLongOrNull() ?: 0L
                 viewModel.saveTransaction(
                     type = type,
                     amount = amount,
@@ -106,11 +107,10 @@ class Transaction_Action_Page : AppCompatActivity() {
             binding.transactionWayField.setAdapter(adapter)
         }
 
-        viewModel.saveStatus.observe(this) { success ->
-            if (success.isNullOrEmpty()) {
-                val type = intent.getStringExtra("type") ?: "expense"
-                successLottie(if (type == "income") "Income Saved" else "Expense Saved")
-                Handler(Looper.getMainLooper()).postDelayed({ finish() }, 1800)
+        viewModel.saveStatus.observe(this) { message ->
+            if (!message.isNullOrEmpty()) {
+                successLottie(message)
+                Handler(Looper.getMainLooper()).postDelayed({ finish() }, 2000)
             }
         }
 
@@ -208,7 +208,9 @@ class Transaction_Action_Page : AppCompatActivity() {
         dialogBinding.dialogLottie.setAnimation("Success.json")
         dialogBinding.message.text = message
         dialog.show()
-        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 2000)
+        Handler(Looper.getMainLooper()).postDelayed({ 
+            if (dialog.isShowing) dialog.dismiss() 
+        }, 2000)
     }
 
     private fun dialog(lottie: String, message: String) {
@@ -219,7 +221,9 @@ class Transaction_Action_Page : AppCompatActivity() {
         dialogBinding.dialogLottie.setAnimation(lottie)
         dialogBinding.message.text = message
         dialog.show()
-        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 1800)
+        Handler(Looper.getMainLooper()).postDelayed({ 
+            if (dialog.isShowing) dialog.dismiss() 
+        }, 1800)
     }
 
     private fun catchAssistantIntent() {

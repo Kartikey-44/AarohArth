@@ -11,9 +11,9 @@ import androidx.room.PrimaryKey
 data class Account_Info(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val accountType: String,
-    val accountName: String,
-    val normalizedName: String,
-    val balance: Long,
-    val isSynced : Boolean=false
+    val accountType: String = "",
+    val accountName: String = "",
+    val normalizedName: String = "",
+    val balance: Long = 0L,
+    val isSynced: Boolean = false
 )
