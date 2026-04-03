@@ -1,18 +1,80 @@
 package ind.finance.aaroharth.repositories
 
+import com.google.firebase.firestore.FirebaseFirestore
 import ind.finance.aaroharth.data.local.Transaction_Dao
 import ind.finance.aaroharth.data.model.CategoryExpense
 import ind.finance.aaroharth.data.model.Transaction_Info
 import ind.finance.aaroharth.data.model.filterchart
+import kotlinx.coroutines.tasks.await
 
 class TransactionRepository(private val transactionDao: Transaction_Dao) {
 
-    suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info> {
-        return transactionDao.getTransactionsByCategory(category, type)
+    private val firestore = FirebaseFirestore.getInstance()
+
+    suspend fun insertTransaction(transaction: Transaction_Info, userId: String) {
+        val id = transactionDao.insertTransaction(transaction)
+        val updatedTransaction = transaction.copy(id = id, isSynced = true)
+
+        try {
+            firestore.collection("users")
+                .document(userId)
+                .collection("transactions")
+                .document(id.toString())
+                .set(updatedTransaction)
+                .await()
+            transactionDao.setSynced(id)
+        } catch (e: Exception) {
+            // Stay unsynced locally
+        }
     }
 
-    suspend fun insertTransaction(transaction: Transaction_Info) {
-        transactionDao.insertTransaction(transaction)
+    suspend fun updateTransaction(transaction: Transaction_Info, userId: String) {
+        transactionDao.updateTransaction(transaction.copy(isSynced = false))
+        
+        try {
+            val syncedTransaction = transaction.copy(isSynced = true)
+            firestore.collection("users")
+                .document(userId)
+                .collection("transactions")
+                .document(transaction.id.toString())
+                .set(syncedTransaction)
+                .await()
+            transactionDao.setSynced(transaction.id)
+        } catch (e: Exception) {
+            // Stay unsynced
+        }
+    }
+
+    suspend fun deleteTransactionById(id: Long, userId: String) {
+        transactionDao.deleteById(id)
+        try {
+            firestore.collection("users")
+                .document(userId)
+                .collection("transactions")
+                .document(id.toString())
+                .delete()
+                .await()
+        } catch (e: Exception) { }
+    }
+
+    suspend fun syncUnsynced(userId: String) {
+        val unsynced = transactionDao.getUnsynced()
+        unsynced.forEach {
+            try {
+                val synced = it.copy(isSynced = true)
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("transactions")
+                    .document(it.id.toString())
+                    .set(synced)
+                    .await()
+                transactionDao.setSynced(it.id)
+            } catch (e: Exception) { }
+        }
+    }
+
+    suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info> {
+        return transactionDao.getTransactionsByCategory(category, type)
     }
 
     suspend fun getAllTransactions(): List<Transaction_Info> {
@@ -21,14 +83,6 @@ class TransactionRepository(private val transactionDao: Transaction_Dao) {
 
     suspend fun getTransactionsByType(type: String): List<Transaction_Info> {
         return transactionDao.gettransaction(type)
-    }
-
-    suspend fun updateTransaction(transaction: Transaction_Info) {
-        transactionDao.updateTransaction(transaction)
-    }
-
-    suspend fun deleteTransactionById(id: Long) {
-        transactionDao.deleteById(id)
     }
 
     suspend fun getTransactionById(id: Long): Transaction_Info {

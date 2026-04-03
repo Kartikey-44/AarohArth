@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "ind.finance.aaroharth"
-    compileSdk = 35 //changed 34 --> 35
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ind.finance.aaroharth"
@@ -45,32 +45,38 @@ android {
 
 dependencies {
     implementation("com.airbnb.android:lottie:6.4.0")
-    // Room (KSP — NO kapt)
+    
+    // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.firebase.database)
+    implementation(libs.androidx.room.common)
+    ksp(libs.room.compiler)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.1.1")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    
+    // Coroutines Play Services for .await()
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.activity:activity:1.9.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.room.common)
-    ksp(libs.room.compiler)
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
-    implementation("androidx.core:core-ktx:1.12.0")
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-database-ktx")
-    implementation("com.google.android.gms:play-services-auth:21.1.1")
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-
-
-    // AndroidX
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.material)
 
     // Testing
     testImplementation(libs.junit)

@@ -20,7 +20,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import ind.finance.aaroharth.MainActivity
 import ind.finance.aaroharth.R
-import ind.finance.aaroharth.authFragments.SignUp
 import ind.finance.aaroharth.databinding.ActivitySignInBinding
 import ind.finance.aaroharth.databinding.DialogScreenBinding
 import ind.finance.aaroharth.viewmodels.AuthViewModel
@@ -78,6 +77,7 @@ class SignIn : AppCompatActivity() {
         viewModel.authState.observe(this) { state ->
             when (state) {
                 is AuthViewModel.AuthState.Loading -> showLoading("Signing In")
+                is AuthViewModel.AuthState.Restoring -> showLoading(state.message)
                 is AuthViewModel.AuthState.Success -> {
                     loadingDialog?.dismiss()
                     showDialog("Success.json", state.message)
@@ -132,13 +132,19 @@ class SignIn : AppCompatActivity() {
     }
 
     private fun showLoading(message: String) {
-        loadingDialog = Dialog(this)
-        val dialogBinding = DialogScreenBinding.inflate(layoutInflater)
-        loadingDialog?.setContentView(dialogBinding.root)
-        loadingDialog?.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
-        dialogBinding.dialogLottie.setAnimation("loading.json")
-        dialogBinding.dialogLottie.playAnimation()
-        dialogBinding.message.text = message
+        if (loadingDialog == null) {
+            loadingDialog = Dialog(this)
+            val dialogBinding = DialogScreenBinding.inflate(layoutInflater)
+            loadingDialog?.setContentView(dialogBinding.root)
+            loadingDialog?.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
+            dialogBinding.dialogLottie.setAnimation("loading.json")
+            dialogBinding.dialogLottie.playAnimation()
+            dialogBinding.message.text = message
+        } else {
+            // Find message textView inside existing dialog and update it
+            val messageView = loadingDialog?.findViewById<android.widget.TextView>(ind.finance.aaroharth.R.id.message)
+            messageView?.text = message
+        }
         loadingDialog?.show()
     }
 
@@ -151,7 +157,7 @@ class SignIn : AppCompatActivity() {
         db.dialogLottie.playAnimation()
         db.message.text = message
         dialog.show()
-        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 2000)
+        Handler(Looper.getMainLooper()).postDelayed({ dialog.dismiss() }, 2000000)
     }
 
     override fun onDestroy() {
