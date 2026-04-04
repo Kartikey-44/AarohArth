@@ -45,6 +45,8 @@ android {
 
 dependencies {
     implementation("com.airbnb.android:lottie:6.4.0")
+
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     
     // Room
     implementation(libs.room.runtime)
