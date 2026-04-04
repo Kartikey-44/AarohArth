@@ -1,9 +1,12 @@
 package ind.finance.aaroharth
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,19 +25,38 @@ import ind.finance.aaroharth.authFragments.SignIn
 import ind.finance.aaroharth.databinding.DialogDeleteConfirmationBinding
 import ind.finance.aaroharth.databinding.FragmentProfileBinding
 import ind.finance.aaroharth.databinding.UsernameDialogBinding
+import ind.finance.aaroharth.notifications.NotificationPrefs
+import ind.finance.aaroharth.notifications.NotificationScheduler
 import ind.finance.aaroharth.viewmodels.ProfileViewModel
+
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
-    
+
     private val viewModel: ProfileViewModel by viewModels()
 
     private val imagePicker =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
                 viewModel.updateProfileImage(uri)
+            }
+        }
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            val context = requireContext()
+            if (isGranted) {
+                NotificationPrefs.setNotificationsEnabled(context, true)
+                NotificationScheduler.enableNotifications(context)
+                binding.notificationToggle.isChecked = true
+                Toast.makeText(context, "Notifications enabled", Toast.LENGTH_SHORT).show()
+            } else {
+                NotificationPrefs.setNotificationsEnabled(context, false)
+                NotificationScheduler.disableNotifications(context)
+                binding.notificationToggle.isChecked = false
+                Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -49,8 +71,7 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Load cloud data on startup
+
         viewModel.loadProfileFromCloud()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -85,6 +106,7 @@ class ProfileFragment : Fragment() {
 
         setupSocialMediaLinks()
         setupDarkModeSwitch()
+        setupNotificationSwitch()
     }
 
     private fun observeViewModel() {
@@ -110,13 +132,20 @@ class ProfileFragment : Fragment() {
         val dialogBinding = UsernameDialogBinding.inflate(layoutInflater)
         val dialog = Dialog(requireContext())
         dialog.setContentView(dialogBinding.root)
-        dialog.window?.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background))
-        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
-        
+        dialog.window?.setBackgroundDrawable(
+            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
+        )
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
         dialogBinding.nameField.setText(viewModel.username.value)
         dialogBinding.nameField.setSelection(dialogBinding.nameField.text?.length ?: 0)
 
-        dialogBinding.nameField.addTextChangedListener { dialogBinding.nameLayout.error = null }
+        dialogBinding.nameField.addTextChangedListener {
+            dialogBinding.nameLayout.error = null
+        }
 
         dialogBinding.save.setOnClickListener {
             val name = dialogBinding.nameField.text.toString().trim()
@@ -135,28 +164,91 @@ class ProfileFragment : Fragment() {
 
     private fun setupDarkModeSwitch() {
         val prefs = requireContext().getSharedPreferences("dark_mode_prefs", Context.MODE_PRIVATE)
-        val isCurrentlyDark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val isCurrentlyDark =
+            (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                    android.content.res.Configuration.UI_MODE_NIGHT_YES
+
         binding.switchDarkMode.isChecked = isCurrentlyDark
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("is_dark_mode", isChecked).apply()
-            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+    }
+
+    private fun setupNotificationSwitch() {
+        val context = requireContext()
+
+        binding.notificationToggle.isChecked =
+            NotificationPrefs.areNotificationsEnabled(context)
+
+        binding.notificationToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                enableNotifications()
+            } else {
+                NotificationPrefs.setNotificationsEnabled(context, false)
+                NotificationScheduler.disableNotifications(context)
+                Toast.makeText(context, "Notifications disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        //Test Notification Press Toggle
+        binding.notificationToggle.setOnLongClickListener {
+            NotificationScheduler.testNotificationIn10Seconds(requireContext())
+            Toast.makeText(requireContext(), "Test notification will come in 10 seconds", Toast.LENGTH_SHORT).show()
+            true
+        }
+    }
+
+    private fun enableNotifications() {
+        val context = requireContext()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                NotificationPrefs.setNotificationsEnabled(context, true)
+                NotificationScheduler.enableNotifications(context)
+                Toast.makeText(context, "Notifications enabled", Toast.LENGTH_SHORT).show()
+            } else {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            NotificationPrefs.setNotificationsEnabled(context, true)
+            NotificationScheduler.enableNotifications(context)
+            Toast.makeText(context, "Notifications enabled", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupSocialMediaLinks() {
-        binding.logo1.setOnClickListener { startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@aaroharth.com"))) }
-        binding.logo2.setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/"))) }
-        binding.logo3.setOnClickListener { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/"))) }
+        binding.logo1.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@aaroharth.com")))
+        }
+        binding.logo2.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.com/")))
+        }
+        binding.logo3.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/")))
+        }
     }
 
     private fun showLogoutConfirmationDialog() {
         val dialog = Dialog(requireContext())
         val db = DialogDeleteConfirmationBinding.inflate(layoutInflater)
         dialog.setContentView(db.root)
-        dialog.window?.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background))
-        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
-        
+        dialog.window?.setBackgroundDrawable(
+            ContextCompat.getDrawable(requireContext(), R.drawable.dialog_background)
+        )
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
         db.save.textSize = 14f
         db.attention.text = "Are you sure you want to log out?"
         db.dialogLottie.setAnimation("stirict.json")
@@ -170,6 +262,7 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
             requireActivity().finish()
         }
+
         db.skip.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
