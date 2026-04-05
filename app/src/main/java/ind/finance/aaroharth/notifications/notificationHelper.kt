@@ -12,7 +12,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import ind.finance.aaroharth.MainActivity
+import ind.finance.aaroharth.MyApplication
 import ind.finance.aaroharth.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object NotificationHelper {
 
@@ -60,10 +64,13 @@ object NotificationHelper {
 
         if (canPostNotifications(context)) {
             NotificationManagerCompat.from(context).notify(title.hashCode(), builder.build())
+            saveNotificationToDb(context, title, message, "DAILY")
         }
     }
 
     fun showMonthlySummary(context: Context, message: String) {
+        val title = "Your monthly summary is ready"
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("open_dashboard", true)
@@ -78,7 +85,7 @@ object NotificationHelper {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.aaroh_arth_logo)
-            .setContentTitle("Your monthly summary is ready")
+            .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -87,6 +94,14 @@ object NotificationHelper {
 
         if (canPostNotifications(context)) {
             NotificationManagerCompat.from(context).notify(5002, builder.build())
+            saveNotificationToDb(context, title, message, "MONTHLY")
+        }
+    }
+
+    private fun saveNotificationToDb(context: Context, title: String, message: String, type: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val app = context.applicationContext as MyApplication
+            app.notificationRepository.saveNotification(title, message, type)
         }
     }
 

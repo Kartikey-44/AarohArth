@@ -9,6 +9,7 @@ import ind.finance.aaroharth.data.local.App_Database
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.BudgetRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
+import ind.finance.aaroharth.repositories.NotificationRepository
 
 class MyApplication : Application(), LifecycleObserver {
 
@@ -21,6 +22,8 @@ class MyApplication : Application(), LifecycleObserver {
         )
     }
     val budgetRepository by lazy { BudgetRepository(database.budgetDao()) }
+
+    val notificationRepository by lazy { NotificationRepository(database.notificationDao()) }
 
     override fun onCreate() {
         super.onCreate()

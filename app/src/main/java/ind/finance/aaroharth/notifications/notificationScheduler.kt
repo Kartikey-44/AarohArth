@@ -16,6 +16,8 @@ object NotificationScheduler {
     private const val EVENING_WORK_NAME = "daily_entry_evening_reminder"
     private const val MONTHLY_WORK_NAME = "monthly_summary_reminder"
 
+    private const val CLEANUP_WORK_NAME = "notification_cleanup_work"
+
     const val KEY_TITLE = "title"
     const val KEY_MESSAGE = "message"
     const val KEY_TYPE = "type"
@@ -165,5 +167,17 @@ object NotificationScheduler {
             }
         }
         return target.timeInMillis - now.timeInMillis
+    }
+
+    fun scheduleNotificationCleanup(context: Context) {
+        val request = OneTimeWorkRequestBuilder<NotificationCleanupWorker>()
+            .setInitialDelay(6, TimeUnit.HOURS)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            CLEANUP_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
     }
 }

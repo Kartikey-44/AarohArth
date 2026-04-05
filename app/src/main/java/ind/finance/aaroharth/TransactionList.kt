@@ -19,7 +19,7 @@ class TransactionList : AppCompatActivity() {
     private lateinit var binding: ActivityTransactionListBinding
     private val viewModel: TransactionViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
     private lateinit var adapter: TransactionListAdapter
     private var selectedType = "ALL"

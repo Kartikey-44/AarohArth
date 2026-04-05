@@ -16,7 +16,7 @@ class Co2AllTransactions : AppCompatActivity() {
     private lateinit var binding: ActivityCo2AllTransactionsBinding
     private val viewModel: CarbonViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
