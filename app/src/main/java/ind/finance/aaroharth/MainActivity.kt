@@ -23,7 +23,6 @@ class MainActivity : BaseSecureActivity() {
     private lateinit var binding: ActivityMainBinding
     private var activeDialog: Dialog? = null
 
-    // ✅ SINGLE instances (VERY IMPORTANT)
     private val homeFragment = HomeFragement()
     private val dashboardFragment = DashboardFragment()
     private val categoriesFragment = CategoriesFragment()
@@ -35,12 +34,9 @@ class MainActivity : BaseSecureActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        // ---------- Theme handling ----------
         val themePrefs = getSharedPreferences("dark_mode_prefs", MODE_PRIVATE)
         if (!themePrefs.contains("is_dark_mode")) {
-            AppCompatDelegate.setDefaultNightMode(
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            )
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         } else {
             AppCompatDelegate.setDefaultNightMode(
                 if (themePrefs.getBoolean("is_dark_mode", false))
@@ -60,17 +56,15 @@ class MainActivity : BaseSecureActivity() {
         setupBottomNav()
         setupBackHandling()
 
-        // ---------- Cold start only ----------
         if (savedInstanceState == null) {
             decideStartFlow()
+            handleNotificationIntent(intent)
         } else {
-            selectedItemId =
-                savedInstanceState.getInt("selected_item", R.id.home)
+            selectedItemId = savedInstanceState.getInt("selected_item", R.id.home)
             binding.bottomNavigationBar.selectedItemId = selectedItemId
         }
     }
 
-    // ---------- Insets ----------
     private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigationBar) { view, insets ->
             view.setPadding(
@@ -83,12 +77,10 @@ class MainActivity : BaseSecureActivity() {
         }
     }
 
-    // ---------- Bottom Navigation ----------
     private fun setupBottomNav() {
         binding.bottomNavigationBar.setOnItemSelectedListener { item ->
 
-            val current =
-                supportFragmentManager.findFragmentById(R.id.fragment_container)
+            val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
             val target: Fragment = when (item.itemId) {
                 R.id.home -> homeFragment
@@ -99,7 +91,6 @@ class MainActivity : BaseSecureActivity() {
                 else -> homeFragment
             }
 
-            // 🚫 DO NOTHING if same fragment
             if (current === target) return@setOnItemSelectedListener true
 
             selectedItemId = item.itemId
@@ -112,31 +103,25 @@ class MainActivity : BaseSecureActivity() {
         }
     }
 
-    // ---------- Back Handling ----------
     private fun setupBackHandling() {
         onBackPressedDispatcher.addCallback(this) {
 
-            // 1. Close dialog if open
             if (activeDialog?.isShowing == true) {
                 activeDialog?.dismiss()
                 return@addCallback
             }
 
-            val current =
-                supportFragmentManager.findFragmentById(R.id.fragment_container)
+            val current = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
-            // 2. If Home → exit
             if (current === homeFragment) {
                 finish()
                 return@addCallback
             }
 
-            // 3. Otherwise → go to Home
             binding.bottomNavigationBar.selectedItemId = R.id.home
         }
     }
 
-    // ---------- App Entry Flow ----------
     private fun decideStartFlow() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
 
@@ -152,11 +137,40 @@ class MainActivity : BaseSecureActivity() {
             return
         }
 
-        // Normal entry
-        binding.bottomNavigationBar.selectedItemId = R.id.home
+        val openDashboardFromNotification =
+            intent?.getBooleanExtra("open_dashboard", false) == true
+
+        val openHomeFromNotification =
+            intent?.getBooleanExtra("open_home", false) == true
+
+        if (!openDashboardFromNotification && !openHomeFromNotification) {
+            binding.bottomNavigationBar.selectedItemId = R.id.home
+            selectedItemId = R.id.home
+        }
     }
 
-    // ---------- State ----------
+    private fun handleNotificationIntent(intent: Intent?) {
+        when {
+            intent?.getBooleanExtra("open_dashboard", false) == true -> {
+                binding.bottomNavigationBar.selectedItemId = R.id.dashboard
+                selectedItemId = R.id.dashboard
+                intent.removeExtra("open_dashboard")
+            }
+
+            intent?.getBooleanExtra("open_home", false) == true -> {
+                binding.bottomNavigationBar.selectedItemId = R.id.home
+                selectedItemId = R.id.home
+                intent.removeExtra("open_home")
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("selected_item", selectedItemId)
         super.onSaveInstanceState(outState)
