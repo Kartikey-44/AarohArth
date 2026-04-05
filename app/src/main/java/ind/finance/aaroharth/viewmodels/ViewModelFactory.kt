@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.BudgetRepository
+import ind.finance.aaroharth.repositories.NotificationRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
 
 class ViewModelFactory(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
-    private val budgetRepository: BudgetRepository
+    private val budgetRepository: BudgetRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -40,6 +42,9 @@ class ViewModelFactory(
             }
             modelClass.isAssignableFrom(CategoriesViewModel::class.java) -> {
                 CategoriesViewModel() as T
+            }
+            modelClass.isAssignableFrom(NotificationHistoryViewModel::class.java) -> {
+                NotificationHistoryViewModel(notificationRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

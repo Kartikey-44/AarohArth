@@ -27,7 +27,7 @@ class BudgetActions : AppCompatActivity() {
     private lateinit var dialogBinding: DialogScreenBinding
     private val viewModel: BudgetViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     private val categoryList = listOf(

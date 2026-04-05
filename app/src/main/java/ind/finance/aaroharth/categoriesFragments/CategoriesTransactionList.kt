@@ -16,7 +16,7 @@ class CategoriesTransactionList : AppCompatActivity() {
     private lateinit var binding: ActivityCategoriestransactionListBinding
     private val viewModel: CategoriesTransactionViewModel by viewModels {
         val app= application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
     private lateinit var adapter: TransactionListAdapter
 

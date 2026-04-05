@@ -30,7 +30,7 @@ class CategoriesFragment : Fragment() {
 
     private val viewModel: CategoriesViewModel by viewModels {
         val app = requireActivity().application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     private lateinit var categoriesAdapter: CategoriesAdapter
