@@ -208,7 +208,7 @@ class CarbonFragment : Fragment() {
                 e.value.toFloat()
             )
         } + BarEntry(6f, othersTotal.toFloat())
-                        else top6.mapIndexed { i, e -> BarEntry(i.toFloat(), e.value.toFloat()) }
+        else top6.mapIndexed { i, e -> BarEntry(i.toFloat(), e.value.toFloat()) }
         if (barEntries.isEmpty()) return
         val barDataSet = BarDataSet(barEntries, "Top CO₂ Categories").apply { colors = listOf(Color.rgb(255, 87, 34), Color.rgb(76, 175, 80), Color.rgb(33, 150, 243), Color.rgb(255, 193, 7), Color.rgb(156, 39, 176), Color.rgb(244, 67, 54), Color.GRAY); valueTextSize = 11f; valueFormatter = object : ValueFormatter() { override fun getFormattedValue(v: Float) = "%.1fkg".format(v) } }
         binding.barChart.apply {

@@ -214,14 +214,26 @@
                             android:textColor="@color/black"
                             android:textSize="18sp"
                             android:textStyle="bold" />
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/downarrow_png"
-                            android:rotation="-90"
-                            android:layout_marginStart="55dp"/>
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/notification_toggle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="45dp"
+                                android:layout_gravity="center"
+                                android:checked="false"
+                                app:thumbTint="@color/switch_thumb_tint"
+                                app:trackTint="@color/switch_track_tint"/>
+
+<!--                        <ImageView-->
+<!--                            android:layout_width="40dp"-->
+<!--                            android:layout_height="40dp"-->
+<!--                            android:layout_gravity="center"-->
+<!--                            android:scaleType="centerCrop"-->
+<!--                            android:src="@drawable/downarrow_png"-->
+<!--                            android:rotation="-90"-->
+<!--                            android:layout_marginStart="55dp"/>-->
+
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

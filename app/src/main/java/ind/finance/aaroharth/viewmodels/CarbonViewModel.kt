@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ind.finance.aaroharth.repositories.TransactionRepository
 import ind.finance.aaroharth.data.model.Transaction_Info
+import ind.finance.aaroharth.repositories.TransactionRepository
 import kotlinx.coroutines.launch
 
 class CarbonViewModel(private val repository: TransactionRepository) : ViewModel() {
@@ -16,8 +16,12 @@ class CarbonViewModel(private val repository: TransactionRepository) : ViewModel
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _period = MutableLiveData<String>("Weekly")
+    private val _period = MutableLiveData("Weekly")
     val period: LiveData<String> = _period
+
+    init {
+        loadData()
+    }
 
     fun setPeriod(period: String) {
         _period.value = period
