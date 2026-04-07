@@ -9,14 +9,25 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import ind.finance.aaroharth.data.local.App_Database
+import ind.finance.aaroharth.repositories.AccountRepository
+import ind.finance.aaroharth.repositories.BudgetRepository
+import ind.finance.aaroharth.repositories.TransactionRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private val prefs = application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+
+    private val db = App_Database.getInstance(application)
+    private val accountRepo = AccountRepository(db.accountDao(), db.transactionDao())
+    private val transactionRepo = TransactionRepository(db.transactionDao())
+    private val budgetRepo = BudgetRepository(db.budgetDao())
 
     private val _username = MutableLiveData<String>()
     val username: LiveData<String> = _username
@@ -69,7 +80,20 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun backupProfileNow() {
-        syncProfileToCloud()
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Sync Profile Info
+                syncProfileToCloud()
+                
+                // 2. Sync Unsynced Transactions, Accounts, Budgets
+                accountRepo.syncUnsynced(userId)
+                transactionRepo.syncUnsynced(userId)
+                budgetRepo.syncUnsynced(userId)
+
+                // Optional: success callback could be added here
+            } catch (e: Exception) { }
+        }
     }
 
     private fun syncProfileToCloud() {

@@ -4,9 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asLiveData
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
 import ind.finance.aaroharth.data.model.Transaction_Info
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
@@ -16,8 +18,9 @@ class HomeViewModel(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
 
-    private val _transactions = MutableLiveData<List<Transaction_Info>>()
-    val transactions: LiveData<List<Transaction_Info>> = _transactions
+    private val refreshTrigger = MutableLiveData<Unit>(Unit)
+
+    val transactions: LiveData<List<Transaction_Info>> = transactionRepository.getAllTransactionsFlow().asLiveData()
 
     private val _currentBalance = MutableLiveData<Long>()
     val currentBalance: LiveData<Long> = _currentBalance
@@ -30,7 +33,6 @@ class HomeViewModel(
 
     fun refreshData() {
         viewModelScope.launch {
-            _transactions.value = transactionRepository.getAllTransactions()
             _currentBalance.value = accountRepository.getCurrentBalance()
 
             val now = LocalDate.now()

@@ -114,8 +114,26 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
 
                     if (result.additionalUserInfo?.isNewUser == true) {
-                        rtdb.child(user.uid).setValue(user_detail(email, "GOOGLE_AUTH"))
-                        _authState.value = AuthState.Success("Welcome to Aaroh Arth!")
+                        val userData = mapOf(
+                            "username" to (user.displayName ?: ""),
+                            "email" to email,
+                            "profileImageUrl" to (user.photoUrl?.toString() ?: ""),
+                            "lastUpdated" to System.currentTimeMillis()
+                        )
+                        
+                        viewModelScope.launch {
+                            try {
+                                firestore.collection("users").document(user.uid).set(userData).await()
+                                rtdb.child(user.uid).setValue(user_detail(email, "GOOGLE_AUTH")).await()
+                                
+                                withContext(Dispatchers.Main) {
+                                    prefs.edit().putString("username", user.displayName).apply()
+                                    _authState.value = AuthState.Success("Welcome to Aaroh Arth!")
+                                }
+                            } catch (e: Exception) {
+                                _authState.value = AuthState.Success("Welcome! (Cloud init failed)")
+                            }
+                        }
                     } else {
                         restoreUserData(user.uid)
                     }
