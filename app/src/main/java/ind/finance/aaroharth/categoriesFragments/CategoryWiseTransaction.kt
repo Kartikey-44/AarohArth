@@ -20,7 +20,7 @@ class CategoryWiseTransaction : AppCompatActivity() {
     private lateinit var binding: ActivityCategoryWiseTransactionBinding
     private val viewModel: DashboardViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
     private lateinit var adapter: CategoryOverviewAdapter
 
@@ -62,9 +62,7 @@ class CategoryWiseTransaction : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.topCategories.observe(this) { list ->
-            // Note: DashboardViewModel's refreshDashboard currently filters by expense only in its refreshDashboard implementation.
-            // For a complete CategoryWiseTransaction, we might need a more specific refresh or update DashboardViewModel.
-            // For now, it shows the top categories from the ViewModel.
+
             adapter.updateList(list)
         }
     }

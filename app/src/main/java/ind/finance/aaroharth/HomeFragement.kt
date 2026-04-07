@@ -32,7 +32,7 @@ class HomeFragement : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels {
         val app = requireActivity().application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     // FAB animations
@@ -144,6 +144,13 @@ class HomeFragement : Fragment() {
                     .putExtra("category", "all")
                     .putExtra("type", "all")
             )
+        }
+
+        binding.notification.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, NotificationHistoryFragment())
+                .addToBackStack("notification_history")
+                .commit()
         }
     }
 

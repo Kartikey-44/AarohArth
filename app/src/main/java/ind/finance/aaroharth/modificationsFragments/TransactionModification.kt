@@ -32,7 +32,7 @@ class TransactionModification : AppCompatActivity() {
     private lateinit var binding: ActivityTransactionModificationBinding
     private val viewModel: TransactionActionViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     private lateinit var original: Transaction_Info

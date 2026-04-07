@@ -25,7 +25,7 @@ class AccountActions : AppCompatActivity() {
     private var successDialog: Dialog? = null
     private val viewModel: AccountViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
