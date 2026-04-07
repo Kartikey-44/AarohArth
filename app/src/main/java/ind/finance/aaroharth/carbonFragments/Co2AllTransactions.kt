@@ -31,7 +31,6 @@ class Co2AllTransactions : AppCompatActivity() {
         }
 
         observeViewModel()
-        viewModel.loadData() // Defaults to Weekly, but we might want "All"
     }
 
     private fun observeViewModel() {
