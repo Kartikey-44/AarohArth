@@ -10,6 +10,7 @@ import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -82,18 +83,48 @@ class AccountModification : AppCompatActivity() {
         viewModel.currentAccount.observe(this) { acc ->
             original = acc
             current = acc.copy()
+            updateUiMode()
+        }
 
-            val txCount = viewModel.transactionCount.value ?: 0L
-            if (txCount > 0) {
-                setupViewOnlyMode(acc)
-            } else {
-                setupEditMode(acc)
-            }
+        viewModel.transactionCount.observe(this) {
+            updateUiMode()
         }
 
         viewModel.operationSuccess.observe(this) { message ->
             successDialog(message)
         }
+
+        viewModel.error.observe(this) { errorMsg ->
+            if (errorMsg != null) {
+                Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateUiMode() {
+        if (!::original.isInitialized) return
+        val txCount = viewModel.transactionCount.value ?: 0L
+
+        if (txCount > 0) {
+            setupRestrictedMode(original)
+        } else {
+            setupEditMode(original)
+        }
+    }
+
+    private fun setupRestrictedMode(acc: Account_Info) {
+        binding.heading.text = "Edit Account"
+        binding.attention.visibility = View.VISIBLE
+        binding.attention.text = "Account Name and Type are locked due to existing transactions"
+        binding.saveBtn.visibility = View.GONE
+        binding.deleteBtn.visibility = View.VISIBLE
+        populateUI(acc)
+        
+        binding.nameField.isEnabled = false
+        binding.typeField.isEnabled = false
+        binding.balanceField.isEnabled = true
+        
+        addTextWatchers()
     }
 
     private fun setupViewOnlyMode(acc: Account_Info) {
@@ -232,7 +263,7 @@ class AccountModification : AppCompatActivity() {
         dialog.window?.setBackgroundDrawable(getDrawable(R.drawable.dialog_background))
         dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.9).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
         dBinding.save.setOnClickListener {
-            viewModel.deleteAccount(original.id)
+            viewModel.deleteAccount(original.id,original.accountName)
             dialog.dismiss()
         }
         dBinding.skip.setOnClickListener { dialog.dismiss() }

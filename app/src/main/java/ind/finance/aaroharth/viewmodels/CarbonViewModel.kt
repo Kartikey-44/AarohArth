@@ -3,51 +3,37 @@ package ind.finance.aaroharth.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import ind.finance.aaroharth.data.model.Transaction_Info
 import ind.finance.aaroharth.repositories.TransactionRepository
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CarbonViewModel(private val repository: TransactionRepository) : ViewModel() {
-
-    private val _transactions = MutableLiveData<List<Transaction_Info>>()
-    val transactions: LiveData<List<Transaction_Info>> = _transactions
-
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
 
     private val _period = MutableLiveData("Weekly")
     val period: LiveData<String> = _period
 
-    init {
-        loadData()
-    }
-
-    fun setPeriod(period: String) {
-        _period.value = period
-        loadData()
-    }
-
-    fun loadData() {
-        val currentPeriod = _period.value ?: "Weekly"
+    val transactions: LiveData<List<Transaction_Info>> = _period.asFlow().flatMapLatest { p ->
         val now = System.currentTimeMillis()
-        val startDate = when (currentPeriod) {
+        val startDate = when (p) {
             "Weekly" -> now - 7 * 86400000L
             "Monthly" -> now - 30 * 86400000L
             "Yearly" -> now - 365 * 86400000L
             else -> now - 7 * 86400000L
         }
-
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val result = repository.getRecentCo2Transactions(startDate, now)
-                _transactions.postValue(result)
-            } catch (e: Exception) {
-                _transactions.postValue(emptyList())
-            } finally {
-                _isLoading.value = false
-            }
+        repository.getAllTransactionsFlow().map { list ->
+            list.filter { it.transactionType == "Expense" && it.carbonImpact > 0 && it.dateAndTime >= startDate }
         }
+    }.asLiveData()
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    fun setPeriod(period: String) {
+        _period.value = period
     }
 }
