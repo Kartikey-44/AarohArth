@@ -5,6 +5,7 @@ import ind.finance.aaroharth.data.local.Transaction_Dao
 import ind.finance.aaroharth.data.model.CategoryExpense
 import ind.finance.aaroharth.data.model.Transaction_Info
 import ind.finance.aaroharth.data.model.filterchart
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
 class TransactionRepository(private val transactionDao: Transaction_Dao) {
@@ -79,6 +80,10 @@ class TransactionRepository(private val transactionDao: Transaction_Dao) {
 
     suspend fun getAllTransactions(): List<Transaction_Info> {
         return transactionDao.getalltransaction()
+    }
+
+    fun getAllTransactionsFlow(): Flow<List<Transaction_Info>> {
+        return transactionDao.getAllTransactionsFlow()
     }
 
     suspend fun getTransactionsByType(type: String): List<Transaction_Info> {
