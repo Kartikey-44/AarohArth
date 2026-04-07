@@ -41,7 +41,7 @@ class CarbonFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: CarbonViewModel by viewModels {
         val app = requireActivity().application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     override fun onCreateView(

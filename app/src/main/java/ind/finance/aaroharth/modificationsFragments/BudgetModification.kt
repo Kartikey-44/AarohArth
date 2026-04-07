@@ -26,7 +26,7 @@ class BudgetModification : AppCompatActivity() {
     private lateinit var binding: ActivityBudgetModificationBinding
     private val viewModel: BudgetViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     private lateinit var original: Budget_Info

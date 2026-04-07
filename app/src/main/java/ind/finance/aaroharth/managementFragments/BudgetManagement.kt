@@ -24,7 +24,7 @@ class BudgetManagement : AppCompatActivity() {
     private lateinit var adapter: BudgetAdapter
     private val viewModel: BudgetViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository)
+        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
     }
 
     private var currentMonthKey: String = currentMonthKey()
