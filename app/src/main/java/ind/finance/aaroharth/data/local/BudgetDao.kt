@@ -2,6 +2,7 @@ package ind.finance.aaroharth.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import ind.finance.aaroharth.data.model.BudgetSummary
@@ -12,7 +13,7 @@ interface BudgetDao {
 
     /* ---------- INSERT ---------- */
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertInfo(budget: Budget_Info): Long
 
     /* ---------- READ ---------- */
