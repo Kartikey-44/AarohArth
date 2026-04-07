@@ -8,7 +8,9 @@ import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
 import ind.finance.aaroharth.data.model.CategoryExpense
 import ind.finance.aaroharth.data.model.filterchart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.ceil
 
 class DashboardViewModel(
@@ -35,21 +37,38 @@ class DashboardViewModel(
         val fromTime = System.currentTimeMillis() - daysRange * 24L * 60 * 60 * 1000
 
         viewModelScope.launch {
-            val categories = transactionRepository.getCategoryExpense(fromTime).take(5)
-            _topCategories.postValue(categories)
 
-            val daily = transactionRepository.getDailyExpense(fromTime)
-            _dailyExpenses.postValue(daily)
+            val categories = withContext(Dispatchers.IO) {
+                transactionRepository.getCategoryExpense(fromTime)
+            }.take(5)
 
-            val total = transactionRepository.getTotalExpense(fromTime)
-            _totalSpent.postValue(total)
+            _topCategories.value = categories
 
-            val balance = accountRepository.getTotalBalance()
+
+            val daily = withContext(Dispatchers.IO) {
+                transactionRepository.getDailyExpense(fromTime)
+            }
+
+            _dailyExpenses.value = daily
+
+
+            val total = withContext(Dispatchers.IO) {
+                transactionRepository.getTotalExpense(fromTime)
+            }
+
+            _totalSpent.value = total
+
+
+            val balance = withContext(Dispatchers.IO) {
+                accountRepository.getTotalBalance()
+            }
+
+
             val pace = if (daysRange > 0) total / daysRange else 0.0
-            _spendingPace.postValue(pace.toInt())
+            _spendingPace.value = pace.toInt()
 
             val remaining = if (pace > 0) ceil(balance / pace).toInt() else 0
-            _exhaustionDays.postValue(remaining)
+            _exhaustionDays.value = remaining
         }
     }
 }

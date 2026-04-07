@@ -2,8 +2,10 @@ package ind.finance.aaroharth.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 import ind.finance.aaroharth.data.model.CategoryExpense
 import ind.finance.aaroharth.data.model.Co2CategoryItem
 import ind.finance.aaroharth.data.model.Co2LineItem
@@ -12,11 +14,14 @@ import ind.finance.aaroharth.data.model.filterchart
 
 @Dao
 interface Transaction_Dao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: Transaction_Info): Long
 
     @Query("SELECT * FROM TransactionTable ORDER BY dateAndTime DESC")
     suspend fun getalltransaction(): List<Transaction_Info>
+
+    @Query("SELECT * FROM TransactionTable ORDER BY dateAndTime DESC")
+    fun getAllTransactionsFlow(): Flow<List<Transaction_Info>>
 
     @Query("SELECT * FROM TransactionTable WHERE transactionType=:type")
     suspend fun gettransaction(type: String): List<Transaction_Info>
