@@ -1,344 +1,497 @@
-<div align="center">
+# AarohArth
 
-<img src="screenshots/logo.png" alt="Aaroh Arth Logo" width="120"/>
+![GitHub stars](https://img.shields.io/github/stars/Kartikey-44/AarohArth?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/Kartikey-44/AarohArth?style=for-the-badge&logo=github) ![GitHub issues](https://img.shields.io/github/issues/Kartikey-44/AarohArth?style=for-the-badge&logo=github) ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
-# Aaroh Arth
+## 📑 Table of Contents
 
-### ${\color{goldenrod}Prospering\ You,\ Prospering\ Earth}$
+- [Description](#description)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Screenshots](#screenshots)
+- [Project Structure](#project-structure)
+- [Development Setup](#development-setup)
+- [Contributing](#contributing)
+- [License](#license)
 
-</div>
 
----
+## 📝 Description
 
-> An offline-first personal finance management system for Android — combining transactional accounting, budget intelligence, and a carbon footprint estimation engine in a single MVVM-architected application.
+AarohArth is a high-performance native Android application designed to provide a seamless and robust mobile experience. Leveraging native development frameworks, the app ensures optimal efficiency and a responsive user interface. With a focus on stability and technical excellence, AarohArth features comprehensive testing modules to deliver a reliable and polished platform for its users.
 
----
+## ✨ Features
 
-## Badges
+- 🧪 Testing
 
-![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Room](https://img.shields.io/badge/Room_DB-4285F4?style=for-the-badge&logo=google&logoColor=white)
-![MVVM](https://img.shields.io/badge/Architecture-MVVM-orange?style=for-the-badge)
-![Offline First](https://img.shields.io/badge/Offline--First-Yes-success?style=for-the-badge)
 
----
+## 🛠️ Tech Stack
 
-## Problem Statement
+- 🤖 Android (Native)
 
-Most personal finance applications available to Indian users suffer from one or more of the following structural limitations:
 
-- **Network dependency** — core functionality degrades or becomes unavailable without an internet connection, making them unreliable in low-connectivity environments.
-- **Lack of environmental context** — financial behavior has a measurable carbon footprint, yet no mainstream budgeting tool surfaces this data alongside spending analytics.
-- **Fragmented account management** — users operating across bank accounts, UPI wallets, debit cards, and cash rarely have a unified view of their financial position.
-- **Shallow analytics** — most apps report raw totals rather than predictive or trend-based insights.
-
-AarohArth addresses this gap by building a fully offline-capable accounting core with Room as the authoritative data layer, layering optional Firestore cloud synchronization on top, and embedding a category-mapped carbon estimation engine that translates everyday financial transactions into estimated CO₂ contributions — providing users with both financial and environmental accountability from a single interface.
-
----
-
-## Feature Modules
-
-### Transaction Engine
-- Add, edit, and delete income and expense transactions with full lifecycle management
-- Category classification system for semantic grouping of financial activity
-- Automatic balance recalculation propagated across affected accounts on every write operation
-
-### Multi-Account System
-- Supports bank accounts, UPI-linked accounts, debit cards, and physical cash wallets
-- Account-level balance tracking with real-time aggregation
-- Unified net-worth view across all account types
-
-### Budget Tracking Module
-- Monthly budget allocation per spending category
-- Usage percentage monitoring with threshold-aware status indicators
-- Budget state persisted locally and synced on demand
-
-### Analytics Dashboard
-- Spending pace prediction based on current period consumption rate
-- Category-wise breakdown with time-range filtering: 7-day, 30-day, and 365-day windows
-- Chart-based visualization of spending distribution and trends over time
-
-### Carbon Footprint Estimation Engine
-- Expense categories mapped to domain-specific CO₂ emission factors
-- Per-transaction carbon contribution calculated and aggregated
-- Visualization dashboards for weekly, monthly, and yearly carbon output
-- Surfaces environmental cost of financial behavior without requiring user input beyond standard transaction entry
-
-### Offline-First Persistence & Sync
-- Room database operates as the single source of truth for all transactional, account, and budget data
-- Firebase Firestore used as an optional asynchronous sync layer — not a dependency for core functionality
-- Application remains fully functional with no network connectivity
-
-### Backup and Restore System
-- Cloud backup capability for user data via Firestore
-- Restore functionality to recover data across device resets or reinstalls
-
-### Authentication
-- Email/password authentication via Firebase Authentication
-- Google Sign-In integration for streamlined onboarding
-
-### Profile and Settings
-- Dark mode toggle with persistent preference storage
-- Notification toggle
-- Backup and Restore access controls within the profile screen
-
----
-
-## Architecture
-
-AarohArth is structured around the **MVVM (Model-View-ViewModel)** pattern with a **Repository abstraction layer**, following Android's recommended app architecture guidelines.
-
-```
-UI Layer (Fragment / Activity)
-        │
-        ▼
-ViewModel Layer
-  - Exposes StateFlow / LiveData to the UI
-  - Contains UI business logic
-  - Delegates all data operations to the Repository
-        │
-        ▼
-Repository Layer
-  - Single entry point for all data access
-  - Decides whether to serve from local (Room) or remote (Firestore)
-  - Abstracts the data source entirely from the ViewModel
-        │
-        ├──────────────────────┐
-        ▼                      ▼
-Room Database (Local)    Firebase Firestore (Remote)
-  - Source of truth         - Optional sync layer
-  - Always written first    - Written after local commit
-```
-
-**Key design decisions:**
-
-- **ViewModels** hold no direct references to Android framework components, enabling safe configuration change survival and straightforward unit testing.
-- **Repositories** encapsulate all read/write logic, including the local-first write strategy: every mutation is committed to Room before any Firestore sync is attempted.
-- **StateFlow** is used for reactive UI state propagation, replacing LiveData where lifecycle-awareness is not required.
-- **Room DAOs** are exposed as Flow-returning interfaces, enabling the UI to observe database changes reactively without polling.
-
----
-
-## Offline-First Data Strategy
-
-AarohArth treats network availability as optional, not assumed. The data strategy is implemented as follows:
-
-1. **All writes go to Room first.** No transaction, account update, or budget change is considered committed until it is persisted locally.
-2. **Firestore sync is initiated after local commit.** If the device is offline, sync is deferred — the local database remains consistent and usable regardless.
-3. **Room is the read source for all UI state.** The UI never reads directly from Firestore. All displayed data is derived from Room queries exposed as reactive Flows.
-4. **Firestore serves backup and cross-device restore**, not real-time data delivery. This eliminates dependency on network latency for any user-facing operation.
-
-This approach ensures that the application maintains full functionality in airplane mode, low-bandwidth environments, or during Firebase service interruptions.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Language | Kotlin |
-| UI | XML Layouts, View Binding |
-| Architecture | MVVM + Repository Pattern |
-| Local Persistence | Room Database |
-| Remote Sync | Firebase Firestore |
-| Authentication | Firebase Authentication |
-| Reactive State | StateFlow / LiveData |
-| Build System | Gradle (Kotlin DSL) |
-| Minimum SDK | Android 8.0 (API 26) |
-
----
-
-## Screenshots
-
-<div align="center">
-
-### Splash Screen
-<img src="screenshots/splash.png" width="250"/>
-
-### Login
-<img src="screenshots/login.png" width="250"/>
-
-### Home
-<img src="screenshots/home.png" width="250"/>
-
-### Analytics Dashboard
-<img src="screenshots/dashboard.png" width="250"/>
-
-### CO₂ Impact Estimator
-<img src="screenshots/carbon.png" width="250"/>
-
-### Accounts
-<img src="screenshots/accounts.png" width="250"/>
-
-### Monthly Budget
-<img src="screenshots/budget.png" width="250"/>
-
-### Profile & Backup
-<img src="screenshots/profile.png" width="250"/>
-
-</div>
-
----
-
-## Installation
-
-### Option 1 — Install via APK
-
-1. Download the latest APK from the [Releases](../../releases) page.
-2. On your Android device, enable **Install from Unknown Sources** under `Settings → Security`.
-3. Open the downloaded `.apk` file and follow the installation prompts.
-
-### Option 2 — Build from Source
-
-**Prerequisites:**
-- Android Studio Hedgehog (2023.1.1) or later
-- JDK 17
-- Android SDK with API Level 26+
-
-**Steps:**
+## ⚡ Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/kartikeypandey/AarohArth.git
+git clone https://github.com/Kartikey-44/AarohArth.git
 
-# Open the project in Android Studio
-# File → Open → select the cloned directory
-
-# Add your google-services.json
-# Place your Firebase project's google-services.json in /app/
+# Install dependencies and run
+# (See Development Setup below)
 ```
 
-> Configure Firebase: Create a Firebase project, enable Authentication (Email + Google), and Firestore. Download `google-services.json` and place it in the `app/` directory.
+## 📸 Screenshots
 
-```bash
-# Build and run
-# Use the Run button in Android Studio, or:
-./gradlew assembleDebug
+> **Tip:** You can auto-generate a beautiful project mockup image using the **Screenshot** button above!
+
+<p align="center">
+  <img src="https://via.placeholder.com/800x400?text=Main+Application+View" alt="Main Application View" width="80%"/>
+</p>
+
+<p align="center">
+  <img src="https://via.placeholder.com/800x400?text=Feature+Showcase" alt="Feature Showcase" width="80%"/>
+</p>
+
+## 📁 Project Structure
+
 ```
-
----
-
-## Project Structure
-
-```
-AarohArth/
-├── app/
-│   ├── src/main/
-│   │   ├── java/com/kartikey/aarohArth/
-│   │   │   ├── data/
-│   │   │   │   ├── local/              # Room database, DAOs, entities
-│   │   │   │   ├── remote/             # Firestore data sources
-│   │   │   │   └── repository/         # Repository implementations
-│   │   │   ├── domain/
-│   │   │   │   ├── model/              # Domain model classes
-│   │   │   │   └── usecase/            # Business logic encapsulation
-│   │   │   ├── ui/
-│   │   │   │   ├── dashboard/          # Analytics dashboard fragment + ViewModel
-│   │   │   │   ├── transactions/       # Transaction list, add/edit screens
-│   │   │   │   ├── accounts/           # Multi-account management
-│   │   │   │   ├── budget/             # Budget allocation and tracking
-│   │   │   │   ├── carbon/             # Carbon footprint estimation screens
-│   │   │   │   ├── auth/               # Login, registration flows
-│   │   │   │   └── profile/            # Settings, backup, dark mode
-│   │   │   └── util/                   # Extension functions, constants, helpers
-│   │   └── res/
-│   │       ├── layout/                 # XML layout files
-│   │       ├── drawable/               # Icons and vector assets
-│   │       └── values/                 # Themes, strings, dimensions
-│   └── google-services.json            # Firebase config (not committed — add manually)
-├── screenshots/                        # App screenshots for README
-│   ├── logo.png
-│   ├── splash.png
-│   ├── login.png
-│   ├── home.png
-│   ├── dashboard.png
-│   ├── carbon.png
-│   ├── accounts.png
-│   ├── budget.png
-│   └── profile.png
+.
+├── LICENSE
+├── app
+│   ├── build.gradle.kts
+│   ├── google-services.json
+│   ├── proguard-rules.pro
+│   └── src
+│       ├── androidTest
+│       │   └── java
+│       │       └── ind
+│       │           └── finance
+│       │               └── aaroharth
+│       │                   ├── AuthFlowTest.kt
+│       │                   ├── EspressoIdlingBridge.kt
+│       │                   ├── ExampleInstrumentedTest.kt
+│       │                   └── FirebaseIdling.kt
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── assets
+│       │   │   ├── DangerIcon.json
+│       │   │   ├── Delete.json
+│       │   │   ├── DeleteBin.json
+│       │   │   ├── Failed.json
+│       │   │   ├── Success.json
+│       │   │   ├── listening.json
+│       │   │   ├── loading.json
+│       │   │   ├── nointernet.json
+│       │   │   ├── noresultfound.json
+│       │   │   ├── normal.json
+│       │   │   ├── signin.json
+│       │   │   ├── signup.json
+│       │   │   └── stirict.json
+│       │   ├── ic_launcher-playstore.png
+│       │   ├── java
+│       │   │   └── ind
+│       │   │       └── finance
+│       │   │           └── aaroharth
+│       │   │               ├── AI_Activity.kt
+│       │   │               ├── AppLockManager.kt
+│       │   │               ├── BaseSecureActivity.kt
+│       │   │               ├── BudgetSummary.kt
+│       │   │               ├── FirstFragment.kt
+│       │   │               ├── HomeFragement.kt
+│       │   │               ├── Idling.kt
+│       │   │               ├── IdlingBridge.kt
+│       │   │               ├── MainActivity.kt
+│       │   │               ├── MyApplication.kt
+│       │   │               ├── NoOpIdlingBridge.kt
+│       │   │               ├── NotificationHistoryFragment.kt
+│       │   │               ├── ProfileFragment.kt
+│       │   │               ├── SecondFragment.kt
+│       │   │               ├── SplashActivity.kt
+│       │   │               ├── TransactionList.kt
+│       │   │               ├── adapters
+│       │   │               │   ├── BudgetAdapter.kt
+│       │   │               │   ├── CategoriesAdapter.kt
+│       │   │               │   ├── CategoryOverviewAdapter.kt
+│       │   │               │   ├── Co2TransactionAdapter.kt
+│       │   │               │   ├── TransactionListAdapter.kt
+│       │   │               │   └── YourAccountListAdapter.kt
+│       │   │               ├── add_delete_edit_Fragments
+│       │   │               │   ├── AI_Activity.kt
+│       │   │               │   ├── AccountActions.kt
+│       │   │               │   ├── BudgetActions.kt
+│       │   │               │   ├── BudgetSummary.kt
+│       │   │               │   ├── FirstFragment.kt
+│       │   │               │   ├── ProfileFragment.kt
+│       │   │               │   ├── TransactionList.kt
+│       │   │               │   └── Transaction_Action_Page.kt
+│       │   │               ├── appSecurity
+│       │   │               │   ├── AppLockManager.kt
+│       │   │               │   └── BaseSecureActivity.kt
+│       │   │               ├── authFragments
+│       │   │               │   ├── SignIn.kt
+│       │   │               │   └── SignUp.kt
+│       │   │               ├── carbonFragments
+│       │   │               │   ├── CarbonFragment.kt
+│       │   │               │   └── Co2AllTransactions.kt
+│       │   │               ├── categoriesFragments
+│       │   │               │   ├── CategoriesFragment.kt
+│       │   │               │   ├── CategoriesTransactionList.kt
+│       │   │               │   └── CategoryWiseTransaction.kt
+│       │   │               ├── dashboardFragments
+│       │   │               │   ├── DashboardFragment.kt
+│       │   │               │   └── filterchart.kt
+│       │   │               ├── data
+│       │   │               │   ├── local
+│       │   │               │   │   ├── Account_Dao.kt
+│       │   │               │   │   ├── App_Database.kt
+│       │   │               │   │   ├── BudgetDao.kt
+│       │   │               │   │   └── Transaction_Dao.kt
+│       │   │               │   └── model
+│       │   │               │       ├── Account_Info.kt
+│       │   │               │       ├── BudgetSummary.kt
+│       │   │               │       ├── Budget_Info.kt
+│       │   │               │       ├── CategoriesDataClass.kt
+│       │   │               │       ├── CategoryExpense.kt
+│       │   │               │       ├── Co2CategoryItem.kt
+│       │   │               │       ├── Co2LineItem.kt
+│       │   │               │       ├── Transaction_Info.kt
+│       │   │               │       ├── filterchart.kt
+│       │   │               │       └── user_detail.kt
+│       │   │               ├── managementFragments
+│       │   │               │   ├── AccountManagement.kt
+│       │   │               │   └── BudgetManagement.kt
+│       │   │               ├── modificationsFragments
+│       │   │               │   ├── AccountModification.kt
+│       │   │               │   ├── BudgetModification.kt
+│       │   │               │   └── TransactionModification.kt
+│       │   │               ├── notifications
+│       │   │               │   ├── NotificationCleanupWorker.kt
+│       │   │               │   ├── NotificationDao.kt
+│       │   │               │   ├── NotificationHistoryAdapter.kt
+│       │   │               │   ├── NotificationHistoryViewModel.kt
+│       │   │               │   ├── NotificationRepository.kt
+│       │   │               │   ├── Notification_History_Info.kt
+│       │   │               │   ├── dailyReminderWorker.kt
+│       │   │               │   ├── monthlySummaryWorker.kt
+│       │   │               │   ├── notificationHelper.kt
+│       │   │               │   ├── notificationPrefs.kt
+│       │   │               │   └── notificationScheduler.kt
+│       │   │               ├── repositories
+│       │   │               │   ├── AccountRepository.kt
+│       │   │               │   ├── BudgetRepository.kt
+│       │   │               │   └── TransactionRepository.kt
+│       │   │               └── viewmodels
+│       │   │                   ├── AI_ViewModel.kt
+│       │   │                   ├── AccountViewModel.kt
+│       │   │                   ├── AuthViewModel.kt
+│       │   │                   ├── BudgetViewModel.kt
+│       │   │                   ├── CarbonViewModel.kt
+│       │   │                   ├── CategoriesTransactionViewModel.kt
+│       │   │                   ├── CategoriesViewModel.kt
+│       │   │                   ├── DashboardViewModel.kt
+│       │   │                   ├── HomeViewModel.kt
+│       │   │                   ├── ProfileViewModel.kt
+│       │   │                   ├── TransactionActionViewModel.kt
+│       │   │                   ├── TransactionViewModel.kt
+│       │   │                   └── ViewModelFactory.kt
+│       │   └── res
+│       │       ├── anim
+│       │       │   ├── addtransaction_from_bottom_animation.xml
+│       │       │   ├── addtransaction_rotate_close_animation.xml
+│       │       │   ├── addtransaction_rotate_open_animation.xml
+│       │       │   ├── addtransaction_to_bottom_animation.xml
+│       │       │   ├── from_left.xml
+│       │       │   ├── scale_up.xml
+│       │       │   └── to_left.xml
+│       │       ├── color
+│       │       │   ├── switch_thumb_tint.xml
+│       │       │   └── switch_track_tint.xml
+│       │       ├── drawable
+│       │       │   ├── aaroh_arth_icon.png
+│       │       │   ├── aaroh_arth_logo.png
+│       │       │   ├── account.xml
+│       │       │   ├── ai.png
+│       │       │   ├── auto.png
+│       │       │   ├── avatar.xml
+│       │       │   ├── back_arrow.xml
+│       │       │   ├── backicon.xml
+│       │       │   ├── bank.xml
+│       │       │   ├── bank_icon.xml
+│       │       │   ├── bell_png.png
+│       │       │   ├── budget.png
+│       │       │   ├── budgetxml.xml
+│       │       │   ├── business.png
+│       │       │   ├── cab.png
+│       │       │   ├── cash.xml
+│       │       │   ├── category.xml
+│       │       │   ├── close.xml
+│       │       │   ├── cloud_sync.xml
+│       │       │   ├── cng.png
+│       │       │   ├── creditcard.xml
+│       │       │   ├── dashboard__1_.xml
+│       │       │   ├── debitcard.xml
+│       │       │   ├── decoration.png
+│       │       │   ├── dialog_background.xml
+│       │       │   ├── diesel.png
+│       │       │   ├── dining_out.png
+│       │       │   ├── discord.png
+│       │       │   ├── donation.png
+│       │       │   ├── downarrow_png.png
+│       │       │   ├── drop_down.xml
+│       │       │   ├── edit.png
+│       │       │   ├── education.png
+│       │       │   ├── electricity.png
+│       │       │   ├── email.xml
+│       │       │   ├── email_logo.png
+│       │       │   ├── entertainment.png
+│       │       │   ├── exit.png
+│       │       │   ├── expense.png
+│       │       │   ├── expense_graph_icon.xml
+│       │       │   ├── fastag.png
+│       │       │   ├── filter.xml
+│       │       │   ├── filterback.xml
+│       │       │   ├── flight.png
+│       │       │   ├── food.png
+│       │       │   ├── freelance.png
+│       │       │   ├── fuel.png
+│       │       │   ├── g_logo.png
+│       │       │   ├── gift.png
+│       │       │   ├── giftbox.png
+│       │       │   ├── git_hub.png
+│       │       │   ├── grocery.png
+│       │       │   ├── home.xml
+│       │       │   ├── homefragiconbg.xml
+│       │       │   ├── hotel.png
+│       │       │   ├── housing.png
+│       │       │   ├── ic_launcher_background.xml
+│       │       │   ├── ic_launcher_foreground.xml
+│       │       │   ├── icon_bg_overview_card.xml
+│       │       │   ├── icon_container_bg.xml
+│       │       │   ├── income.png
+│       │       │   ├── income_graph_icon.xml
+│       │       │   ├── insurance.png
+│       │       │   ├── investment.png
+│       │       │   ├── loan.png
+│       │       │   ├── lpgpng.png
+│       │       │   ├── medical.png
+│       │       │   ├── microphone.png
+│       │       │   ├── miscellaneous.png
+│       │       │   ├── more.xml
+│       │       │   ├── next.xml
+│       │       │   ├── nonotification.png
+│       │       │   ├── notification.png
+│       │       │   ├── notificationbg.xml
+│       │       │   ├── other.png
+│       │       │   ├── password_protection.xml
+│       │       │   ├── personalcare.png
+│       │       │   ├── petrol.png
+│       │       │   ├── plus_icon.xml
+│       │       │   ├── previous.xml
+│       │       │   ├── privatetransport.png
+│       │       │   ├── publictransport.png
+│       │       │   ├── recharge.png
+│       │       │   ├── reduction__1_.xml
+│       │       │   ├── rental.png
+│       │       │   ├── restore.xml
+│       │       │   ├── rupee.png
+│       │       │   ├── rupee_expense.xml
+│       │       │   ├── rupee_income.xml
+│       │       │   ├── rupee_list_icon.xml
+│       │       │   ├── salary.png
+│       │       │   ├── savings.png
+│       │       │   ├── search.xml
+│       │       │   ├── send.png
+│       │       │   ├── set_pin.png
+│       │       │   ├── shopping.png
+│       │       │   ├── sign_up_and_sign_in_background.png
+│       │       │   ├── signing.png
+│       │       │   ├── subscription.png
+│       │       │   ├── sun_png.png
+│       │       │   ├── tax.png
+│       │       │   ├── taxi.png
+│       │       │   ├── toolbar_background.xml
+│       │       │   ├── transaction_card_background_expense.xml
+│       │       │   ├── transaction_card_background_income.xml
+│       │       │   ├── transaction_page_sub_heading_expense.xml
+│       │       │   ├── transaction_page_sub_heading_income.xml
+│       │       │   ├── transportation.png
+│       │       │   ├── travel.png
+│       │       │   ├── upi.xml
+│       │       │   ├── upiicon.png
+│       │       │   ├── user_png.png
+│       │       │   ├── utilities.png
+│       │       │   ├── waterbill.png
+│       │       │   └── wrap_up.xml
+│       │       ├── drawable-night
+│       │       │   ├── avatar.xml
+│       │       │   ├── back_arrow.xml
+│       │       │   ├── bell_png.png
+│       │       │   ├── business.png
+│       │       │   ├── category.xml
+│       │       │   ├── cloud_sync.xml
+│       │       │   ├── dashboard__1_.xml
+│       │       │   ├── downarrow_png.png
+│       │       │   ├── education.png
+│       │       │   ├── email_logo.png
+│       │       │   ├── entertainment.png
+│       │       │   ├── exit.png
+│       │       │   ├── expense_graph_icon.xml
+│       │       │   ├── food.png
+│       │       │   ├── freelance.png
+│       │       │   ├── g_logo.png
+│       │       │   ├── git_hub.png
+│       │       │   ├── home.xml
+│       │       │   ├── housing.png
+│       │       │   ├── income_graph_icon.xml
+│       │       │   ├── investment.png
+│       │       │   ├── medical.png
+│       │       │   ├── plus_icon.xml
+│       │       │   ├── reduction__1_.xml
+│       │       │   ├── rental.png
+│       │       │   ├── restore.xml
+│       │       │   ├── rupee.png
+│       │       │   ├── set_pin.png
+│       │       │   ├── shopping.png
+│       │       │   ├── sign_up_and_sign_in_background.png
+│       │       │   ├── sun_png.png
+│       │       │   ├── tax.png
+│       │       │   ├── transportation.png
+│       │       │   ├── travel.png
+│       │       │   ├── upiicon.png
+│       │       │   ├── user_png.png
+│       │       │   └── utilities.png
+│       │       ├── font
+│       │       │   ├── inter18ptmedium.ttf
+│       │       │   └── inter18ptsemibold.ttf
+│       │       ├── layout
+│       │       │   ├── activity_account_actions.xml
+│       │       │   ├── activity_account_management.xml
+│       │       │   ├── activity_account_modification.xml
+│       │       │   ├── activity_ai.xml
+│       │       │   ├── activity_budget_actions.xml
+│       │       │   ├── activity_budget_management.xml
+│       │       │   ├── activity_budget_modification.xml
+│       │       │   ├── activity_categoriestransaction_list.xml
+│       │       │   ├── activity_category_wise_transaction.xml
+│       │       │   ├── activity_co2_all_transactions.xml
+│       │       │   ├── activity_main.xml
+│       │       │   ├── activity_sign_in.xml
+│       │       │   ├── activity_sign_up.xml
+│       │       │   ├── activity_splash.xml
+│       │       │   ├── activity_transaction_action_page.xml
+│       │       │   ├── activity_transaction_list.xml
+│       │       │   ├── activity_transaction_modification.xml
+│       │       │   ├── budget_card.xml
+│       │       │   ├── category_expense_card.xml
+│       │       │   ├── dialog_delete_confirmation.xml
+│       │       │   ├── dialog_screen.xml
+│       │       │   ├── eachitem_categories.xml
+│       │       │   ├── fragment_carbon.xml
+│       │       │   ├── fragment_categories.xml
+│       │       │   ├── fragment_dashboard.xml
+│       │       │   ├── fragment_first.xml
+│       │       │   ├── fragment_home.xml
+│       │       │   ├── fragment_notification_history.xml
+│       │       │   ├── fragment_profile.xml
+│       │       │   ├── fragment_second.xml
+│       │       │   ├── item_co2_transaction.xml
+│       │       │   ├── item_notification_history.xml
+│       │       │   ├── recent_transaction.xml
+│       │       │   ├── username_dialog.xml
+│       │       │   ├── username_greet.xml
+│       │       │   └── your_accounts_card.xml
+│       │       ├── menu
+│       │       │   ├── bottom_menu.xml
+│       │       │   ├── filter_dropdown.xml
+│       │       │   └── search_bar.xml
+│       │       ├── mipmap-anydpi-v26
+│       │       │   ├── ic_launcher.xml
+│       │       │   └── ic_launcher_round.xml
+│       │       ├── mipmap-hdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   ├── ic_launcher_background.webp
+│       │       │   ├── ic_launcher_foreground.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-mdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   ├── ic_launcher_background.webp
+│       │       │   ├── ic_launcher_foreground.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   ├── ic_launcher_background.webp
+│       │       │   ├── ic_launcher_foreground.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xxhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   ├── ic_launcher_background.webp
+│       │       │   ├── ic_launcher_foreground.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xxxhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   ├── ic_launcher_background.webp
+│       │       │   ├── ic_launcher_foreground.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── navigation
+│       │       │   └── nav_graph.xml
+│       │       ├── values
+│       │       │   ├── colors.xml
+│       │       │   ├── dimens.xml
+│       │       │   ├── strings.xml
+│       │       │   └── themes.xml
+│       │       ├── values-land
+│       │       │   └── dimens.xml
+│       │       ├── values-night
+│       │       │   ├── colors.xml
+│       │       │   └── themes.xml
+│       │       ├── values-v23
+│       │       │   └── themes.xml
+│       │       ├── values-w1240dp
+│       │       │   └── dimens.xml
+│       │       ├── values-w600dp
+│       │       │   └── dimens.xml
+│       │       └── xml
+│       │           ├── backup_rules.xml
+│       │           └── data_extraction_rules.xml
+│       └── test
+│           └── java
+│               └── ind
+│                   └── finance
+│                       └── aaroharth
+│                           └── ExampleUnitTest.kt
 ├── build.gradle.kts
-├── settings.gradle.kts
-└── README.md
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+└── settings.gradle.kts
 ```
 
----
+## 🛠️ Development Setup
 
-## Engineering Highlights
+### Native Android Setup
+1. Open project in Android Studio
+2. Sync Gradle and build project
+3. Run on emulator or connected device
 
-### Offline-First Architecture
-The application is designed such that the Room database is never bypassed. Every data operation — regardless of network state — resolves locally first. This is not a fallback mechanism; it is the primary data flow. Firestore sync is treated as an eventual-consistency side effect, not a prerequisite for data integrity.
 
-### Reactive Balance Recalculation Pipeline
-Account balances are not stored as static fields that require manual update calls. Instead, balance values are derived reactively from the transaction log via Room's Flow-based queries. Any insert, update, or delete operation on the transactions table triggers downstream recomputation of affected account balances, which propagates automatically to all active observers in the UI layer. This eliminates an entire class of stale-state bugs common in imperative update patterns.
+## 👥 Contributing
 
-### Repository Abstraction Layer
-The Repository pattern is enforced as a hard boundary between the ViewModel layer and any data source. ViewModels have no awareness of whether data originates from Room or Firestore — they interact solely with repository interfaces. This decoupling means data source implementations can be swapped, mocked for testing, or extended (e.g., adding a REST API layer) without modifying any ViewModel or UI code.
+Contributions are welcome! Here's how you can help:
 
-### Firestore Sync Strategy
-Firestore is integrated as an asynchronous, non-blocking sync layer. The sync flow operates as follows: local Room write completes → coroutine dispatches a Firestore write in the background → failure is handled silently with retry eligibility. Firestore is never in the read path for UI state. This strategy keeps the UI responsive and consistent regardless of Firestore availability.
+1. **Fork** the repository
+2. **Clone** your fork: `git clone https://github.com/Kartikey-44/AarohArth.git`
+3. **Create** a new branch: `git checkout -b feature/your-feature`
+4. **Commit** your changes: `git commit -am 'Add some feature'`
+5. **Push** to your branch: `git push origin feature/your-feature`
+6. **Open** a pull request
 
-### Carbon Estimation Logic Pipeline
-Each transaction carries a category tag that maps to a predefined emission factor table. On transaction commit, the carbon module computes an estimated CO₂ contribution using the transaction amount and the category's emission coefficient. These per-transaction values are aggregated by time window (weekly, monthly, yearly) and surfaced through a dedicated visualization dashboard. The pipeline runs entirely offline with no external API dependency.
+Please ensure your code follows the project's style guidelines and includes tests where applicable.
 
----
+## 📜 License
 
-## Carbon Estimation Engine
+This project is licensed under the MIT License.
 
-The carbon footprint module operates as a self-contained estimation subsystem embedded within the transaction processing pipeline.
-
-**Category Mapping**
-Each expense category (e.g., Food, Transport, Utilities, Shopping) is mapped to a corresponding emission factor expressed in kg CO₂ per unit of spend. These mappings are stored as static configuration within the application.
-
-**Emission Factor Application**
-On each transaction write, the engine retrieves the emission factor for the transaction's category and computes:
-
-```
-Estimated CO₂ (kg) = Transaction Amount × Emission Factor (kg CO₂ / currency unit)
-```
-
-This produces a per-transaction carbon estimate that is persisted alongside the transaction record in Room.
-
-**Time-Range Aggregation**
-Carbon data is aggregated across configurable time windows — 7 days, 30 days, and 365 days — using Room queries that group and sum estimates by date range. These aggregated values are fed directly into the visualization layer.
-
-**Chart Visualization**
-Aggregated carbon data is rendered as time-series and category-distribution charts within the carbon dashboard, providing users with a visual representation of how their spending patterns translate to environmental impact over time.
-
-**Note on Accuracy**
-Emission factors used are static approximations based on general-purpose consumption research. This engine is designed to provide indicative estimates for behavioral awareness, not certified carbon accounting.
-
----
-
-## Limitations
-
-- **No conflict-safe multi-device sync** — the current Firestore sync strategy uses a last-write-wins approach. Concurrent edits from multiple devices are not resolved through conflict detection and may result in data loss.
-- **No recurring transaction automation** — the application does not support scheduled or automatically repeating transactions (e.g., monthly subscriptions or salary credits). All transactions require manual entry.
-- **Static emission factors** — carbon estimation uses fixed emission coefficients that do not adapt to regional energy grids, seasonal variation, or user-specific consumption patterns.
-
----
-
-## Future Improvements
-
-- **Biometric authentication** — integrate Android BiometricPrompt API for fingerprint and face-based app lock.
-- **CSV export** — allow users to export transaction history and carbon reports as CSV files for use in external tools.
-- **Recurring transactions engine** — build a background-scheduled transaction system with configurable frequency, amount, and category for automated bookkeeping.
-- **Conflict-aware sync strategy** — implement a versioned document model in Firestore with server-side timestamps to enable deterministic conflict resolution across devices.
-- **Advanced analytics insights** — extend the analytics module with anomaly detection, month-over-month variance analysis, and predictive budget exhaustion forecasting.
-
----
-
-## Team
-
-AarohArth was collaboratively designed and developed by a team of three.
-
-| Name | GitHub |
-|---|---|
-| Kartikey Pandey | [@kartikeypandey](https://github.com/kartikeypandey) |
-| Atul Kumar | [@A-t-u-l-K-u-m-a-r](https://github.com/A-t-u-l-K-u-m-a-r) |
-| Vishal Kumar Bharti | [@vitaly4321](https://github.com/vitaly4321) |
-
----
-
-*AarohArth is a portfolio project demonstrating production-oriented Android engineering practices including offline-first architecture, reactive data pipelines, and multi-source persistence strategies.*
