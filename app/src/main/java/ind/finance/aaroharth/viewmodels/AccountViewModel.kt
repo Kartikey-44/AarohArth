@@ -1,5 +1,6 @@
 package ind.finance.aaroharth.viewmodels
 
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -60,10 +61,16 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
         }
     }
 
-    fun deleteAccount(accountId: Long) {
+    fun deleteAccount(accountId: Long, accountName: String) {
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             try {
+                val transactionCount = repository.getTransactionCountForAccount(accountName)
+                if (transactionCount > 0) {
+                    _error.value = "Cannot delete account with existing transactions"
+                    return@launch
+
+                }
                 repository.deleteAccountById(accountId, userId)
                 _operationSuccess.value = "Account Deleted Successfully"
                 loadAccounts()
@@ -76,10 +83,21 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
     fun saveAccount(type: String, name: String, balance: Long) {
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
+            val normalized = name.lowercase().trim()
+            
+            // 1. Local Check
+            val existing = repository.getAllAccounts().find { 
+                it.normalizedName == normalized 
+            }
+            if (existing != null) {
+                _error.value = "Account with this name already exists"
+                return@launch
+            }
+
             val account = Account_Info(
                 accountType = type,
                 accountName = name,
-                normalizedName = name.lowercase().trim(),
+                normalizedName = normalized,
                 balance = balance
             )
             try {
@@ -87,7 +105,7 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
                 _saveStatus.value = true
                 loadAccounts()
             } catch (e: Exception) {
-                _error.value = "Account already exists or error occurred"
+                _error.value = "Account name must be unique"
             }
         }
     }
