@@ -39,7 +39,7 @@ class CategoryWiseTransaction : AppCompatActivity() {
         setupUI()
         observeViewModel()
         updateToggleUI()
-        viewModel.refreshDashboard(daysRange)
+        viewModel.refreshDashboard(daysRange, selectedType)
     }
 
     private fun setupUI() {
@@ -48,13 +48,13 @@ class CategoryWiseTransaction : AppCompatActivity() {
         binding.btnIncome.setOnClickListener {
             selectedType = if (selectedType == "Income") "ALL" else "Income"
             updateToggleUI()
-            viewModel.refreshDashboard(daysRange)
+            viewModel.refreshDashboard(daysRange, selectedType)
         }
 
         binding.btnExpense.setOnClickListener {
             selectedType = if (selectedType == "Expense") "ALL" else "Expense"
             updateToggleUI()
-            viewModel.refreshDashboard(daysRange)
+            viewModel.refreshDashboard(daysRange, selectedType)
         }
 
         binding.filterIcon.setOnClickListener { showFilterMenu() }
@@ -62,7 +62,6 @@ class CategoryWiseTransaction : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.topCategories.observe(this) { list ->
-
             adapter.updateList(list)
         }
     }
@@ -79,7 +78,7 @@ class CategoryWiseTransaction : AppCompatActivity() {
                 "Last 30 Days" -> 30
                 else -> 0
             }
-            viewModel.refreshDashboard(daysRange)
+            viewModel.refreshDashboard(daysRange, selectedType)
             true
         }
         popup.show()

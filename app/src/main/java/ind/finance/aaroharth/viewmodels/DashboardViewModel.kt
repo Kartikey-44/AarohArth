@@ -33,36 +33,32 @@ class DashboardViewModel(
     private val _totalSpent = MutableLiveData<Double>()
     val totalSpent: LiveData<Double> = _totalSpent
 
-    fun refreshDashboard(daysRange: Int) {
-        val fromTime = System.currentTimeMillis() - daysRange * 24L * 60 * 60 * 1000
+    fun refreshDashboard(daysRange: Int, type: String = "Expense") {
+        val fromTime = if (daysRange == 0) 0L else System.currentTimeMillis() - daysRange * 24L * 60 * 60 * 1000
 
         viewModelScope.launch {
-
             val categories = withContext(Dispatchers.IO) {
-                transactionRepository.getCategoryExpense(fromTime)
-            }.take(5)
-
+                if (type == "ALL") {
+                    transactionRepository.getCategoryAll(fromTime)
+                } else {
+                    transactionRepository.getCategoryExpenseFiltered(fromTime, type)
+                }
+            }
             _topCategories.value = categories
-
 
             val daily = withContext(Dispatchers.IO) {
                 transactionRepository.getDailyExpense(fromTime)
             }
-
             _dailyExpenses.value = daily
-
 
             val total = withContext(Dispatchers.IO) {
                 transactionRepository.getTotalExpense(fromTime)
             }
-
             _totalSpent.value = total
-
 
             val balance = withContext(Dispatchers.IO) {
                 accountRepository.getTotalBalance()
             }
-
 
             val pace = if (daysRange > 0) total / daysRange else 0.0
             _spendingPace.value = pace.toInt()

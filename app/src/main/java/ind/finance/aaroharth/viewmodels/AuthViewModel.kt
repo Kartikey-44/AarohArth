@@ -67,7 +67,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
                     restoreUserData(userId)
                 } else {
-                    _authState.value = AuthState.Error("Failed.json", task.exception?.message ?: "Sign in failed")
+                    _authState.value = AuthState.Error("Failed.json",  "Sign in failed wrong Id or Password")
                 }
             }
     }
@@ -88,14 +88,30 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser!!
-                    rtdb.child(user.uid).setValue(user_detail(email, password))
-                        .addOnSuccessListener {
-                            prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
-                            _authState.value = AuthState.Success("Signed up successfully")
+                    viewModelScope.launch {
+                        try {
+                            rtdb.child(user.uid).setValue(user_detail(email, password)).await()
+                            
+                            val userData = mapOf(
+                                "username" to "",
+                                "email" to email,
+                                "profileImageUrl" to "",
+                                "lastUpdated" to System.currentTimeMillis()
+                            )
+                            firestore.collection("users").document(user.uid).set(userData).await()
+                            
+                            withContext(Dispatchers.Main) {
+                                prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
+                                _authState.value = AuthState.Success("Signed up successfully")
+                            }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                // Even if firestore/rtdb fails, the user is created in Auth
+                                prefs.edit().putString("email", email).putBoolean("is_logged_in", true).apply()
+                                _authState.value = AuthState.Success("Signed up (Cloud sync pending)")
+                            }
                         }
-                        .addOnFailureListener {
-                            _authState.value = AuthState.Error("Failed.json", "Database error")
-                        }
+                    }
                 } else {
                     _authState.value = AuthState.Error("Failed.json", task.exception?.message ?: "Signup failed")
                 }
