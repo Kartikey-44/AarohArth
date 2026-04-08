@@ -36,3 +36,10 @@ firebase-adminsdk*.json
 # OS junk
 .DS_Store
 Thumbs.db
+
+
+app/release/
+*.apk
+*.aab
+*.dm
+output-metadata.json
