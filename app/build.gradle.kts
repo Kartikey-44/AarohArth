@@ -8,6 +8,9 @@ plugins {
 android {
     namespace = "ind.finance.aaroharth"
     compileSdk = 35
+    lint {
+        disable += "NullSafeMutableLiveData"
+    }
 
     defaultConfig {
         applicationId = "ind.finance.aaroharth"
@@ -73,6 +76,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
 
 
     implementation(libs.androidx.navigation.fragment.ktx)
