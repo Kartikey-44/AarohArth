@@ -121,4 +121,12 @@ class TransactionRepository(private val transactionDao: Transaction_Dao) {
     suspend fun getTotalExpense(fromTime: Long): Double {
         return transactionDao.getTotalExpense(fromTime)
     }
+
+    suspend fun getCategoryExpenseFiltered(fromTime: Long, type: String): List<CategoryExpense> {
+        return transactionDao.getCategoryExpenseFiltered(fromTime, type)
+    }
+
+    suspend fun getCategoryAll(fromTime: Long): List<CategoryExpense> {
+        return transactionDao.getCategoryAll(fromTime)
+    }
 }
