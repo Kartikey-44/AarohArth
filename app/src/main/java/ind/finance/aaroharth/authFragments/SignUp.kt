@@ -12,6 +12,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -105,20 +106,20 @@ class SignUp : AppCompatActivity() {
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
-        startActivityForResult(googleSignInClient.signInIntent, RC_GOOGLE_SIGN_IN)
+        googleSignInClient.signOut().addOnCompleteListener {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_GOOGLE_SIGN_IN) {
-            try {
-                val account = GoogleSignIn.getSignedInAccountFromIntent(data)
-                    .getResult(ApiException::class.java)
-                viewModel.firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: Exception) {
-                showDialog("Failed.json", "Google sign-in failed")
-            }
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            viewModel.firebaseAuthWithGoogle(account.idToken!!)
+        } catch (e: ApiException) {
+            showDialog("Failed.json", "Google sign-in failed: ${e.statusCode}")
         }
     }
 

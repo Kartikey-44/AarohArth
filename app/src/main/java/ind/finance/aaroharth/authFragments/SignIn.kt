@@ -12,6 +12,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -77,7 +78,6 @@ class SignIn : AppCompatActivity() {
         viewModel.authState.observe(this) { state ->
             when (state) {
                 is AuthViewModel.AuthState.Loading -> showLoading("Signing In")
-                is AuthViewModel.AuthState.Restoring -> showLoading(state.message)
                 is AuthViewModel.AuthState.Success -> {
                     loadingDialog?.dismiss()
                     showDialog("Success.json", state.message)
@@ -85,6 +85,9 @@ class SignIn : AppCompatActivity() {
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     }, 2000)
+                }
+                is AuthViewModel.AuthState.Restoring -> {
+                    showLoading(state.message)
                 }
                 is AuthViewModel.AuthState.Error -> {
                     loadingDialog?.dismiss()
@@ -106,20 +109,20 @@ class SignIn : AppCompatActivity() {
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
-        startActivityForResult(googleSignInClient.signInIntent, RC_GOOGLE_SIGN_IN)
+        googleSignInClient.signOut().addOnCompleteListener {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_GOOGLE_SIGN_IN) {
-            try {
-                val account = GoogleSignIn.getSignedInAccountFromIntent(data)
-                    .getResult(ApiException::class.java)
-                viewModel.firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: Exception) {
-                showDialog("Failed.json", "Google sign-in failed")
-            }
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            viewModel.firebaseAuthWithGoogle(account.idToken!!)
+        } catch (e: ApiException) {
+            showDialog("Failed.json", "Google sign-in failed: ${e.statusCode}")
         }
     }
 
@@ -141,8 +144,7 @@ class SignIn : AppCompatActivity() {
             dialogBinding.dialogLottie.playAnimation()
             dialogBinding.message.text = message
         } else {
-            // Find message textView inside existing dialog and update it
-            val messageView = loadingDialog?.findViewById<android.widget.TextView>(ind.finance.aaroharth.R.id.message)
+            val messageView = loadingDialog?.findViewById<android.widget.TextView>(R.id.message)
             messageView?.text = message
         }
         loadingDialog?.show()
