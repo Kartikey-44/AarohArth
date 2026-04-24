@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AI_Activity">
+    tools:context=".add_delete_edit_Fragments.AI_Activity">
     <ImageView
         android:id="@+id/bg"
         android:layout_width="match_parent"
@@ -34,6 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/instruct"
         app:layout_constraintEnd_toStartOf="@id/mice"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="20dp"
@@ -55,7 +56,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/input_field"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="match_parent"
             android:textSize="16sp"
             android:textStyle="bold" />
     </com.google.android.material.textfield.TextInputLayout>

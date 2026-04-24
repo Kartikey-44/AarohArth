@@ -227,17 +227,28 @@ class Transaction_Action_Page : AppCompatActivity() {
     }
 
     private fun catchAssistantIntent() {
+
         val amount = intent.getLongExtra("amount", -1L)
         val category = intent.getStringExtra("category")
-        val accountType = intent.getStringExtra("accountType")
-        val note = intent.getStringExtra("note")
+        val otherParty = intent.getStringExtra("otherParty")
+        val transactionWay = intent.getStringExtra("transactionWay")
+        val transactionMedium = intent.getStringExtra("transactionMedium")
 
-        if (amount > 0) binding.amountField.setText(amount.toString())
-        if (!category.isNullOrBlank() && category in categoryList) binding.categoryField.setText(category, false)
-        if (!accountType.isNullOrBlank()) {
-            binding.transactionMediumField.setText(accountType, false)
-            viewModel.loadAccountNames(accountType)
+        if (amount > 0)
+            binding.amountField.setText(amount.toString())
+
+        if (!category.isNullOrBlank() && category in categoryList)
+            binding.categoryField.setText(category, false)
+
+        if (!otherParty.isNullOrBlank())
+            binding.otherPartyField.setText(otherParty)
+
+        if (!transactionMedium.isNullOrBlank()) {
+            binding.transactionMediumField.setText(transactionMedium, false)
+            viewModel.loadAccountNames(transactionMedium)
         }
-        if (!note.isNullOrBlank()) binding.remarkField.setText(note)
+
+        if (!transactionWay.isNullOrBlank())
+            binding.transactionWayField.setText(transactionWay, false)
     }
 }

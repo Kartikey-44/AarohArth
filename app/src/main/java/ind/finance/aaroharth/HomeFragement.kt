@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import ind.finance.aaroharth.adapters.TransactionListAdapter
+import ind.finance.aaroharth.add_delete_edit_Fragments.AI_Activity
 import ind.finance.aaroharth.add_delete_edit_Fragments.Transaction_Action_Page
 import ind.finance.aaroharth.databinding.FragmentHomeBinding
 import ind.finance.aaroharth.managementFragments.AccountManagement

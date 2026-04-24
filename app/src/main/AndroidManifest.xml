@@ -40,7 +40,7 @@
             android:name=".categoriesFragments.CategoriesTransactionList"
             android:exported="false" />
         <activity
-            android:name=".AI_Activity"
+            android:name=".add_delete_edit_Fragments.AI_Activity"
             android:exported="false" />
         <activity
             android:name=".TransactionList"

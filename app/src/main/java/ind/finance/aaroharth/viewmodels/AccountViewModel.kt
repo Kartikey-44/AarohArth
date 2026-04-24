@@ -40,24 +40,24 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
 
     fun loadAccounts() {
         viewModelScope.launch {
-            _accounts.value = repository.getAllAccounts()
-            _totalBalance.value = repository.getTotalBalance()
-            _accountCount.value = repository.getNumberOfAccounts()
+            _accounts.postValue(repository.getAllAccounts())
+            _totalBalance.postValue(repository.getTotalBalance())
+            _accountCount.postValue(repository.getNumberOfAccounts())
         }
     }
 
     fun loadAccountDetails(id: Long, name: String?) {
         viewModelScope.launch {
-            _currentAccount.value = repository.getAccountById(id)
+            _currentAccount.postValue(repository.getAccountById(id))
             if (name != null) {
-                _transactionCount.value = repository.getTransactionCountForAccount(name)
+                _transactionCount.postValue(repository.getTransactionCountForAccount(name))
             }
         }
     }
 
     fun searchAccounts(query: String) {
         viewModelScope.launch {
-            _accounts.value = repository.searchAccounts(query)
+            _accounts.postValue(repository.searchAccounts(query))
         }
     }
 
@@ -67,15 +67,14 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
             try {
                 val transactionCount = repository.getTransactionCountForAccount(accountName)
                 if (transactionCount > 0) {
-                    _error.value = "Cannot delete account with existing transactions"
+                    _error.postValue("Cannot delete account with existing transactions")
                     return@launch
-
                 }
                 repository.deleteAccountById(accountId, userId)
-                _operationSuccess.value = "Account Deleted Successfully"
+                _operationSuccess.postValue("Account Deleted Successfully")
                 loadAccounts()
             } catch (e: Exception) {
-                _error.value = "Failed to delete account"
+                _error.postValue("Failed to delete account")
             }
         }
     }
@@ -84,16 +83,13 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
         val userId = auth.currentUser?.uid ?: return
         viewModelScope.launch {
             val normalized = name.lowercase().trim()
-            
-            // 1. Local Check
-            val existing = repository.getAllAccounts().find { 
-                it.normalizedName == normalized 
+            val existing = repository.getAllAccounts().find {
+                it.normalizedName == normalized
             }
             if (existing != null) {
-                _error.value = "Account with this name already exists"
+                _error.postValue("Account with this name already exists")
                 return@launch
             }
-
             val account = Account_Info(
                 accountType = type,
                 accountName = name,
@@ -102,10 +98,10 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
             )
             try {
                 repository.insertAccount(account, userId)
-                _saveStatus.value = true
+                _saveStatus.postValue(true)
                 loadAccounts()
             } catch (e: Exception) {
-                _error.value = "Account name must be unique"
+                _error.postValue("Account name must be unique")
             }
         }
     }
@@ -115,10 +111,10 @@ class AccountViewModel(private val repository: AccountRepository) : ViewModel() 
         viewModelScope.launch {
             try {
                 repository.updateAccount(account, userId)
-                _operationSuccess.value = "Account Updated Successfully"
+                _operationSuccess.postValue("Account Updated Successfully")
                 loadAccounts()
             } catch (e: Exception) {
-                _error.value = "Failed to update account"
+                _error.postValue("Failed to update account")
             }
         }
     }

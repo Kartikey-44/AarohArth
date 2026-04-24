@@ -6,6 +6,7 @@ import ind.finance.aaroharth.data.local.Transaction_Dao
 import ind.finance.aaroharth.data.model.Account_Info
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 class AccountRepository(
     private val accountDao: Account_Dao,
@@ -17,57 +18,85 @@ class AccountRepository(
     fun getAllAccountsFlow(): Flow<List<Account_Info>> = accountDao.getAllAccountsFlow()
 
     fun getNumberOfAccountsFlow(): Flow<Int> = accountDao.getNumberOfAccountsFlow()
+    suspend fun updateBalance(balance: Long, accountName: String, userId: String) {
+        //  Always update Room first and mark as unsynced
+        val existingAccount = accountDao.getAllAccounts().find { it.accountName == accountName }
+        existingAccount?.let {
+            accountDao.updateaccountinfo(it.copy(balance = balance, isSynced = false))
+        } ?: accountDao.updatebalance(balance, accountName)
+
+        //  Firestore completely isolated — never throws to caller
+        try {
+            withTimeoutOrNull(100) {
+                val account = accountDao.getAllAccounts().find { it.accountName == accountName }
+                account?.let {
+                    val synced = it.copy(isSynced = true)
+                    firestore.collection("users")
+                        .document(userId)
+                        .collection("accounts")
+                        .document(it.id.toString())
+                        .set(synced)
+                        .await()
+                    accountDao.setSynced(it.id)
+                }
+            }
+        } catch (e: Exception) {
+            // Offline or error — will be picked up by syncUnsynced() later
+        }
+    }
 
     suspend fun insertAccount(account: Account_Info, userId: String) {
-        val id = accountDao.insertAccount(account)
-        val updatedAccount = account.copy(id = id, isSynced = true)
+        // Always insert locally first with isSynced = false
+        val id = accountDao.insertAccount(account.copy(isSynced = false))
 
+        // Firestore isolated with timeout
         try {
-            firestore.collection("users")
-                .document(userId)
-                .collection("accounts")
-                .document(id.toString())
-                .set(updatedAccount)
-                .await()
-            accountDao.setSynced(id)
+            withTimeoutOrNull(100) {
+                val synced = account.copy(id = id, isSynced = true)
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("accounts")
+                    .document(id.toString())
+                    .set(synced)
+                    .await()
+                accountDao.setSynced(id)
+            }
         } catch (e: Exception) {
-            // Leave isSynced = false for background sync
+            // Stays unsynced — picked up by syncUnsynced()
         }
     }
 
     suspend fun updateAccount(account: Account_Info, userId: String) {
+        //  Always update Room first
         accountDao.updateaccountinfo(account.copy(isSynced = false))
-        
-        try {
-            val cloudAccount = account.copy(isSynced = true)
-            firestore.collection("users")
-                .document(userId)
-                .collection("accounts")
-                .document(account.id.toString())
-                .set(cloudAccount)
-                .await()
-            accountDao.setSynced(account.id)
-        } catch (e: Exception) {
-            // Stay unsynced
-        }
-    }
 
-    suspend fun updateBalance(balance: Long, accountName: String, userId: String) {
-        accountDao.updatebalance(balance, accountName)
-        // Sync the full account object to cloud
-        val account = accountDao.getAllAccounts().find { it.accountName == accountName }
-        account?.let { updateAccount(it, userId) }
+        //  Firestore isolated with timeout
+        try {
+            withTimeoutOrNull(2500) {
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("accounts")
+                    .document(account.id.toString())
+                    .set(account.copy(isSynced = true))
+                    .await()
+                accountDao.setSynced(account.id)
+            }
+        } catch (e: Exception) {
+            // Stays unsynced
+        }
     }
 
     suspend fun deleteAccountById(id: Long, userId: String) {
         accountDao.deletebyid(id)
         try {
-            firestore.collection("users")
-                .document(userId)
-                .collection("accounts")
-                .document(id.toString())
-                .delete()
-                .await()
+            withTimeoutOrNull(100) {
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("accounts")
+                    .document(id.toString())
+                    .delete()
+                    .await()
+            }
         } catch (e: Exception) { }
     }
 
@@ -75,14 +104,16 @@ class AccountRepository(
         val unsynced = accountDao.getUnsynced()
         unsynced.forEach {
             try {
-                val synced = it.copy(isSynced = true)
-                firestore.collection("users")
-                    .document(userId)
-                    .collection("accounts")
-                    .document(it.id.toString())
-                    .set(synced)
-                    .await()
-                accountDao.setSynced(it.id)
+                withTimeoutOrNull(100) {
+                    val synced = it.copy(isSynced = true)
+                    firestore.collection("users")
+                        .document(userId)
+                        .collection("accounts")
+                        .document(it.id.toString())
+                        .set(synced)
+                        .await()
+                    accountDao.setSynced(it.id)
+                }
             } catch (e: Exception) { }
         }
     }
