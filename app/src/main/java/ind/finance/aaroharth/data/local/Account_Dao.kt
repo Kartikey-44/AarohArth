@@ -29,7 +29,7 @@ interface Account_Dao {
     @Query("SELECT balance FROM AccountsTable WHERE AccountName=:accountName")
     suspend fun getbalance(accountName: String): Long
 
-    @Query("UPDATE AccountsTable SET balance= :balance WHERE AccountName=:accountName")
+    @Query("UPDATE AccountsTable SET balance= :balance, isSynced = 0 WHERE AccountName=:accountName")
     suspend fun updatebalance(balance: Long, accountName: String)
 
     @Query(

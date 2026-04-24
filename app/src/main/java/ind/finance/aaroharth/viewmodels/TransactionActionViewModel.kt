@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import ind.finance.aaroharth.repositories.AccountRepository
 import ind.finance.aaroharth.repositories.TransactionRepository
 import ind.finance.aaroharth.data.model.Transaction_Info
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,20 +37,20 @@ class TransactionActionViewModel(
     val currentTransaction: LiveData<Transaction_Info> = _currentTransaction
 
     fun loadAccountTypes() {
-        viewModelScope.launch {
-            _accountTypes.value = accountRepository.getAllAccountTypes()
+        viewModelScope.launch(Dispatchers.IO) {
+            _accountTypes.postValue(accountRepository.getAllAccountTypes())
         }
     }
 
     fun loadAccountNames(type: String) {
-        viewModelScope.launch {
-            _accountNames.value = accountRepository.filterAccountsByType(type).map { it.accountName }
+        viewModelScope.launch(Dispatchers.IO) {
+            _accountNames.postValue(accountRepository.filterAccountsByType(type).map { it.accountName })
         }
     }
 
     fun loadTransactionById(id: Long) {
-        viewModelScope.launch {
-            _currentTransaction.value = transactionRepository.getTransactionById(id)
+        viewModelScope.launch(Dispatchers.IO) {
+            _currentTransaction.postValue(transactionRepository.getTransactionById(id))
         }
     }
 
@@ -63,8 +64,8 @@ class TransactionActionViewModel(
         remark: String
     ) {
         val userId = auth.currentUser?.uid ?: return
-        
-        viewModelScope.launch {
+
+        viewModelScope.launch(Dispatchers.IO) { // IO dispatcher
             try {
                 val balance = accountRepository.getBalance(accountName)
                 val now = System.currentTimeMillis()
@@ -72,7 +73,7 @@ class TransactionActionViewModel(
 
                 if (type == "expense") {
                     if (balance < amount) {
-                        _error.value = "Insufficient Balance"
+                        _error.postValue("Insufficient Balance")
                         return@launch
                     }
                     accountRepository.updateBalance(balance - amount, accountName, userId)
@@ -102,9 +103,11 @@ class TransactionActionViewModel(
                 )
 
                 transactionRepository.insertTransaction(transaction, userId)
-                _saveStatus.value = if (type == "income") "Income Saved" else "Expense Saved"
+                _saveStatus.postValue(if (type == "income") "Income Saved" else "Expense Saved")
+
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to save transaction"
+                android.util.Log.e("SAVE_ERROR", "saveTransaction failed: ${e::class.simpleName}: ${e.message}", e)
+                _error.postValue(e.message ?: "Failed to save transaction")
             }
         }
     }
@@ -112,9 +115,8 @@ class TransactionActionViewModel(
     fun updateTransaction(original: Transaction_Info, updated: Transaction_Info) {
         val userId = auth.currentUser?.uid ?: return
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) { //  IO dispatcher
             try {
-                // 1. Revert original balance
                 val balance = accountRepository.getBalance(original.transactionWay)
                 val restoredBalance = if (original.transactionType == "Income") {
                     balance - original.amount
@@ -122,24 +124,21 @@ class TransactionActionViewModel(
                     balance + original.amount
                 }
 
-                // 2. Check sufficient balance for updated if Expense
                 if (updated.transactionType == "Expense") {
                     if (restoredBalance < updated.amount) {
-                        _error.value = "Insufficient Balance"
+                        _error.postValue("Insufficient Balance")
                         return@launch
                     }
                 }
 
-                // 3. Update balance on original account (if changed account, this reverts the old one)
                 accountRepository.updateBalance(restoredBalance, original.transactionWay, userId)
-                
-                // 4. If account changed, get balance of new account, else use restoredBalance
+
                 val currentBalanceOnTargetAccount = if (original.transactionWay == updated.transactionWay) {
                     restoredBalance
                 } else {
                     accountRepository.getBalance(updated.transactionWay)
                 }
-                
+
                 val finalBalance = if (updated.transactionType == "Income") {
                     currentBalanceOnTargetAccount + updated.amount
                 } else {
@@ -147,11 +146,12 @@ class TransactionActionViewModel(
                 }
                 accountRepository.updateBalance(finalBalance, updated.transactionWay, userId)
 
-                // 5. Update transaction entry
                 transactionRepository.updateTransaction(updated, userId)
-                _saveStatus.value = "Transaction Edited Successfully"
+                _saveStatus.postValue("Transaction Edited Successfully")
+
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to update transaction"
+                android.util.Log.e("SAVE_ERROR", "updateTransaction failed: ${e::class.simpleName}: ${e.message}", e)
+                _error.postValue(e.message ?: "Failed to update transaction")
             }
         }
     }
@@ -159,7 +159,7 @@ class TransactionActionViewModel(
     fun deleteTransaction(transaction: Transaction_Info) {
         val userId = auth.currentUser?.uid ?: return
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) { //  IO dispatcher
             try {
                 val balance = accountRepository.getBalance(transaction.transactionWay)
                 val newBalance = if (transaction.transactionType == "Income") {
@@ -169,40 +169,42 @@ class TransactionActionViewModel(
                 }
                 accountRepository.updateBalance(newBalance, transaction.transactionWay, userId)
                 transactionRepository.deleteTransactionById(transaction.id, userId)
-                _saveStatus.value = "Transaction Deleted Successfully"
+                _saveStatus.postValue("Transaction Deleted Successfully")
+
             } catch (e: Exception) {
-                _error.value = e.message ?: "Failed to delete transaction"
+                android.util.Log.e("SAVE_ERROR", "deleteTransaction failed: ${e::class.simpleName}: ${e.message}", e)
+                _error.postValue(e.message ?: "Failed to delete transaction")
             }
         }
     }
 
     private fun carbonEmissionFactor(categoryName: String): Double {
         return when (categoryName.lowercase().trim()) {
-            "food"          -> 0.0080
-            "grocery"       -> 0.0083
-            "dining out"    -> 0.0120
-            "shopping"      -> 0.0035
-            "personal care" -> 0.0015
-            "entertainment" -> 0.0021
-            "subscriptions" -> 0.0011
-            "medical"       -> 0.0021
-            "education"     -> 0.0017
-            "gifts"         -> 0.0030
-            "miscellaneous" -> 0.0064
-            "housing"       -> 0.0080
-            "utilities"     -> 0.0448
-            "water bill"    -> 0.0112
+            "food"             -> 0.0080
+            "grocery"          -> 0.0083
+            "dining out"       -> 0.0120
+            "shopping"         -> 0.0035
+            "personal care"    -> 0.0015
+            "entertainment"    -> 0.0021
+            "subscriptions"    -> 0.0011
+            "medical"          -> 0.0021
+            "education"        -> 0.0017
+            "gifts"            -> 0.0030
+            "miscellaneous"    -> 0.0064
+            "housing"          -> 0.0080
+            "utilities"        -> 0.0448
+            "water bill"       -> 0.0112
             "public transport" -> 0.0006
             "auto"             -> 0.0102
             "taxi"             -> 0.0085
             "hotel"            -> 0.0027
             "flight"           -> 0.0765
-            "electricity" -> 0.0895
-            "petrol"      -> 0.0224
-            "diesel"      -> 0.0263
-            "cng"         -> 0.0284
-            "lpg"         -> 0.0470
-            "png"         -> 0.1218
+            "electricity"      -> 0.0895
+            "petrol"           -> 0.0224
+            "diesel"           -> 0.0263
+            "cng"              -> 0.0284
+            "lpg"              -> 0.0470
+            "png"              -> 0.1218
             "mobile recharge", "fasttag recharge", "recharge" -> 0.0002
             else -> 0.0
         }

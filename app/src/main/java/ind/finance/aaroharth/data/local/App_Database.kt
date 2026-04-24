@@ -16,7 +16,7 @@ import ind.finance.aaroharth.data.model.Transaction_Info
         Budget_Info::class,
         Notification_History_Info::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class App_Database : RoomDatabase() {
