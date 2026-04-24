@@ -25,17 +25,25 @@ class BudgetActions : AppCompatActivity() {
 
     private lateinit var binding: ActivityBudgetActionsBinding
     private lateinit var dialogBinding: DialogScreenBinding
+
+    private var monthKeyFromAssistant: String? = null   // ✅ added
+
     private val viewModel: BudgetViewModel by viewModels {
         val app = application as MyApplication
-        ViewModelFactory(app.transactionRepository, app.accountRepository, app.budgetRepository, app.notificationRepository)
+        ViewModelFactory(
+            app.transactionRepository,
+            app.accountRepository,
+            app.budgetRepository,
+            app.notificationRepository
+        )
     }
 
     private val categoryList = listOf(
         "Mobile Recharge", "FastTag Recharge", "Food", "Dining Out", "Shopping",
-        "Personal Care", "Entertainment", "Subscriptions", "Housing", "Utilities",
-        "Public Transport", "Petrol", "Diesel", "CNG", "Electricity",
-        "Medical", "Insurance", "Education", "EMI / Loans", "Tax",
-        "Gifts", "Donations", "Grocery", "Other"
+        "Personal Care", "Entertainment", "Subscriptions", "Rental",   // ✅ fixed
+        "Utilities", "Public Transport", "Petrol", "Diesel", "CNG",
+        "Electricity", "Medical", "Insurance", "Education",
+        "EMI / Loans", "Tax", "Gifts", "Donations", "Grocery", "Other"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,16 +54,24 @@ class BudgetActions : AppCompatActivity() {
         setContentView(binding.root)
 
         setupCategoryDropdown()
+
+        catchAssistantIntent()   // ✅ added
+
         observeViewModel()
 
         binding.saveBtn.setOnClickListener {
             if (validateInput()) {
+
                 val category = binding.categoryField.text.toString().trim()
                 val amount = binding.amountField.text.toString().toLong()
-                val monthKey = SimpleDateFormat("yyyy-MM", Locale.US).format(Date())
+
+                val monthKey = monthKeyFromAssistant
+                    ?: SimpleDateFormat("yyyy-MM", Locale.US).format(Date())   // ✅ corrected
+
                 viewModel.addBudget(category, amount, monthKey)
             }
         }
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
             val blur = RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP)
             binding.bg.setRenderEffect(blur)
@@ -64,17 +80,39 @@ class BudgetActions : AppCompatActivity() {
 
     private fun setupCategoryDropdown() {
         val adapter = ArrayAdapter(this, R.layout.simple_list_item_1, categoryList)
+
         binding.categoryField.apply {
             setAdapter(adapter)
             threshold = 0
             keyListener = null
             isFocusable = false
             isCursorVisible = false
-            setOnClickListener { showDropDown() }
+
+            setOnClickListener {
+                showDropDown()
+            }
+
             setOnItemClickListener { parent, _, position, _ ->
                 setText(parent.getItemAtPosition(position).toString(), false)
             }
         }
+    }
+
+    private fun catchAssistantIntent() {   // ✅ added
+
+        val amount = intent.getLongExtra("amount", -1L)
+        val category = intent.getStringExtra("category")
+        val monthKey = intent.getStringExtra("monthKey")
+
+        if (amount > 0) {
+            binding.amountField.setText(amount.toString())
+        }
+
+        if (!category.isNullOrBlank() && category in categoryList) {
+            binding.categoryField.setText(category, false)
+        }
+
+        monthKeyFromAssistant = monthKey
     }
 
     private fun observeViewModel() {
@@ -84,6 +122,7 @@ class BudgetActions : AppCompatActivity() {
     }
 
     private fun validateInput(): Boolean {
+
         binding.categoryLayout.error = null
         binding.amountLayout.error = null
 
@@ -94,30 +133,48 @@ class BudgetActions : AppCompatActivity() {
             binding.categoryLayout.error = "Select category"
             return false
         }
+
         if (category !in categoryList) {
             binding.categoryLayout.error = "Select from list"
             return false
         }
+
         val amount = amountText.toLongOrNull()
+
         if (amount == null || amount <= 0) {
             binding.amountLayout.error = "Enter valid amount"
             return false
         }
+
         return true
     }
 
     private fun successDialog(message: String) {
+
         val dialog = Dialog(this)
+
         dialogBinding = DialogScreenBinding.inflate(layoutInflater)
+
         dialog.setContentView(dialogBinding.root)
+
         dialog.setCancelable(false)
-        dialog.window?.setBackgroundDrawable(getDrawable(ind.finance.aaroharth.R.drawable.dialog_background))
+
+        dialog.window?.setBackgroundDrawable(
+            getDrawable(ind.finance.aaroharth.R.drawable.dialog_background)
+        )
+
         dialogBinding.dialogLottie.setAnimation("Success.json")
+
         dialogBinding.message.text = message
+
         dialog.show()
+
         Handler(Looper.getMainLooper()).postDelayed({
+
             dialog.dismiss()
+
             finish()
+
         }, 1800)
     }
 }

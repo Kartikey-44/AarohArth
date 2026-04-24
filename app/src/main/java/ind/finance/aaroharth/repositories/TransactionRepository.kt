@@ -7,126 +7,127 @@ import ind.finance.aaroharth.data.model.Transaction_Info
 import ind.finance.aaroharth.data.model.filterchart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 class TransactionRepository(private val transactionDao: Transaction_Dao) {
 
     private val firestore = FirebaseFirestore.getInstance()
 
     suspend fun insertTransaction(transaction: Transaction_Info, userId: String) {
-        val id = transactionDao.insertTransaction(transaction)
-        val updatedTransaction = transaction.copy(id = id, isSynced = true)
+        //  Always insert locally with isSynced = FALSE
+        // This guarantees it's saved offline regardless of network
+        val id = transactionDao.insertTransaction(transaction.copy(isSynced = false))
 
+        //  Try Firestore separately with timeout — never blocks the local save message
         try {
-            firestore.collection("users")
-                .document(userId)
-                .collection("transactions")
-                .document(id.toString())
-                .set(updatedTransaction)
-                .await()
-            transactionDao.setSynced(id)
+            withTimeoutOrNull(100) {
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("transactions")
+                    .document(id.toString())
+                    .set(transaction.copy(id = id, isSynced = true))
+                    .await()
+                transactionDao.setSynced(id) //  Only mark synced after Firestore confirms
+            }
         } catch (e: Exception) {
-            // Stay unsynced locally
+            // Offline or error — stays isSynced=false, syncUnsynced() will retry later
         }
     }
 
     suspend fun updateTransaction(transaction: Transaction_Info, userId: String) {
+        //  Always update locally with isSynced = FALSE first
         transactionDao.updateTransaction(transaction.copy(isSynced = false))
-        
+
         try {
-            val syncedTransaction = transaction.copy(isSynced = true)
-            firestore.collection("users")
-                .document(userId)
-                .collection("transactions")
-                .document(transaction.id.toString())
-                .set(syncedTransaction)
-                .await()
-            transactionDao.setSynced(transaction.id)
+            withTimeoutOrNull(100) {
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("transactions")
+                    .document(transaction.id.toString())
+                    .set(transaction.copy(isSynced = true))
+                    .await()
+                transactionDao.setSynced(transaction.id)
+            }
         } catch (e: Exception) {
-            // Stay unsynced
+            // Will retry via syncUnsynced()
         }
     }
 
     suspend fun deleteTransactionById(id: Long, userId: String) {
+        //  Always delete locally first
         transactionDao.deleteById(id)
-        try {
-            firestore.collection("users")
-                .document(userId)
-                .collection("transactions")
-                .document(id.toString())
-                .delete()
-                .await()
-        } catch (e: Exception) { }
-    }
 
-    suspend fun syncUnsynced(userId: String) {
-        val unsynced = transactionDao.getUnsynced()
-        unsynced.forEach {
-            try {
-                val synced = it.copy(isSynced = true)
+        try {
+            withTimeoutOrNull(100) {
                 firestore.collection("users")
                     .document(userId)
                     .collection("transactions")
-                    .document(it.id.toString())
-                    .set(synced)
+                    .document(id.toString())
+                    .delete()
                     .await()
-                transactionDao.setSynced(it.id)
-            } catch (e: Exception) { }
+            }
+        } catch (e: Exception) {
+            // Local delete already done — Firestore will be stale until manual sync
+            // Consider maintaining a "pendingDeletes" table for robust offline delete sync
         }
     }
 
-    suspend fun getTransactionsByCategory(category: String, type: String): List<Transaction_Info> {
-        return transactionDao.getTransactionsByCategory(category, type)
-    }
-
-    suspend fun getAllTransactions(): List<Transaction_Info> {
-        return transactionDao.getalltransaction()
-    }
-
-    fun getAllTransactionsFlow(): Flow<List<Transaction_Info>> {
-        return transactionDao.getAllTransactionsFlow()
-    }
-
-    suspend fun getTransactionsByType(type: String): List<Transaction_Info> {
-        return transactionDao.gettransaction(type)
-    }
-
-    suspend fun getTransactionById(id: Long): Transaction_Info {
-        return transactionDao.getTransactionById(id)
-    }
-
-    suspend fun getMonthWiseSum(startDate: Long, endDate: Long, type: String): Long {
-        return transactionDao.monthWise(startDate, endDate, type)
-    }
-
-    suspend fun searchTransactions(query: String, type: String): List<Transaction_Info> {
-        return if (type == "ALL") {
-            transactionDao.searchTransactionstype(query)
-        } else {
-            transactionDao.searchTransactions(query, type)
+    //  Call this when network becomes available — picks up everything missed offline
+    suspend fun syncUnsynced(userId: String) {
+        val unsynced = transactionDao.getUnsynced()
+        unsynced.forEach { transaction ->
+            try {
+                withTimeoutOrNull(100) {
+                    firestore.collection("users")
+                        .document(userId)
+                        .collection("transactions")
+                        .document(transaction.id.toString())
+                        .set(transaction.copy(isSynced = true))
+                        .await()
+                    transactionDao.setSynced(transaction.id)
+                }
+            } catch (e: Exception) {
+                // Will retry next time syncUnsynced() is called
+            }
         }
     }
 
-    suspend fun getRecentCo2Transactions(startDate: Long, endDate: Long): List<Transaction_Info> {
-        return transactionDao.getRecentCo2Transactions(startDate, endDate)
-    }
+    // ── Read methods (unchanged) ──────────────────────────────────────────────
 
-    suspend fun getCategoryExpense(fromTime: Long): List<CategoryExpense> {
-        return transactionDao.getCategoryExpense(fromTime)
-    }
+    suspend fun getTransactionsByCategory(category: String, type: String) =
+        transactionDao.getTransactionsByCategory(category, type)
 
-    suspend fun getDailyExpense(fromTime: Long): List<filterchart> {
-        return transactionDao.getDailyExpense(fromTime)
-    }
+    suspend fun getAllTransactions() = transactionDao.getalltransaction()
 
-    suspend fun getTotalExpense(fromTime: Long): Double {
-        return transactionDao.getTotalExpense(fromTime)
-    }
+    fun getAllTransactionsFlow(): Flow<List<Transaction_Info>> =
+        transactionDao.getAllTransactionsFlow()
 
-    suspend fun getCategoryExpenseFiltered(fromTime: Long, type: String): List<CategoryExpense> {
-        return transactionDao.getCategoryExpenseFiltered(fromTime, type)
-    }
+    suspend fun getTransactionsByType(type: String) = transactionDao.gettransaction(type)
 
-    suspend fun getCategoryAll(fromTime: Long): List<CategoryExpense> {
-        return transactionDao.getCategoryAll(fromTime)
-    }
+    suspend fun getTransactionById(id: Long) = transactionDao.getTransactionById(id)
+
+    suspend fun getMonthWiseSum(startDate: Long, endDate: Long, type: String) =
+        transactionDao.monthWise(startDate, endDate, type)
+
+    suspend fun searchTransactions(query: String, type: String) =
+        if (type == "ALL") transactionDao.searchTransactionstype(query)
+        else transactionDao.searchTransactions(query, type)
+
+    suspend fun getRecentCo2Transactions(startDate: Long, endDate: Long) =
+        transactionDao.getRecentCo2Transactions(startDate, endDate)
+
+    suspend fun getCategoryExpense(fromTime: Long) =
+        transactionDao.getCategoryExpense(fromTime)
+
+    suspend fun getDailyExpense(fromTime: Long) =
+        transactionDao.getDailyExpense(fromTime)
+
+    suspend fun getTotalExpense(fromTime: Long) =
+        transactionDao.getTotalExpense(fromTime)
+
+    suspend fun getCategoryExpenseFiltered(fromTime: Long, type: String) =
+        transactionDao.getCategoryExpenseFiltered(fromTime, type)
+
+    suspend fun getCategoryAll(fromTime: Long) =
+        transactionDao.getCategoryAll(fromTime)
 }
