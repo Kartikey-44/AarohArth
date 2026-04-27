@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -83,6 +85,8 @@ class AI_Activity : AppCompatActivity() {
     }
 
 
+    private lateinit var speechRecognizer: SpeechRecognizer
+
     private fun startSpeech() {
 
         if (
@@ -101,9 +105,9 @@ class AI_Activity : AppCompatActivity() {
             return
         }
 
-        val intent = Intent(
-            RecognizerIntent.ACTION_RECOGNIZE_SPEECH
-        ).apply {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
 
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -114,19 +118,39 @@ class AI_Activity : AppCompatActivity() {
                 RecognizerIntent.EXTRA_LANGUAGE,
                 Locale.getDefault()
             )
-
-            putExtra(
-                RecognizerIntent.EXTRA_PROMPT,
-                "Speak now"
-            )
         }
 
-        startListeningUI()
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
 
-        startActivityForResult(intent, SPEECH_REQ)
+            override fun onReadyForSpeech(params: Bundle?) {
+                startListeningUI()
+            }
+
+            override fun onResults(results: Bundle?) {
+                val data = results?.getStringArrayList(
+                    SpeechRecognizer.RESULTS_RECOGNITION
+                )
+
+                binding.inputField.setText(data?.get(0))
+                viewModel.processInput(data?.get(0) ?: "")
+                stopListeningUI()
+            }
+
+            override fun onError(error: Int) {
+                stopListeningUI()
+            }
+
+
+            override fun onBeginningOfSpeech() {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onRmsChanged(rmsdB: Float) {}
+        })
+
+        speechRecognizer.startListening(intent)
     }
-
-
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -243,6 +267,7 @@ class AI_Activity : AppCompatActivity() {
             }
 
         startActivity(intent)
+
     }
 
 
@@ -265,4 +290,6 @@ class AI_Activity : AppCompatActivity() {
         )
             startSpeech()
     }
+
+
 }
